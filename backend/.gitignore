@@ -1,0 +1,20 @@
+# Virtual environment
+venv/
+venv_py310/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Generated files
+temp/
+data/
+
+# Logs
+*.log
+
+# Distribution / packaging
+dist/
+build/

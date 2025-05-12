@@ -1,0 +1,9 @@
+# Common
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+venv_py310/
+.env
+.DS_Store
