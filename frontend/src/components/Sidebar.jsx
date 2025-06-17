@@ -5,8 +5,10 @@ import {
   FileTextIcon, 
   LogOutIcon, 
   ChevronLeftIcon,
-  UserIcon
+  UserIcon,
+  UserPlusIcon
 } from 'lucide-react';
+import { CreateUserOverlay } from './CreateUserOverlay';
 
 export const Sidebar = ({ 
   isOpen, 
@@ -18,9 +20,28 @@ export const Sidebar = ({
   artifacts,
   onSelectArtifact,
   user,
-  onLogout
+  onLogout,
+  onToggleChatCollapse,
+  onOpenArtifactPanel
 }) => {
   const [activeTab, setActiveTab] = useState('chats');
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  
+  const handleArtifactDoubleClick = (artifactId) => {
+    onSelectArtifact(artifactId);
+    onToggleChatCollapse(true);
+    onOpenArtifactPanel(true);
+  };
+
+  const handleSessionDoubleClick = (sessionId) => {
+    onSelectSession(sessionId);
+    onToggleChatCollapse(false);
+  };
+
+  const handleCreateUserSuccess = (newUser) => {
+    // You can add a toast notification here if you want
+    console.log('User created successfully:', newUser);
+  };
   
   if (!isOpen) {
     return (
@@ -46,7 +67,7 @@ export const Sidebar = ({
           </button>
         </div>
         <button
-          onClick={onCreateNewSession}
+          onClick={() => onCreateNewSession()}
           className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           <PlusIcon size={16} />
@@ -89,6 +110,7 @@ export const Sidebar = ({
                 <button
                   key={session.id}
                   onClick={() => onSelectSession(session.id)}
+                  onDoubleClick={() => handleSessionDoubleClick(session.id)}
                   className={`w-full px-4 py-3 flex items-center gap-3 text-left text-sm ${
                     currentSession?.id === session.id
                       ? 'bg-blue-50 text-blue-700'
@@ -117,6 +139,7 @@ export const Sidebar = ({
                 <button
                   key={artifact.id}
                   onClick={() => onSelectArtifact(artifact.id)}
+                  onDoubleClick={() => handleArtifactDoubleClick(artifact.id)}
                   className="w-full px-4 py-3 flex items-center gap-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <FileTextIcon size={16} />
@@ -140,6 +163,15 @@ export const Sidebar = ({
             <div className="font-medium text-sm truncate">{user.name}</div>
             <div className="text-xs text-gray-500 truncate">{user.email}</div>
           </div>
+          {user.role === 'admin' && (
+            <button
+              onClick={() => setShowCreateUser(true)}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
+              title="Create new user"
+            >
+              <UserPlusIcon size={16} />
+            </button>
+          )}
           <button
             onClick={onLogout}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -149,6 +181,13 @@ export const Sidebar = ({
           </button>
         </div>
       </div>
+
+      {showCreateUser && (
+        <CreateUserOverlay
+          onClose={() => setShowCreateUser(false)}
+          onSuccess={handleCreateUserSuccess}
+        />
+      )}
     </div>
   );
 };

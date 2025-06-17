@@ -8,8 +8,10 @@ import {
   Download as DownloadIcon,
   Trash as TrashIcon,
   ChevronLeft as CollapseIcon,
-  ChevronRight as ExpandIcon
+  ChevronRight as ExpandIcon,
+  InfoIcon
 } from 'lucide-react';
+import { HighlightingGuide } from './HighlightingGuide';
 
 export const Header = ({ 
   onToggleSidebar, 
@@ -17,9 +19,34 @@ export const Header = ({
   artifactPanelOpen,
   currentSession,
   isChatCollapsed,
-  onToggleChatCollapse
+  onToggleChatCollapse,
+  templateLibraryOpen,
+  onToggleTemplateLibrary,
+  onDeleteSession
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  
+  const handleDeleteSession = async () => {
+    if (!currentSession || !onDeleteSession) return;
+    
+    if (confirmDelete) {
+      // Second click confirms deletion
+      try {
+        await onDeleteSession(currentSession.id);
+        setConfirmDelete(false);
+        setMenuOpen(false);
+      } catch (error) {
+        console.error('Error deleting session:', error);
+        alert('Failed to delete conversation. Please try again.');
+      }
+    } else {
+      // First click shows confirmation
+      setConfirmDelete(true);
+      // Auto-cancel confirmation after 3 seconds
+      setTimeout(() => setConfirmDelete(false), 3000);
+    }
+  };
   
   return (
     <header className="h-14 border-b border-gray-200 flex items-center justify-between px-4 bg-white">
@@ -37,6 +64,20 @@ export const Header = ({
       </div>
       
       <div className="flex items-center gap-3">
+        {/* Template Library Toggle */}
+        <button
+          onClick={onToggleTemplateLibrary}
+          className={`p-2 ${
+            templateLibraryOpen ? 'text-blue-600' : 'text-gray-500'
+          } hover:text-blue-700 transition-colors`}
+          title="Toggle Template Library"
+        >
+          <FileTextIcon size={20} />
+        </button>
+        
+        {/* Highlighting Guide Button */}
+        <HighlightingGuide renderAsHeaderButton={true} />
+        
         {artifactPanelOpen && (
           <button
             onClick={() => onToggleChatCollapse && onToggleChatCollapse(!isChatCollapsed)}
@@ -96,10 +137,15 @@ export const Header = ({
                   </button>
                   <div className="border-t border-gray-100 my-1" />
                   <button
-                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 text-left flex items-center gap-2"
+                    onClick={handleDeleteSession}
+                    className={`w-full px-4 py-2 text-sm ${
+                      confirmDelete 
+                        ? 'text-red-700 bg-red-50' 
+                        : 'text-red-600 hover:bg-gray-100'
+                    } text-left flex items-center gap-2`}
                   >
                     <TrashIcon size={16} />
-                    <span>Clear conversation</span>
+                    <span>{confirmDelete ? 'Click again to confirm' : 'Delete conversation'}</span>
                   </button>
                 </div>
               </div>

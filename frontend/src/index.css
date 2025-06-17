@@ -1,3 +1,127 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles for text highlighting and selection */
+.highlightable-content {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  cursor: text;
+}
+
+.highlightable-content::selection {
+  background-color: rgba(59, 130, 246, 0.4);
+  color: inherit;
+}
+
+.highlightable-content::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.4);
+  color: inherit;
+}
+
+/* Hover effect for highlightable content */
+.highlightable-content:hover {
+  background-color: rgba(59, 130, 246, 0.02);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+/* Artifact context menu animation */
+.artifact-context-menu {
+  animation: contextMenuSlideIn 0.15s ease-out;
+  pointer-events: auto;
+}
+
+/* Ensure mermaid diagrams render properly with context menus */
+.mermaid {
+  pointer-events: none;
+}
+
+.mermaid svg {
+  pointer-events: auto;
+}
+
+/* Enhanced highlighting for artifacts */
+.artifact-content.highlightable-content {
+  position: relative;
+}
+
+.artifact-content.highlightable-content::before {
+  content: "💡 Select text to modify with AI";
+  position: absolute;
+  top: -25px;
+  right: 0;
+  font-size: 11px;
+  color: #6b7280;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.artifact-content.highlightable-content:hover::before {
+  opacity: 1;
+}
+
+/* Context menu animation */
+.context-menu {
+  animation: contextMenuSlideIn 0.15s ease-out;
+}
+
+@keyframes contextMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Global notification animation */
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Highlight marker styles */
+.highlight-marker {
+  background: linear-gradient(120deg, #fbbf24 0%, #fbbf24 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.2em;
+  background-position: 0 88%;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.highlight-marker.question {
+  background-color: rgba(34, 197, 94, 0.15);
+  border-left: 3px solid #22c55e;
+}
+
+.highlight-marker.modify {
+  background-color: rgba(249, 115, 22, 0.15);
+  border-left: 3px solid #f97316;
+}
+
+.highlight-marker.code {
+  background-color: rgba(139, 92, 246, 0.15);
+  border-left: 3px solid #8b5cf6;
+}
+
+.highlight-marker.expand {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-left: 3px solid #3b82f6;
+}

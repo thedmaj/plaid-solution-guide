@@ -1,0 +1,1522 @@
+
+> plaid-solution-guide-frontend@0.1.0 start
+> PORT=3000 react-scripts start
+
+(node:77795) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:77795) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view plaid-solution-guide-frontend in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.0.5:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 154:9:  'handleSaveAsArtifact' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 154:9:  'handleSaveAsArtifact' is assigned a value but never used  no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ChatWindow.jsx
+  Line 148:9:  'handleCreateArtifactFromMessage' is assigned a value but never used  no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/components/Message.jsx
+  Line 87:19:  'hasExistingArtifact' is not defined  no-undef
+  Line 91:24:  'hasExistingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+ERROR in [eslint] 
+src/components/Message.jsx
+  Line 87:19:  'hasExistingArtifact' is not defined  no-undef
+  Line 91:24:  'hasExistingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/components/HighlightableMessage.jsx
+  Line 257:19:  'hasExistingArtifact' is not defined  no-undef
+  Line 261:24:  'hasExistingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+ERROR in [eslint] 
+src/components/HighlightableMessage.jsx
+  Line 257:19:  'hasExistingArtifact' is not defined  no-undef
+  Line 261:24:  'hasExistingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/components/ArtifactCreationDialog.jsx
+  Line 18:42:  'existingArtifact' is not defined  no-undef
+  Line 57:16:  'existingArtifact' is not defined  no-undef
+  Line 64:51:  'existingArtifact' is not defined  no-undef
+  Line 66:24:  'existingArtifact' is not defined  no-undef
+  Line 67:47:  'existingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ArtifactCreationDialog.jsx
+  Line 1:27:   'useEffect' is defined but never used        no-unused-vars
+  Line 2:104:  'ChevronDownIcon' is defined but never used  no-unused-vars
+
+ERROR in [eslint] 
+src/components/ArtifactCreationDialog.jsx
+  Line 18:42:  'existingArtifact' is not defined  no-undef
+  Line 57:16:  'existingArtifact' is not defined  no-undef
+  Line 64:51:  'existingArtifact' is not defined  no-undef
+  Line 66:24:  'existingArtifact' is not defined  no-undef
+  Line 67:47:  'existingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/components/ArtifactCreationDialog.jsx
+  Line 80:16:  'existingArtifact' is not defined  no-undef
+  Line 87:51:  'existingArtifact' is not defined  no-undef
+  Line 89:24:  'existingArtifact' is not defined  no-undef
+  Line 90:47:  'existingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src/components/ArtifactCreationDialog.jsx
+  Line 2:104:  'ChevronDownIcon' is defined but never used                no-unused-vars
+  Line 16:10:  'showArtifactSelector' is assigned a value but never used  no-unused-vars
+  Line 39:9:   'handleArtifactSelect' is assigned a value but never used  no-unused-vars
+
+ERROR in [eslint] 
+src/components/ArtifactCreationDialog.jsx
+  Line 80:16:  'existingArtifact' is not defined  no-undef
+  Line 87:51:  'existingArtifact' is not defined  no-undef
+  Line 89:24:  'existingArtifact' is not defined  no-undef
+  Line 90:47:  'existingArtifact' is not defined  no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 310:7:  Duplicate key 'sessionArtifacts'                                                                                                                                                                                   no-dupe-keys
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 276:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 310:7:  Duplicate key 'sessionArtifacts'                                                                                                                                                                                   no-dupe-keys
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 315:7:  Duplicate key 'sessionArtifacts'                                                                                                                                                                                   no-dupe-keys
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 315:7:  Duplicate key 'sessionArtifacts'                                                                                                                                                                                   no-dupe-keys
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 466:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 466:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 466:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 466:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 471:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 471:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 465:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 465:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 465:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 465:11:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 475:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 483:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:    'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                    no-unused-vars
+  Line 66:5:    'mergeSuggestions' is assigned a value but never used                                                                                                                                                              no-unused-vars
+  Line 67:5:    'workspaceSettings' is assigned a value but never used                                                                                                                                                             no-unused-vars
+  Line 69:5:    'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                         no-unused-vars
+  Line 72:5:    'getWorkspace' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 73:5:    'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                       no-unused-vars
+  Line 281:6:   React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'processContentForWorkspace', 'selectArtifact', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 483:13:  'newArtifact' is assigned a value but never used                                                                                                                                                                   no-unused-vars
+
+webpack compiled with 1 warning

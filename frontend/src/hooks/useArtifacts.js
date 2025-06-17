@@ -4,68 +4,153 @@ import { v4 as uuidv4 } from 'uuid';
 export const useArtifacts = () => {
   const [artifacts, setArtifacts] = useState([]);
   const [selectedArtifact, setSelectedArtifact] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Load artifacts from localStorage on initial render
+  // Load artifacts from backend on initial render
   useEffect(() => {
-    const storedArtifacts = localStorage.getItem('plaid_artifacts');
-    
-    if (storedArtifacts) {
-      setArtifacts(JSON.parse(storedArtifacts));
-    }
-  }, []);
-  
-  // Save artifacts to localStorage whenever they change
-  useEffect(() => {
-    if (artifacts.length > 0) {
-      localStorage.setItem('plaid_artifacts', JSON.stringify(artifacts));
-    }
-  }, [artifacts]);
-  
-  const createArtifact = (title, content, type = 'markdown') => {
-    const newArtifact = {
-      id: uuidv4(),
-      title,
-      content,
-      type,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+    const loadArtifacts = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setArtifacts([]);
+          setSelectedArtifact(null);
+          setError(null);
+          return;
+        }
+
+        const response = await fetch('/api/artifacts', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to load artifacts');
+        }
+        const data = await response.json();
+        setArtifacts(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading artifacts:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    setArtifacts(prevArtifacts => [newArtifact, ...prevArtifacts]);
-    setSelectedArtifact(newArtifact);
-    
-    return newArtifact;
-  };
+    loadArtifacts();
+  }, [localStorage.getItem('token')]);
   
-  const updateArtifact = (artifactId, updates) => {
-    setArtifacts(prevArtifacts => 
-      prevArtifacts.map(artifact => 
-        artifact.id === artifactId
-          ? { 
-              ...artifact, 
-              ...updates, 
-              updated_at: new Date().toISOString() 
-            }
-          : artifact
-      )
-    );
-    
-    if (selectedArtifact?.id === artifactId) {
-      setSelectedArtifact(prev => ({ 
-        ...prev, 
-        ...updates, 
-        updated_at: new Date().toISOString() 
-      }));
+  const createArtifact = async (title, content, type = 'markdown') => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('/api/artifacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          type,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create artifact');
+      }
+      
+      const newArtifact = await response.json();
+      setArtifacts(prevArtifacts => [newArtifact, ...prevArtifacts]);
+      setSelectedArtifact(newArtifact);
+      setError(null);
+      
+      return newArtifact;
+    } catch (err) {
+      console.error('Error creating artifact:', err);
+      setError(err.message);
+      throw err;
     }
   };
   
-  const deleteArtifact = (artifactId) => {
-    setArtifacts(prevArtifacts => 
-      prevArtifacts.filter(artifact => artifact.id !== artifactId)
-    );
-    
-    if (selectedArtifact?.id === artifactId) {
-      setSelectedArtifact(null);
+  const updateArtifact = async (artifactId, updates) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`/api/artifacts/${artifactId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update artifact');
+      }
+      
+      const updatedArtifact = await response.json();
+      
+      setArtifacts(prevArtifacts => 
+        prevArtifacts.map(artifact => 
+          artifact.id === artifactId ? updatedArtifact : artifact
+        )
+      );
+      
+      if (selectedArtifact?.id === artifactId) {
+        setSelectedArtifact(updatedArtifact);
+      }
+      
+      setError(null);
+      return updatedArtifact;
+    } catch (err) {
+      console.error('Error updating artifact:', err);
+      setError(err.message);
+      throw err;
+    }
+  };
+  
+  const deleteArtifact = async (artifactId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`/api/artifacts/${artifactId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete artifact');
+      }
+      
+      setArtifacts(prevArtifacts => 
+        prevArtifacts.filter(artifact => artifact.id !== artifactId)
+      );
+      
+      if (selectedArtifact?.id === artifactId) {
+        setSelectedArtifact(null);
+      }
+      
+      setError(null);
+    } catch (err) {
+      console.error('Error deleting artifact:', err);
+      setError(err.message);
+      throw err;
     }
   };
   
@@ -74,7 +159,7 @@ export const useArtifacts = () => {
     setSelectedArtifact(artifact || null);
   };
   
-  const downloadArtifact = async (artifactId, format = 'markdown') => {
+  const downloadArtifact = async (artifactId) => {
     const artifact = artifacts.find(artifact => artifact.id === artifactId);
     
     if (!artifact) {
@@ -83,52 +168,58 @@ export const useArtifacts = () => {
     }
     
     try {
-      // In a real app, you would call your backend API to convert and download
-      // For this demo, we'll handle markdown directly in the browser
-      if (format === 'markdown') {
-        // Create a blob with the markdown content
-        const blob = new Blob([artifact.content], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        
-        // Create a download link and trigger it
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${artifact.title.replace(/\s+/g, '_')}.md`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // For DOCX and PDF, we need the backend to convert
-        const response = await fetch(`/api/artifacts/${artifactId}/download`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ format }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to download artifact as ${format}`);
-        }
-        
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${artifact.title.replace(/\s+/g, '_')}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
       }
+
+      const response = await fetch(`/api/artifacts/${artifactId}/download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download artifact');
+      }
+      
+      // Get the filename from the Content-Disposition header or use a default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `${artifact.title.replace(/\s+/g, '_')}.md`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Get the blob from the response
+      const blob = await response.blob();
+      
+      // Create a download link and trigger it
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading artifact:', error);
+      setError(error.message);
+      alert(`Failed to download artifact: ${error.message}`);
     }
   };
   
   return {
     artifacts,
     selectedArtifact,
+    isLoading,
+    error,
     createArtifact,
     updateArtifact,
     deleteArtifact,

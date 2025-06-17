@@ -1,9 +1,11 @@
 import React from 'react';
-import { FileIcon, CopyIcon, CheckIcon, BookmarkIcon } from 'lucide-react';
+import { FileIcon, CopyIcon, CheckIcon, BookmarkIcon, PlusIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useState } from 'react';
+import remarkGfm from 'remark-gfm';
+import { ErrorBoundary } from './ErrorBoundary';
 
-export const Message = ({ message, onCreateArtifact, markdownComponents }) => {
+export const Message = ({ message, onCreateArtifact, onCreateManualArtifact, markdownComponents }) => {
   const [copied, setCopied] = useState(false);
   
   const copyToClipboard = () => {
@@ -44,12 +46,15 @@ export const Message = ({ message, onCreateArtifact, markdownComponents }) => {
         </div>
         
         <div className="prose prose-blue max-w-none">
-          <ReactMarkdown components={markdownComponents}>
-            {String(message.content)}
-          </ReactMarkdown>
+          <ErrorBoundary>
+            {console.log('About to render markdown in Message.jsx:', message.content)}
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+              {String(message.content)}
+            </ReactMarkdown>
+          </ErrorBoundary>
         </div>
         
-        {message.sources && message.sources.length > 0 && (
+        {message.sources && Array.isArray(message.sources) && message.sources.length > 0 && (
           <div className="mt-2 text-xs text-gray-500">
             <div className="font-medium mb-1">Sources:</div>
             <ul className="space-y-1">
@@ -74,14 +79,26 @@ export const Message = ({ message, onCreateArtifact, markdownComponents }) => {
             {copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
           </button>
           
-          {message.content.length > 100 && (
-            <button
-              onClick={() => onCreateArtifact()}
-              className="text-gray-500 hover:text-gray-700 transition-colors p-1"
-              title="Save as artifact"
-            >
-              <BookmarkIcon size={16} />
-            </button>
+          {message.content && message.content.length > 100 && (
+            <>
+              <button
+                onClick={() => onCreateArtifact()}
+                className="text-gray-500 hover:text-gray-700 transition-colors p-1"
+                title="Save as artifact"
+              >
+                <BookmarkIcon size={16} />
+              </button>
+              
+              {onCreateManualArtifact && (
+                <button
+                  onClick={() => onCreateManualArtifact(message.content)}
+                  className="text-blue-500 hover:text-blue-700 transition-colors p-1"
+                  title="Create new artifact"
+                >
+                  <PlusIcon size={16} />
+                </button>
+              )}
+            </>
           )}
         </div>
       )}

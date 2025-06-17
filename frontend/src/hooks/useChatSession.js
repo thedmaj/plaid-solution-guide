@@ -1,100 +1,330 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-export const useChatSession = () => {
+export const useChatSession = (onNewAssistantMessage) => {
   const [sessions, setSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMode, setSelectedMode] = useState('solution_guide');
   
-  // Simulate loading sessions from local storage or API
+  // Load sessions from the backend
   useEffect(() => {
     const loadSessions = async () => {
-      const storedSessions = localStorage.getItem('plaid_sessions');
-      
-      if (storedSessions) {
-        const parsedSessions = JSON.parse(storedSessions);
-        setSessions(parsedSessions);
-        
-        // Load the most recent session by default
-        if (parsedSessions.length > 0) {
-          const lastSession = parsedSessions[0];
-          setCurrentSession(lastSession);
-          loadSessionMessages(lastSession.id);
-        } else {
-          createNewSession();
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setSessions([]);
+          setCurrentSession(null);
+          setMessages([]);
+          return;
         }
-      } else {
+
+        const response = await fetch('/api/chat/sessions', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📊 Loaded sessions from backend:', {
+            count: data.length,
+            sessions: data.map(s => ({ id: s.id, title: s.title, type: typeof s.id }))
+          });
+          
+          // Validate session data structure
+          const validSessions = data.filter(session => {
+            const isValid = session && session.id && typeof session.id !== 'undefined';
+            if (!isValid) {
+              console.error('❌ Invalid session found:', session);
+            }
+            return isValid;
+          });
+          
+          if (validSessions.length !== data.length) {
+            console.warn('⚠️ Some sessions were filtered out due to invalid data');
+          }
+          
+          setSessions(validSessions);
+          
+          // Load the most recent session by default
+          if (validSessions.length > 0) {
+            const lastSession = validSessions[0];
+            console.log('🔄 Auto-loading most recent session:', {
+              id: lastSession.id,
+              title: lastSession.title,
+              mode: lastSession.mode
+            });
+            setCurrentSession(lastSession);
+            setSelectedMode(lastSession.mode || 'solution_guide');
+            await loadSession(lastSession.id);
+          } else {
+            createNewSession();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading sessions:', error);
         createNewSession();
       }
     };
     
     loadSessions();
-  }, []);
+  }, [localStorage.getItem('token')]);
   
-  // Save sessions to localStorage whenever they change
-  useEffect(() => {
-    if (sessions.length > 0) {
-      localStorage.setItem('plaid_sessions', JSON.stringify(sessions));
+  const createNewSession = async (mode = selectedMode) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Ensure we're only sending the mode as a string
+      const sessionMode = typeof mode === 'string' ? mode : selectedMode;
+
+      const response = await fetch('/api/chat/sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          mode: sessionMode
+        })
+      });
+
+      if (response.ok) {
+        const newSession = await response.json();
+        setSessions(prevSessions => [newSession, ...prevSessions]);
+        setCurrentSession(newSession);
+        setSelectedMode(sessionMode);
+        setMessages([]);
+        return newSession;
+      }
+    } catch (error) {
+      console.error('Error creating new session:', error);
     }
-  }, [sessions]);
+  };
   
-  const createNewSession = () => {
-    const newSession = {
-      id: uuidv4(),
-      title: 'New conversation',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    
-    setSessions(prevSessions => [newSession, ...prevSessions]);
-    setCurrentSession(newSession);
-    setMessages([]);
-    
-    return newSession;
+  const handleModeChange = async (mode) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token || !currentSession) return;
+
+      console.log('Updating mode to:', mode); // Debug log
+
+      // Update the mode in the backend
+      const response = await fetch(`/api/chat/sessions/${currentSession.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          mode,
+          title: currentSession.title || 'New conversation'
+        })
+      });
+
+      if (response.ok) {
+        const updatedSession = await response.json();
+        console.log('Server response:', updatedSession); // Debug log
+        
+        // Update all state in a single batch
+        setSelectedMode(mode); // Use the requested mode, not the response mode
+        setCurrentSession(prevSession => ({
+          ...prevSession,
+          mode: mode // Use the requested mode
+        }));
+        
+        // Update the session in the sessions list
+        setSessions(prevSessions => 
+          prevSessions.map(session => 
+            session.id === currentSession.id 
+              ? { ...session, mode: mode } // Use the requested mode
+              : session
+          )
+        );
+      } else {
+        const errorData = await response.json();
+        console.error('Error updating session mode:', errorData);
+        throw new Error(errorData.detail || 'Failed to update session mode');
+      }
+    } catch (error) {
+      console.error('Error updating session mode:', error);
+      // Revert the mode change in the UI if the server update failed
+      setSelectedMode(currentSession.mode);
+    }
   };
   
   const loadSession = async (sessionId) => {
-    const session = sessions.find(s => s.id === sessionId);
-    
-    if (session) {
-      setCurrentSession(session);
-      await loadSessionMessages(sessionId);
-    }
-  };
-  
-  const loadSessionMessages = async (sessionId) => {
-    const storedMessages = localStorage.getItem(`plaid_messages_${sessionId}`);
-    if (storedMessages) {
-      const loadedMessages = JSON.parse(storedMessages).filter(m => m.content && m.content.trim());
-      setMessages(loadedMessages);
-      console.log("Loaded messages from localStorage:", loadedMessages);
-    } else {
+    try {
+      console.log('🔄 useChatSession: Loading session...', { sessionId, type: typeof sessionId });
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('❌ No token found when loading session');
+        setIsLoading(false);
+        return;
+      }
+
+      // Ensure sessionId is a string and validate it
+      if (!sessionId || sessionId === null || sessionId === undefined) {
+        console.error('❌ Invalid sessionId provided:', sessionId);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Convert to string and validate it's not empty
+      const stringSessionId = String(sessionId).trim();
+      if (!stringSessionId || stringSessionId === 'null' || stringSessionId === 'undefined') {
+        console.error('❌ Invalid sessionId after conversion:', stringSessionId);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('📨 Loading session with ID:', stringSessionId);
+
+      const response = await fetch(`/api/chat/sessions/${stringSessionId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('📡 Session load response:', { 
+        ok: response.ok, 
+        status: response.status, 
+        statusText: response.statusText 
+      });
+
+      if (response.ok) {
+        const sessionMessages = await response.json();
+        console.log('📨 Loaded messages:', { 
+          count: sessionMessages?.length, 
+          firstMessage: sessionMessages?.[0]?.role 
+        });
+        
+        // Validate messages array
+        if (!Array.isArray(sessionMessages)) {
+          console.error('❌ Invalid messages format:', sessionMessages);
+          setMessages([]);
+        } else {
+          setMessages(sessionMessages);
+        }
+        
+        // Update current session and mode
+        const session = sessions.find(s => s.id === stringSessionId);
+        console.log('🔍 Found session in list:', { 
+          found: !!session, 
+          sessionTitle: session?.title,
+          sessionMode: session?.mode 
+        });
+        
+        if (session) {
+          setCurrentSession(session);
+          setSelectedMode(session.mode || 'solution_guide');
+        } else {
+          console.warn('⚠️ Session not found in sessions list:', stringSessionId);
+        }
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to load session:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          error: errorText 
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error loading session:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        sessionId
+      });
+      
+      // Reset to empty state on error
       setMessages([]);
+      setCurrentSession(null);
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const saveSessionMessages = (sessionId, messages) => {
-    localStorage.setItem(`plaid_messages_${sessionId}`, JSON.stringify(messages));
+  const updateSessionTitle = async (sessionId, title) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/chat/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title })
+      });
+
+      if (response.ok) {
+        const updatedSession = await response.json();
+        setSessions(prevSessions => 
+          prevSessions.map(session => 
+            session.id === sessionId ? updatedSession : session
+          )
+        );
+        
+        if (currentSession?.id === sessionId) {
+          setCurrentSession(updatedSession);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating session title:', error);
+    }
   };
-  
-  const updateSessionTitle = (sessionId, title) => {
-    setSessions(prevSessions => 
-      prevSessions.map(session => 
-        session.id === sessionId 
-          ? { ...session, title, updated_at: new Date().toISOString() } 
-          : session
-      )
-    );
-    
-    if (currentSession?.id === sessionId) {
-      setCurrentSession(prev => ({ ...prev, title, updated_at: new Date().toISOString() }));
+
+  const deleteSession = async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/chat/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Remove session from list
+        setSessions(prevSessions => 
+          prevSessions.filter(session => session.id !== sessionId)
+        );
+        
+        // If this was the current session, create a new one or switch to another
+        if (currentSession?.id === sessionId) {
+          const remainingSessions = sessions.filter(session => session.id !== sessionId);
+          if (remainingSessions.length > 0) {
+            // Switch to the first remaining session
+            const nextSession = remainingSessions[0];
+            setCurrentSession(nextSession);
+            await loadSession(nextSession.id);
+          } else {
+            // Create a new session if no sessions remain
+            await createNewSession();
+          }
+        }
+      } else {
+        throw new Error('Failed to delete session');
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      throw error;
     }
   };
   
   const sendMessage = async (content) => {
     if (!currentSession) return;
-    if (!content || !content.trim()) return; // Prevent empty messages
+    if (!content || !content.trim()) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) return;
     
     const userMessage = {
       id: uuidv4(),
@@ -105,62 +335,85 @@ export const useChatSession = () => {
     
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    saveSessionMessages(currentSession.id, updatedMessages);
-    
-    if (messages.length === 0) {
-      const title = content.length > 30 ? `${content.substring(0, 30)}...` : content;
-      updateSessionTitle(currentSession.id, title);
-    }
     
     setIsLoading(true);
     
     try {
-      const filteredMessages = messages.filter(m => m.content && m.content.trim());
-      console.log("Sending previous_messages to backend:", filteredMessages);
-      
+      // Format messages according to backend expectations, including the current message
+      const formattedMessages = [...messages, userMessage].map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        sources: msg.sources || []
+      }));
+
+      console.log('Sending message with session ID:', String(currentSession.id));
+      console.log('Previous messages:', formattedMessages);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          session_id: currentSession.id,
+          session_id: String(currentSession.id),
           message: content,
-          previous_messages: filteredMessages,
+          previous_messages: formattedMessages,
+          mode: selectedMode
         }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to get response from assistant');
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        throw new Error(`Failed to get response from assistant: ${errorData.detail || 'Unknown error'}`);
       }
       
       const responseData = await response.json();
+      console.log('Received response:', responseData);
       
-      // Extract the response text from the backend response
-      // The backend returns { content: "response text" } in the assistant_message
-      const responseText = responseData.content || '';
+      if (responseData.messages && Array.isArray(responseData.messages)) {
+        // Find the assistant message in the response
+        const assistantMsg = responseData.messages.find(msg => msg.role === 'assistant');
+        if (assistantMsg) {
+          setMessages([...updatedMessages, assistantMsg]);
+          // Notify callback about new assistant message
+          if (onNewAssistantMessage) {
+            onNewAssistantMessage(assistantMsg, currentSession?.id);
+          }
+        } else {
+          setMessages(updatedMessages); // fallback: just user message
+        }
+      } else {
+        setMessages(updatedMessages); // fallback: just user message
+      }
       
-      // Log for debugging
-      console.log("Backend response data:", responseData);
-      console.log("Assistant message content:", responseText);
-      
-      const assistantMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: responseText,
-        timestamp: new Date().toISOString(),
-        sources: responseData.sources || [],
-      };
-      
-      const finalMessages = [...updatedMessages, assistantMessage];
-      setMessages(finalMessages);
-      saveSessionMessages(currentSession.id, finalMessages);
-      
-      // After receiving the response from the backend
-      console.log("Claude API response:", response);
+      // Handle session title update
+      if (responseData.session && responseData.session.title) {
+        const updatedSession = {
+          ...currentSession,
+          title: responseData.session.title,
+          updated_at: responseData.session.updated_at
+        };
+        
+        // Update current session
+        setCurrentSession(updatedSession);
+        
+        // Update sessions list
+        setSessions(prevSessions => 
+          prevSessions.map(session => 
+            session.id === updatedSession.id ? updatedSession : session
+          )
+        );
+        
+        console.log(`Session title updated to: "${responseData.session.title}"`);
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Add an error message
       const errorMessage = {
         id: uuidv4(),
         role: 'assistant',
@@ -171,7 +424,6 @@ export const useChatSession = () => {
       
       const finalMessages = [...updatedMessages, errorMessage];
       setMessages(finalMessages);
-      saveSessionMessages(currentSession.id, finalMessages);
       
     } finally {
       setIsLoading(false);
@@ -199,9 +451,12 @@ export const useChatSession = () => {
     currentSession,
     messages,
     isLoading,
-    sendMessage,
+    selectedMode,
     createNewSession,
     loadSession,
     updateSessionTitle,
+    deleteSession,
+    sendMessage,
+    handleModeChange
   };
 };
