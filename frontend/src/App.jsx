@@ -212,8 +212,8 @@ function App() {
                 title: updatedArtifact.title,
                 contentLength: updatedArtifact.content?.length
               });
-              selectArtifact(updatedArtifact.id);
-              setArtifactPanelOpen(true);
+              // Force refresh to show updated content
+              forceRefreshArtifactPanel(updatedArtifact.id);
             }
           } else {
             console.warn('⚠️ Target artifact not found for scoped instruction');
@@ -260,9 +260,8 @@ function App() {
               title: artifact.title,
               contentLength: artifact.content?.length
             });
-            // Auto-open artifact panel if a new artifact was created
-            setArtifactPanelOpen(true);
-            selectArtifact(artifact.id);
+            // Auto-open artifact panel with force refresh for new/updated artifacts
+            forceRefreshArtifactPanel(artifact.id);
           } else {
             console.log('❌ No artifact returned from workspace processing');
           }
@@ -301,8 +300,8 @@ function App() {
   };
   
   const handleViewArtifact = (artifactId) => {
-    selectArtifact(artifactId);
-    setArtifactPanelOpen(true);
+    // Force refresh to ensure latest content is shown
+    forceRefreshArtifactPanel(artifactId);
   };
   
   const handleCreateArtifact = (title, content, type = 'markdown') => {
@@ -341,8 +340,13 @@ function App() {
     } else {
       console.log('➕ Creating new artifact directly - no existing artifacts in workspace');
       // No existing artifacts, create new one directly
-      createArtifact(title, content, type);
-      setArtifactPanelOpen(true);
+      const newArtifact = await createArtifact(title, content, type);
+      if (newArtifact) {
+        // Force refresh to show new artifact
+        forceRefreshArtifactPanel(newArtifact.id);
+      } else {
+        setArtifactPanelOpen(true);
+      }
     }
   };
 
@@ -356,8 +360,8 @@ function App() {
     );
     
     if (artifact) {
-      selectArtifact(artifact.id);
-      setArtifactPanelOpen(true);
+      // Force refresh to show new manual artifact
+      forceRefreshArtifactPanel(artifact.id);
     }
   };
 
