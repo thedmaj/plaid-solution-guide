@@ -75,6 +75,8 @@ function App() {
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [artifactPanelOpen, setArtifactPanelOpen] = useState(false);
+  const [artifactPanelKey, setArtifactPanelKey] = useState(0); // Force re-mount when needed
+  const [isRefreshingArtifact, setIsRefreshingArtifact] = useState(false); // Show refresh state
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [workspaceMode, setWorkspaceMode] = useState(true); // Enable workspace features
   
@@ -445,6 +447,26 @@ function App() {
     }
   };
 
+  // Helper function to force refresh artifact panel
+  const forceRefreshArtifactPanel = (artifactId) => {
+    console.log('🔄 Force refreshing artifact panel for:', artifactId);
+    
+    // Show refresh state
+    setIsRefreshingArtifact(true);
+    
+    // Method 1: Close and reopen with delay
+    setArtifactPanelOpen(false);
+    
+    // Method 2: Force re-mount by updating key
+    setArtifactPanelKey(prev => prev + 1);
+    
+    setTimeout(() => {
+      selectArtifact(artifactId);
+      setArtifactPanelOpen(true);
+      setIsRefreshingArtifact(false);
+    }, 150); // Slightly longer delay to ensure complete refresh
+  };
+
   // Template system handlers
   const handleCreateTemplate = () => {
     setEditingTemplateId(null);
@@ -475,13 +497,18 @@ function App() {
     if (currentSession) {
       const newArtifact = await createManualArtifact(content, title, currentSession.id, type || 'markdown');
       if (newArtifact) {
-        selectArtifact(newArtifact.id);
-        setArtifactPanelOpen(true);
+        // Force refresh the panel to show new content
+        forceRefreshArtifactPanel(newArtifact.id);
       }
     } else {
       // Fallback to direct creation if no session
       const newArtifact = await createArtifact(title, content, type || 'markdown');
-      setArtifactPanelOpen(true);
+      if (newArtifact) {
+        // Force refresh the panel to show new content
+        forceRefreshArtifactPanel(newArtifact.id);
+      } else {
+        setArtifactPanelOpen(true);
+      }
     }
     
     // Close the dialog
@@ -514,13 +541,12 @@ function App() {
         
         // Force artifact panel to refresh with new content immediately
         if (updatedArtifact) {
-          selectArtifact(updatedArtifact.id);
-          setArtifactPanelOpen(true);
+          // Force refresh the panel to show merged content
+          forceRefreshArtifactPanel(updatedArtifact.id);
         } else {
           console.warn('⚠️ No artifact returned from workspace merge');
-          // Fallback: re-select to trigger refresh
-          selectArtifact(selectedArtifact.id);
-          setArtifactPanelOpen(true);
+          // Fallback: force refresh with original artifact
+          forceRefreshArtifactPanel(selectedArtifact.id);
         }
         
         // Close the dialog
@@ -695,6 +721,7 @@ function App() {
           {artifactPanelOpen && (
             <ErrorBoundary fallback="Error loading artifact panel">
               <ArtifactPanel 
+                key={artifactPanelKey} // Force re-mount when key changes
                 artifact={selectedArtifact}
                 onUpdate={updateArtifact}
                 onDownload={downloadArtifact}
@@ -702,7 +729,7 @@ function App() {
                 onToggleChatCollapse={handleToggleChatCollapse}
                 isChatCollapsed={isChatCollapsed}
                 className={isChatCollapsed ? 'w-full' : 'w-1/2'}
-                isLoading={artifactsLoading}
+                isLoading={artifactsLoading || isRefreshingArtifact}
                 error={artifactsError}
                 onScopedInstruction={handleArtifactScopedInstruction}
               />
