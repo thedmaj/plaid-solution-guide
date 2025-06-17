@@ -304,7 +304,7 @@ function App() {
     forceRefreshArtifactPanel(artifactId);
   };
   
-  const handleCreateArtifact = (title, content, type = 'markdown') => {
+  const handleCreateArtifact = async (title, content, type = 'markdown') => {
     console.log('🎯 handleCreateArtifact called:', { 
       title, 
       contentLength: content?.length, 

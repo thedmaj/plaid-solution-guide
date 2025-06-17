@@ -2141,3 +2141,30 @@ src/App.jsx
   Line 343:26:  Parsing error: Unexpected reserved word 'await'. (343:26)
 
 webpack compiled with 2 errors
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                               no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                                         no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                                        no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                                    no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                             no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 282:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'forceRefreshArtifactPanel', 'processContentForWorkspace', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.jsx
+  Line 38:5:   'processMessageForArtifacts' is assigned a value but never used                                                                                                                                                               no-unused-vars
+  Line 66:5:   'mergeSuggestions' is assigned a value but never used                                                                                                                                                                         no-unused-vars
+  Line 67:5:   'workspaceSettings' is assigned a value but never used                                                                                                                                                                        no-unused-vars
+  Line 69:5:   'handleMergeSuggestion' is assigned a value but never used                                                                                                                                                                    no-unused-vars
+  Line 72:5:   'getWorkspace' is assigned a value but never used                                                                                                                                                                             no-unused-vars
+  Line 73:5:   'updateWorkspaceSettings' is assigned a value but never used                                                                                                                                                                  no-unused-vars
+  Line 282:6:  React Hook useEffect has missing dependencies: 'artifacts', 'currentSession', 'forceRefreshArtifactPanel', 'processContentForWorkspace', and 'updateArtifactWithContent'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+webpack compiled with 1 warning
