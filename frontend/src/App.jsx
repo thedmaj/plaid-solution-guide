@@ -8,8 +8,8 @@ import { useChatSession } from './hooks/useChatSession';
 import { useSmartArtifacts } from './hooks/useSmartArtifacts';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { GlobalNotifications } from './components/GlobalNotifications';
-import { WorkspaceHeader } from './components/WorkspaceHeader';
-import { useSessionWorkspace } from './hooks/useSessionWorkspace';
+// Removed: WorkspaceHeader - using simplified session artifact header
+// Removed: useSessionWorkspace - simplified to direct artifact operations
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DebugPanel } from './components/DebugPanel';
 import TemplateEditor from './components/TemplateEditor';
@@ -17,13 +17,13 @@ import TemplateLibrary from './components/TemplateLibrary';
 import { TemplateProvider } from './contexts/TemplateContext';
 import { ArtifactCreationDialog } from './components/ArtifactCreationDialog';
 import { ContentMerger } from './utils/contentMerger';
+import { SmartLabeling } from './utils/smartLabeling';
 
 function App() {
   const { user, isLoading: authLoading, login, logout } = useAuth();
   const chatInputRef = useRef(null);
   
-  // Track the current scoped instruction context
-  const [pendingScopedInstruction, setPendingScopedInstruction] = useState(null);
+  // SIMPLIFIED: Removed complex scoped instruction tracking
   
   // Get smart artifacts hook first
   const { 
@@ -35,7 +35,6 @@ function App() {
     selectArtifact,
     isLoading: artifactsLoading,
     error: artifactsError,
-    processMessageForArtifacts,
     getLinkedArtifact,
     recentChanges,
     clearRecentChanges,
@@ -54,31 +53,65 @@ function App() {
     handleModeChange
   } = useChatSession();
 
-  // Get session workspace hook with artifact operations (after currentSession is defined)
-  const workspaceArtifactOperations = {
-    createArtifact,
-    updateArtifact
-  };
+  // SIMPLIFIED: Direct artifact operations without workspace complexity
   
-  const {
-    currentWorkspace,
-    workspaces,
-    mergeSuggestions,
-    workspaceSettings,
-    processContentForWorkspace,
-    handleMergeSuggestion,
-    updateArtifactWithContent,
-    createManualArtifact,
-    getWorkspace,
-    updateWorkspaceSettings
-  } = useSessionWorkspace(currentSession?.id, artifacts, workspaceArtifactOperations);
+  // SIMPLIFIED: Remove complex workspace system - using simple session-based approach
+  const createSessionArtifact = async (title, content, type = 'markdown', chatInstruction = '') => {
+    // NEW artifacts always start at version 1
+    const version = 1;
+    
+    // Use smart labeling for title if not provided or generic
+    let finalTitle = title;
+    if (!title || title.includes('Plaid Guide -') || title === 'New Conversation') {
+      finalTitle = SmartLabeling.generateArtifactTitle(chatInstruction || currentChatInstruction, content, version);
+    }
+    // Don't add version suffix for version 1
+    
+    const smartLabel = SmartLabeling.generateLabel(chatInstruction || currentChatInstruction, content);
+    
+    const metadata = {
+      sessionId: currentSession?.id,
+      role: 'primary',
+      autoCreated: true,
+      createdAt: new Date().toISOString(),
+      version: version,
+      smartLabel: smartLabel,
+      originalInstruction: chatInstruction || currentChatInstruction,
+      isNew: true // Mark as new for UI indication
+    };
+    
+    return await createArtifact(finalTitle, content, type, metadata);
+  };
+
+  // SIMPLIFIED: Using direct updateArtifact calls instead of wrapper
+
+  // Get the primary artifact for current session
+  const sessionArtifact = artifacts.find(a => 
+    a.metadata?.sessionId === currentSession?.id && a.metadata?.role === 'primary'
+  );
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [artifactPanelOpen, setArtifactPanelOpen] = useState(false);
   const [artifactPanelKey, setArtifactPanelKey] = useState(0); // Force re-mount when needed
   const [isRefreshingArtifact, setIsRefreshingArtifact] = useState(false); // Show refresh state
+  const [isMergingContent, setIsMergingContent] = useState(false); // Show merge operation state
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
-  const [workspaceMode, setWorkspaceMode] = useState(true); // Enable workspace features
+  const [userClosedPanel, setUserClosedPanel] = useState(false); // Track if user deliberately closed panel
+  const [mergeMode, setMergeMode] = useState('chat_only'); // User preference: 'chat_only' or 'merge_response'
+  const [currentChatInstruction, setCurrentChatInstruction] = useState(''); // Track original user instruction for smart labeling
+  
+  // Reset merge state when switching to chat_only mode
+  useEffect(() => {
+    if (mergeMode === 'chat_only') {
+      console.log('🔄 Switching to Chat Only mode - clearing merge state');
+      setIsMergingContent(false);
+    }
+  }, [mergeMode]);
+  
+  // Debug current merge state
+  useEffect(() => {
+    console.log('🔍 Current merge state:', { isMergingContent, mergeMode });
+  }, [isMergingContent, mergeMode]);
   
   // Template system state
   const [templateLibraryOpen, setTemplateLibraryOpen] = useState(false);
@@ -163,149 +196,163 @@ function App() {
     };
   }, []);
 
-  // Debug: Log workspace changes
+  // Debug: Log session artifact changes and reset panel close state on session change
   useEffect(() => {
-    console.log('🏢 App.jsx: currentWorkspace updated:', currentWorkspace?.primaryArtifact?.title);
-  }, [currentWorkspace]);
+    console.log('🏢 App.jsx: sessionArtifact updated:', sessionArtifact?.title);
+    // Reset user closed panel flag when session changes
+    setUserClosedPanel(false);
+  }, [currentSession?.id]);
 
-  // Process new assistant messages for workspace management
+  // REMOVED: Auto-loading of artifacts - now click-based like Claude Desktop
+  // Artifacts only load when user clicks the artifact icon
+
+  // Track last processed message to avoid reprocessing old messages
+  const [lastProcessedMessageIndex, setLastProcessedMessageIndex] = useState(-1);
+  
+  // SIMPLIFIED: Auto-generate artifacts for ALL substantial assistant responses (Claude Desktop style)
   useEffect(() => {
-    const processLatestMessage = async () => {
-      console.log('🔄 App.jsx: Processing latest message...', {
-        messagesLength: messages.length,
-        currentSession: currentSession?.id,
-        pendingScope: pendingScopedInstruction?.artifactId
-      });
+    const processNewAssistantMessage = async () => {
+      if (!messages.length || !currentSession) return;
       
-      if (!messages.length || !currentSession) {
-        console.log('❌ No messages or session, skipping processing');
+      // Only process if we have new messages
+      if (messages.length <= lastProcessedMessageIndex + 1) return;
+      
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role !== 'assistant') {
+        setLastProcessedMessageIndex(messages.length - 1);
         return;
       }
       
-      const lastMessage = messages[messages.length - 1];
-      console.log('📨 Last message:', {
-        role: lastMessage.role,
-        contentLength: lastMessage.content?.length,
-        id: lastMessage.id
-      });
-      
-      if (lastMessage.role !== 'assistant') {
-        console.log('❌ Last message is not assistant, skipping');
+      // Skip if message is too short to be substantial
+      const content = lastMessage.content || '';
+      if (content.length < 300) { // Increased threshold for artifact generation
+        setLastProcessedMessageIndex(messages.length - 1);
         return;
       }
       
       try {
-        // If this message is in response to a scoped instruction, use workspace update
-        if (pendingScopedInstruction?.artifactId) {
-          console.log('🎯 Processing scoped instruction for artifact:', pendingScopedInstruction.artifactId);
-          const targetArtifact = artifacts.find(a => a.id === pendingScopedInstruction.artifactId);
-          if (targetArtifact) {
-            const updatedArtifact = await updateArtifactWithContent(
-              targetArtifact, 
-              lastMessage.content, 
-              lastMessage.id,
-              'scoped_instruction'
-            );
-            if (updatedArtifact) {
-              console.log('🎯 App.jsx: Scoped instruction update completed, selecting artifact:', {
-                artifactId: updatedArtifact.id,
-                title: updatedArtifact.title,
-                contentLength: updatedArtifact.content?.length
-              });
-              // Force refresh to show updated content
-              forceRefreshArtifactPanel(updatedArtifact.id);
-            }
-          } else {
-            console.warn('⚠️ Target artifact not found for scoped instruction');
-          }
-        } else {
-          // Use workspace processing for new content
-          console.log('🏢 Processing workspace content for new message');
-          console.log('🔍 Last message structure:', lastMessage);
-          const messageId = lastMessage.id || lastMessage.message_id || Date.now().toString();
-          
-          // Get the previous user message for context
-          let userMessage = '';
-          try {
-            if (messages.length >= 2) {
-              const userMsg = messages.find((msg, index) => 
-                index < messages.length - 1 && 
-                msg.role === 'user'
-              );
-              userMessage = userMsg?.content || '';
-            }
-            const userMsgPreview = userMessage && typeof userMessage === 'string' ? 
-              userMessage.substring(0, 100) + '...' : 'No user message';
-            console.log('📋 User message context:', userMsgPreview);
-          } catch (error) {
-            console.error('❌ Error finding user message:', error);
-            userMessage = '';
-          }
-          
-          const artifact = await processContentForWorkspace(
-            lastMessage.content, 
-            messageId, 
-            currentSession.id,
-            null, // forceTargetArtifactId
-            true, // shouldAutoCreate
-            userMessage, // pass user message for section targeting
-            currentSession.title // pass session title for artifact naming
-          );
-          
-          console.log('🏭 Workspace processing result:', artifact ? 'Artifact returned' : 'No artifact returned');
-          
-          if (artifact) {
-            console.log('📄 App.jsx: Artifact processed, selecting and opening panel:', {
-              artifactId: artifact.id,
-              title: artifact.title,
-              contentLength: artifact.content?.length
-            });
-            // Auto-open artifact panel with force refresh for new/updated artifacts
-            forceRefreshArtifactPanel(artifact.id);
-          } else {
-            console.log('❌ No artifact returned from workspace processing');
-          }
+        // Check if this message already has an artifact (prevent duplicates on refresh)
+        const existingArtifact = artifacts.find(a => 
+          a.metadata?.sessionId === currentSession?.id &&
+          Math.abs(new Date(a.created_at).getTime() - new Date(lastMessage.timestamp || new Date()).getTime()) < 30000
+        );
+        
+        if (existingArtifact) {
+          console.log('🔍 Artifact already exists for this message, skipping creation');
+          setLastProcessedMessageIndex(messages.length - 1);
+          return;
         }
         
-        // Clear pending scoped instruction
-        setPendingScopedInstruction(null);
+        // ALWAYS generate artifact for substantial responses (Claude Desktop style)
+        if (mergeMode === 'merge_response' && sessionArtifact) {
+          // Merge mode: merge with existing artifact
+          setIsMergingContent(true);
+          
+          console.log('🔄 Auto-merging with existing session artifact');
+          const mergeResult = await ContentMerger.mergeContent(
+            sessionArtifact.content,
+            content,
+            null, // No modification scope
+            false // Not from scoped instruction
+          );
+          
+          // Update metadata for version tracking
+          const updatedMetadata = {
+            ...sessionArtifact.metadata,
+            version: (sessionArtifact.metadata?.version || 1) + 1,
+            isNew: true,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          await updateArtifact(sessionArtifact.id, {
+            content: mergeResult.mergedContent,
+            metadata: updatedMetadata
+          });
+          
+          // Mark artifact in message for inline display (show icon after merge)
+          lastMessage.artifactId = sessionArtifact.id;
+        } else {
+          // Check if this is a merge-related request even in Chat Only mode
+          const isMergeRequest = currentChatInstruction.toLowerCase().includes('merge') ||
+                                content.toLowerCase().includes('merged') ||
+                                content.toLowerCase().includes('combining');
+          
+          if (isMergeRequest && sessionArtifact) {
+            // User explicitly requested merge - update artifact and show icon
+            console.log('🔄 Manual merge detected - updating artifact version');
+            
+            // Update artifact metadata to indicate manual merge and increment version
+            const updatedMetadata = {
+              ...sessionArtifact.metadata,
+              version: (sessionArtifact.metadata?.version || 1) + 1,
+              isNew: true,
+              lastUpdated: new Date().toISOString(),
+              manualMerge: true
+            };
+            
+            await updateArtifact(sessionArtifact.id, {
+              metadata: updatedMetadata
+            });
+            
+            lastMessage.artifactId = sessionArtifact.id;
+          } else {
+            // Create new artifact for substantial responses (only if one doesn't exist)
+            console.log('🆕 Auto-creating artifact for substantial response');
+            
+            const newArtifact = await createSessionArtifact('', content, 'markdown', currentChatInstruction);
+            if (newArtifact) {
+              // Mark artifact in message for inline display
+              lastMessage.artifactId = newArtifact.id;
+            }
+          }
+        }
       } catch (error) {
-        console.error('❌ Error processing message for workspace:', error);
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack
-        });
+        console.error('Error in auto-processing:', error);
+      } finally {
+        setIsMergingContent(false);
+        setLastProcessedMessageIndex(messages.length - 1);
       }
     };
 
-    processLatestMessage();
-  }, [messages, currentSession?.id, pendingScopedInstruction?.artifactId]);
+    processNewAssistantMessage();
+  }, [messages.length]); // Only depend on message count, not the messages themselves
+  
+  // Reset message tracking when session changes
+  useEffect(() => {
+    setLastProcessedMessageIndex(-1);
+  }, [currentSession?.id]);
   
   const handleSendMessage = async (message) => {
+    // Track the user instruction for smart labeling
+    setCurrentChatInstruction(message);
     await sendMessage(message);
     // Artifact processing is now handled automatically by the handleNewAssistantMessage callback
   };
   
   const handleSendMessageWithTarget = async (message, targetArtifactId = null) => {
-    // Store the target artifact for when the response arrives
-    if (targetArtifactId) {
-      setPendingScopedInstruction({ 
-        artifactId: targetArtifactId, 
-        type: 'modify', 
-        highlightedText: 'conversation context' 
-      });
-    }
-    
+    // SIMPLIFIED: Direct message sending - scoped instructions removed
     await sendMessage(message);
   };
   
   const handleViewArtifact = (artifactId) => {
-    // Force refresh to ensure latest content is shown
-    forceRefreshArtifactPanel(artifactId);
+    // Check if this artifact is already selected and panel is open - if so, toggle panel closed
+    if (selectedArtifact?.id === artifactId && artifactPanelOpen) {
+      setArtifactPanelOpen(false);
+      setUserClosedPanel(true);
+    } else {
+      // Select and open artifact in panel (click-based loading)
+      selectArtifact(artifactId);
+      setArtifactPanelOpen(true);
+      setUserClosedPanel(false); // Reset user closed flag since they explicitly opened it
+    }
+  };
+  
+  const handleDownloadArtifact = (artifactId) => {
+    downloadArtifact(artifactId);
   };
   
   const handleCreateArtifact = async (title, content, type = 'markdown') => {
-    console.log('🎯 handleCreateArtifact called:', { 
+    console.log('🎯 handleCreateArtifact called (Save as Artifact):', { 
       title, 
       contentLength: content?.length, 
       type,
@@ -313,24 +360,9 @@ function App() {
       sessionId: currentSession?.id 
     });
     
-    // Use workspace to check for existing artifacts instead of manually filtering
-    const sessionArtifacts = currentWorkspace ? [
-      ...(currentWorkspace.primaryArtifact ? [currentWorkspace.primaryArtifact] : []),
-      ...currentWorkspace.supplementaryArtifacts
-    ] : [];
-    
-    console.log('🔍 DEBUG - handleCreateArtifact:', {
-      currentSessionId: currentSession?.id,
-      hasWorkspace: !!currentWorkspace,
-      hasPrimaryArtifact: !!currentWorkspace?.primaryArtifact,
-      supplementaryCount: currentWorkspace?.supplementaryArtifacts?.length || 0,
-      sessionArtifactsCount: sessionArtifacts.length,
-      workspaceArtifacts: sessionArtifacts.map(a => ({ id: a.id, title: a.title }))
-    });
-    
-    if (sessionArtifacts.length > 0) {
-      console.log('✅ Opening merge dialog - found existing artifacts via workspace');
-      // Open dialog to ask user's preference
+    // Check if session already has a primary artifact
+    if (sessionArtifact) {
+      console.log('✅ Session has existing artifact - opening merge dialog');
       setArtifactCreationDialog({
         isOpen: true,
         content: content,
@@ -338,30 +370,44 @@ function App() {
         type: type
       });
     } else {
-      console.log('➕ Creating new artifact directly - no existing artifacts in workspace');
-      // No existing artifacts, create new one directly
-      const newArtifact = await createArtifact(title, content, type);
+      console.log('➕ Creating primary artifact for session');
+      const newArtifact = await createSessionArtifact(title, content, type);
       if (newArtifact) {
-        // Force refresh to show new artifact
-        forceRefreshArtifactPanel(newArtifact.id);
-      } else {
+        console.log('🆕 Session artifact created:', newArtifact.title);
+        selectArtifact(newArtifact.id);
         setArtifactPanelOpen(true);
       }
     }
   };
 
+  const handleMergeWithArtifact = async (title, content, type = 'markdown') => {
+    console.log('🔄 handleMergeWithArtifact called (Merge button):', { 
+      title, 
+      contentLength: content?.length, 
+      type 
+    });
+    
+    // Always show merge dialog regardless of artifacts (merge button should only appear when artifacts exist)
+    setArtifactCreationDialog({
+      isOpen: true,
+      content: content,
+      title: title,
+      type: type
+    });
+  };
+
   const handleCreateManualArtifact = async (content, title) => {
     if (!currentSession) return;
     
-    const artifact = await createManualArtifact(
-      content, 
-      title, 
-      currentSession.id
+    // Use simplified session artifact creation
+    const artifact = await createSessionArtifact(
+      title || `Guide - ${new Date().toLocaleDateString()}`, 
+      content
     );
     
     if (artifact) {
-      // Force refresh to show new manual artifact
-      forceRefreshArtifactPanel(artifact.id);
+      selectArtifact(artifact.id);
+      setArtifactPanelOpen(true);
     }
   };
 
@@ -376,8 +422,7 @@ function App() {
         return;
       }
       
-      // Store the scoped instruction context for when the assistant responds
-      setPendingScopedInstruction({ artifactId, type, highlightedText });
+      // SIMPLIFIED: Direct prompt generation without state management
       
       // Create a contextual prompt based on the action type and artifact context
       let prompt = '';
@@ -495,22 +540,13 @@ function App() {
   const handleCreateNewArtifact = async () => {
     const { content, title, type } = artifactCreationDialog;
     
-    console.log('🆕 Creating new artifact via workspace system');
+    console.log('🆕 Creating new session artifact');
     
-    // Use workspace system to create supplementary artifact
+    // Use simplified session artifact creation
     if (currentSession) {
-      const newArtifact = await createManualArtifact(content, title, currentSession.id, type || 'markdown');
+      const newArtifact = await createSessionArtifact(title, content, type || 'markdown');
       if (newArtifact) {
-        // Force refresh the panel to show new content
-        forceRefreshArtifactPanel(newArtifact.id);
-      }
-    } else {
-      // Fallback to direct creation if no session
-      const newArtifact = await createArtifact(title, content, type || 'markdown');
-      if (newArtifact) {
-        // Force refresh the panel to show new content
-        forceRefreshArtifactPanel(newArtifact.id);
-      } else {
+        selectArtifact(newArtifact.id);
         setArtifactPanelOpen(true);
       }
     }
@@ -524,46 +560,52 @@ function App() {
     
     if (selectedArtifact && currentSession) {
       try {
-        console.log('🔄 Starting merge process via workspace system:', {
-          artifactId: selectedArtifact.id,
+        console.log('🔄 Starting simple merge process:', {
+          targetArtifactId: selectedArtifact.id,
+          targetArtifactTitle: selectedArtifact.title,
           originalLength: selectedArtifact.content?.length,
           newContentLength: content?.length
         });
         
-        // Use workspace system to handle the merge
-        const updatedArtifact = await updateArtifactWithContent(
-          selectedArtifact, 
-          content, 
-          Date.now().toString(), // messageId
-          'manual_merge'
+        setIsMergingContent(true); // Start merge loading
+        
+        // Simple content merging using AI service
+        const mergeResult = await ContentMerger.mergeContent(
+          selectedArtifact.content,
+          content,
+          null, // No modification scope
+          false // Not from scoped instruction
         );
         
-        console.log('✅ Workspace merge completed:', {
+        // Update the artifact with merged content
+        const updatedArtifact = await updateArtifact(selectedArtifact.id, {
+          content: mergeResult.mergedContent
+        });
+        
+        console.log('✅ Simple merge completed:', {
           updatedArtifactId: updatedArtifact?.id,
           updatedLength: updatedArtifact?.content?.length
         });
         
-        // Force artifact panel to refresh with new content immediately
+        // Refresh the panel
         if (updatedArtifact) {
-          // Force refresh the panel to show merged content
-          forceRefreshArtifactPanel(updatedArtifact.id);
-        } else {
-          console.warn('⚠️ No artifact returned from workspace merge');
-          // Fallback: force refresh with original artifact
-          forceRefreshArtifactPanel(selectedArtifact.id);
+          selectArtifact(updatedArtifact.id);
+          setArtifactPanelOpen(true);
         }
         
         // Close the dialog
         setArtifactCreationDialog(prev => ({ ...prev, isOpen: false }));
       } catch (error) {
-        console.error('Error merging content via workspace:', error);
+        console.error('Error in simple merge:', error);
         alert('Failed to merge content. Please try again.');
+      } finally {
+        setIsMergingContent(false); // End merge loading
       }
     }
   };
 
   const handlePreviewMerge = async (existingContent, newContent) => {
-    return ContentMerger.previewMerge(existingContent, newContent);
+    return await ContentMerger.previewMerge(existingContent, newContent);
   };
 
   // Simplified workspace handling - auto-merge by default
@@ -635,7 +677,7 @@ function App() {
   
   return (
     <TemplateProvider>
-      <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-gray-50">
       <WorkspaceSidebar 
         isOpen={sidebarOpen} 
         onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -663,14 +705,18 @@ function App() {
         onLogout={logout}
         onToggleChatCollapse={handleToggleChatCollapse}
         onOpenArtifactPanel={setArtifactPanelOpen}
-        workspaces={workspaces}
-        workspaceMode={workspaceMode}
+        sessionArtifact={sessionArtifact}
       />
       
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header 
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          onToggleArtifactPanel={() => setArtifactPanelOpen(!artifactPanelOpen)}
+          onToggleArtifactPanel={() => {
+            setArtifactPanelOpen(!artifactPanelOpen);
+            if (!artifactPanelOpen) {
+              setUserClosedPanel(false); // Reset when manually opening
+            }
+          }}
           artifactPanelOpen={artifactPanelOpen}
           currentSession={currentSession}
           isChatCollapsed={isChatCollapsed}
@@ -680,13 +726,19 @@ function App() {
           onDeleteSession={deleteSession}
         />
         
-        {/* Workspace Header */}
-        {currentWorkspace && (
-          <WorkspaceHeader 
-            workspace={currentWorkspace}
-            onOpenSettings={() => setWorkspaceMode(!workspaceMode)}
-            isCompact={!isChatCollapsed}
-          />
+        {/* Session Artifact Header */}
+        {sessionArtifact && (
+          <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-blue-700">Active Guide:</span>
+                <span className="text-sm text-blue-600">{sessionArtifact.title}</span>
+              </div>
+              <div className="text-xs text-blue-500">
+                Updated {new Date(sessionArtifact.updated_at).toLocaleTimeString()}
+              </div>
+            </div>
+          </div>
         )}
         
         <div className="flex flex-1 overflow-hidden">
@@ -701,23 +753,29 @@ function App() {
                 messages={messages} 
                 onSendMessage={handleSendMessage}
                 onSendMessageWithTarget={handleSendMessageWithTarget}
-                isLoading={chatLoading}
+                isLoading={chatLoading || isMergingContent}
+                isMergingContent={isMergingContent}
                 onCreateArtifact={handleCreateArtifact}
+                onMergeWithArtifact={handleMergeWithArtifact}
                 onCreateManualArtifact={handleCreateManualArtifact}
                 currentSession={currentSession}
-                currentWorkspace={currentWorkspace}
+                sessionArtifact={sessionArtifact}
                 isChatCollapsed={isChatCollapsed}
                 onModeChange={handleModeChange}
-                onProcessMessage={(message, sessionId) => processContentForWorkspace(message.content, message.id, sessionId)}
                 getLinkedArtifact={getLinkedArtifact}
                 onDismissChange={dismissRecentChange}
                 onViewArtifact={handleViewArtifact}
+                onDownloadArtifact={handleDownloadArtifact}
                 artifacts={artifacts}
                 externalInputRef={chatInputRef}
                 selectedTemplate={selectedTemplate}
                 onTemplateSelect={handleTemplateSelect}
                 onCreateTemplate={handleCreateTemplate}
                 onEditTemplate={handleEditTemplate}
+                mergeMode={mergeMode}
+                onMergeModeChange={setMergeMode}
+                artifactPanelOpen={artifactPanelOpen}
+                selectedArtifact={selectedArtifact}
               />
             </div>
           </ErrorBoundary>
@@ -729,13 +787,18 @@ function App() {
                 artifact={selectedArtifact}
                 onUpdate={updateArtifact}
                 onDownload={downloadArtifact}
-                onClose={() => setArtifactPanelOpen(false)}
+                onClose={() => {
+                  setArtifactPanelOpen(false);
+                  setUserClosedPanel(true);
+                }}
                 onToggleChatCollapse={handleToggleChatCollapse}
                 isChatCollapsed={isChatCollapsed}
                 className={isChatCollapsed ? 'w-full' : 'w-1/2'}
                 isLoading={artifactsLoading || isRefreshingArtifact}
                 error={artifactsError}
                 onScopedInstruction={handleArtifactScopedInstruction}
+                sessions={sessions}
+                currentSession={currentSession}
               />
             </ErrorBoundary>
           )}
@@ -761,10 +824,7 @@ function App() {
       <ArtifactCreationDialog
         isOpen={artifactCreationDialog.isOpen}
         onClose={() => setArtifactCreationDialog(prev => ({ ...prev, isOpen: false }))}
-        existingArtifacts={currentWorkspace ? [
-          ...(currentWorkspace.primaryArtifact ? [currentWorkspace.primaryArtifact] : []),
-          ...currentWorkspace.supplementaryArtifacts
-        ] : []}
+        existingArtifacts={sessionArtifact ? [sessionArtifact] : []} // Only show current session artifact
         newContent={artifactCreationDialog.content}
         onCreateNew={handleCreateNewArtifact}
         onMerge={handleMergeWithExisting}
@@ -784,13 +844,13 @@ function App() {
       {/* Debug Panel (only in development) */}
       {process.env.NODE_ENV === 'development' && user && (
         <DebugPanel
-          currentWorkspace={currentWorkspace}
+          sessionArtifact={sessionArtifact}
           artifacts={artifacts}
           messages={messages}
           currentSession={currentSession}
         />
       )}
-    </div>
+        </div>
     </TemplateProvider>
   );
 }

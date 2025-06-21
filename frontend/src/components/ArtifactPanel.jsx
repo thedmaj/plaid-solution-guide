@@ -31,7 +31,9 @@ export const ArtifactPanel = ({
   isLoading = false,
   error = null,
   onScopedInstruction, // New prop for handling scoped instructions from artifact highlighting
-  forceRefresh = false // New prop to force content refresh
+  forceRefresh = false, // New prop to force content refresh
+  sessions = [], // Array of all sessions
+  currentSession = null // Current active session
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
@@ -46,6 +48,20 @@ export const ArtifactPanel = ({
   const [highlights, setHighlights] = useState([]);
   const artifactContentRef = useRef(null);
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
+  
+  // Helper function to get session information for the artifact
+  const getArtifactSession = () => {
+    if (!artifact) return null;
+    
+    // Try to get sessionId from various possible locations
+    const sessionId = artifact.metadata?.sessionId || artifact.session_id || artifact.sessionId;
+    
+    if (!sessionId) return null;
+    
+    // Find the session in the sessions list
+    const session = sessions.find(s => s.id === sessionId);
+    return session || { id: sessionId, title: 'Unknown Session' };
+  };
   
   // Initialize mermaid once the component mounts
   useEffect(() => {
@@ -572,7 +588,30 @@ export const ArtifactPanel = ({
               placeholder="Artifact title"
             />
           ) : (
-            artifact.title
+            <div className="flex flex-col">
+              <div className="text-sm font-medium">{artifact.title}</div>
+              {(() => {
+                const artifactSession = getArtifactSession();
+                if (artifactSession) {
+                  const isCurrentSession = currentSession && artifactSession.id === currentSession.id;
+                  return (
+                    <div className={`text-xs ${isCurrentSession ? 'text-blue-600' : 'text-gray-500'} flex items-center gap-1`}>
+                      <MessageSquareIcon size={10} />
+                      <span>{isCurrentSession ? 'Current session' : artifactSession.title}</span>
+                      {isCurrentSession && <span className="text-blue-500">●</span>}
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="text-xs text-gray-400 flex items-center gap-1">
+                      <MessageSquareIcon size={10} />
+                      <span>Session not linked</span>
+                    </div>
+                  );
+                }
+              })()
+              }
+            </div>
           )}
         </div>
         
@@ -691,7 +730,24 @@ export const ArtifactPanel = ({
       </div>
       
       <div className="p-3 border-t border-gray-200 text-xs text-gray-500 bg-gray-50">
-        Last updated: {new Date(artifact.updated_at || artifact.created_at).toLocaleString()}
+        <div className="flex justify-between items-center">
+          <span>Last updated: {new Date(artifact.updated_at || artifact.created_at).toLocaleString()}</span>
+          {(() => {
+            const artifactSession = getArtifactSession();
+            if (artifactSession) {
+              const isCurrentSession = currentSession && artifactSession.id === currentSession.id;
+              return (
+                <span className={`flex items-center gap-1 ${isCurrentSession ? 'text-blue-600' : 'text-gray-500'}`}>
+                  <MessageSquareIcon size={10} />
+                  <span>{artifactSession.title}</span>
+                  {isCurrentSession && <span className="text-blue-500 ml-1">●</span>}
+                </span>
+              );
+            }
+            return null;
+          })()
+          }
+        </div>
       </div>
 
       {/* Context menu for artifact highlighting */}

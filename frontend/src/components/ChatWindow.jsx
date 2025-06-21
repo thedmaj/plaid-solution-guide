@@ -1,19 +1,20 @@
-import React, { useState, useRef, useEffect, useImperativeHandle } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, useMemo, useCallback } from 'react';
 import { Message } from './Message';
 import { HighlightableMessage } from './HighlightableMessage';
-import { SendIcon, SparklesIcon, FileTextIcon, PlusIcon, EditIcon, ChevronDownIcon } from 'lucide-react';
+import { SendIcon, SparklesIcon } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ChatModeSelector } from './ChatModeSelector';
-import { ArtifactTargeting } from '../utils/artifactTargeting';
 import TemplateSelector from './TemplateSelector';
 import { buildPromptWithTemplate } from '../hooks/useTemplates';
+import ArtifactIcon from './ArtifactIcon';
 
 export const ChatWindow = ({ 
   messages, 
   onSendMessage, 
   isLoading, 
+  isMergingContent, // New prop for merge loading state
   onCreateArtifact,
+  onMergeWithArtifact, // New prop for merge functionality
   onCreateManualArtifact, // New prop for manual artifact creation
   currentSession,
   currentWorkspace, // Current workspace to check for existing artifacts
@@ -30,17 +31,117 @@ export const ChatWindow = ({
   selectedTemplate,
   onTemplateSelect,
   onCreateTemplate,
-  onEditTemplate
+  onEditTemplate,
+  // Merge mode props
+  mergeMode = 'chat_only',
+  onMergeModeChange,
+  // Artifact handling props
+  onDownloadArtifact,
+  // Panel state props
+  artifactPanelOpen = false, // New prop to track panel state
+  selectedArtifact = null // New prop to track selected artifact
 }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   
-  // Artifact targeting state
-  const [targetMode, setTargetMode] = useState('auto'); // 'auto', 'update', 'create'
-  const [selectedArtifact, setSelectedArtifact] = useState(null);
-  const [showTargetSelector, setShowTargetSelector] = useState(false);
-  const [targetingAnalysis, setTargetingAnalysis] = useState(null);
+  // Optimized: Pre-compute artifact mappings for O(1) lookups
+  const artifactMappings = useMemo(() => {
+    const directIdMap = new Map(); // message.artifactId -> artifact
+    const temporalMap = new Map(); // temporal key -> artifact
+    const sessionArtifacts = []; // Store session artifacts for fallback
+    
+    artifacts.forEach(artifact => {
+      // Direct artifact ID mapping (highest priority)
+      if (artifact.id) {
+        directIdMap.set(artifact.id, artifact);
+      }
+      
+      // Session-based temporal mapping for auto-created artifacts
+      if (artifact.metadata?.sessionId === currentSession?.id && artifact.metadata?.autoCreated) {
+        sessionArtifacts.push(artifact);
+        
+        // Create temporal lookup key based on creation time
+        if (artifact.created_at) {
+          try {
+            const artifactTime = new Date(artifact.created_at).getTime();
+            // Create multiple temporal keys for 30-second window matching
+            for (let offset = -30000; offset <= 30000; offset += 5000) {
+              const timeKey = `temporal_${artifactTime + offset}`;
+              if (!temporalMap.has(timeKey)) {
+                temporalMap.set(timeKey, artifact);
+              }
+            }
+          } catch (error) {
+            // Handle invalid date gracefully
+            console.warn('Invalid artifact creation date:', artifact.created_at);
+          }
+        }
+      }
+    });
+    
+    return {
+      directIdMap,
+      temporalMap,
+      sessionArtifacts: sessionArtifacts.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    };
+  }, [artifacts, currentSession?.id]);
+
+  // Optimized helper function with O(1) lookups
+  const getMessageArtifact = useCallback((message, messageIndex) => {
+    // Null/undefined safety check
+    if (!message) {
+      return null;
+    }
+    
+    // Priority 1: Check if message has direct artifact link
+    if (message.artifactId) {
+      const artifact = artifactMappings.directIdMap.get(message.artifactId);
+      if (artifact) {
+        return artifact;
+      }
+    }
+    
+    // Priority 2: For substantial assistant responses, use temporal matching
+    if (message.role === 'assistant' && message.content?.length > 300) {
+      // Try temporal mapping first (O(1) lookup)
+      if (message.timestamp) {
+        try {
+          const messageTime = new Date(message.timestamp).getTime();
+          const temporalKey = `temporal_${Math.round(messageTime / 5000) * 5000}`; // Round to 5-second intervals
+          const temporalArtifact = artifactMappings.temporalMap.get(temporalKey);
+          if (temporalArtifact) {
+            return temporalArtifact;
+          }
+        } catch (error) {
+          // Handle invalid timestamp gracefully
+          console.warn('Invalid message timestamp:', message.timestamp);
+        }
+      }
+      
+      // Fallback: Linear search through session artifacts (only when temporal fails)
+      const messageTime = message.timestamp ? 
+        new Date(message.timestamp).getTime() : 
+        new Date().getTime();
+      
+      for (const artifact of artifactMappings.sessionArtifacts) {
+        try {
+          const artifactTime = new Date(artifact.created_at).getTime();
+          if (Math.abs(artifactTime - messageTime) < 30000) {
+            return artifact;
+          }
+        } catch (error) {
+          // Skip artifacts with invalid dates
+          continue;
+        }
+      }
+    }
+    
+    return null;
+  }, [artifactMappings]);
+  
 
   // Expose input control to parent component
   useImperativeHandle(externalInputRef, () => ({
@@ -81,6 +182,25 @@ export const ChatWindow = ({
     scrollToBottom();
   }, [messages]);
   
+  // Scroll to bottom when loading completes (to ensure artifact icons are visible)
+  useEffect(() => {
+    if (!isLoading && !isMergingContent) {
+      // Longer delay to ensure artifact icons are fully rendered
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  }, [isLoading, isMergingContent]);
+  
+  // Scroll to bottom when artifacts change (new icons appear)
+  useEffect(() => {
+    if (artifacts.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 200);
+    }
+  }, [artifacts.length]);
+  
   // Focus input when component mounts
   useEffect(() => {
     if (inputRef.current && !isChatCollapsed) {
@@ -88,42 +208,17 @@ export const ChatWindow = ({
     }
   }, [isChatCollapsed]);
   
-  // Analyze message for artifact targeting
-  useEffect(() => {
-    if (input.trim()) {
-      const sessionArtifacts = ArtifactTargeting.getSessionArtifacts(artifacts, currentSession?.id);
-      const analysis = ArtifactTargeting.analyzeModificationIntent(input, sessionArtifacts);
-      setTargetingAnalysis(analysis);
-      
-      // Auto-set target mode based on analysis
-      if (targetMode === 'auto') {
-        if (analysis.isModification && analysis.suggestedArtifact) {
-          setSelectedArtifact(analysis.suggestedArtifact);
-        } else {
-          setSelectedArtifact(null);
-        }
-      }
-    } else {
-      setTargetingAnalysis(null);
-      if (targetMode === 'auto') {
-        setSelectedArtifact(null);
-      }
-    }
-  }, [input, artifacts, currentSession?.id, targetMode]);
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use setTimeout to ensure all content (including artifact icons) is rendered
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input.trim() && !isLoading) {
-      // Determine target artifact based on mode
-      let targetArtifact = null;
-      if (targetMode === 'update' || (targetMode === 'auto' && selectedArtifact)) {
-        targetArtifact = selectedArtifact;
-      }
-      
+    if (input.trim() && !isLoading && !isMergingContent) {
       // Apply template if selected
       let messageToSend = input;
       if (selectedTemplate) {
@@ -131,26 +226,51 @@ export const ChatWindow = ({
         console.log('📋 Using template:', selectedTemplate.name);
       }
       
-      // Use enhanced send function if available
-      if (onSendMessageWithTarget) {
-        onSendMessageWithTarget(messageToSend, targetArtifact?.id);
-      } else {
-        onSendMessage(messageToSend);
-      }
-      
+      // Send the message
+      onSendMessage(messageToSend);
       setInput('');
-      setTargetingAnalysis(null);
-      setTargetMode('auto');
-      setSelectedArtifact(null);
     }
   };
   
 
   // Handler for save as artifact button - always shows dialog for choice
   const handleSaveAsArtifact = (content) => {
+    console.log('🎯 ChatWindow handleSaveAsArtifact called:', { contentLength: content?.length });
     const title = `Guide ${new Date().toLocaleString()}`;
-    onCreateArtifact(title, content);
+    if (onCreateArtifact) {
+      onCreateArtifact(title, content);
+    } else {
+      console.error('❌ onCreateArtifact prop is missing in ChatWindow');
+    }
   };
+
+  const handleMergeWithArtifact = (content) => {
+    console.log('🔄 ChatWindow handleMergeWithArtifact called:', { contentLength: content?.length });
+    const title = `Guide ${new Date().toLocaleString()}`;
+    if (onMergeWithArtifact) {
+      // Use the dedicated merge handler
+      onMergeWithArtifact(title, content);
+    } else {
+      console.error('❌ onMergeWithArtifact prop is missing in ChatWindow');
+    }
+  };
+
+  // Check if there are existing artifacts for merge functionality
+  const hasExistingArtifacts = artifacts.length > 0;
+
+  // Debug logging (reduced frequency to prevent spam)
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 ChatWindow state:', {
+        hasCurrentWorkspace: !!currentWorkspace,
+        hasPrimaryArtifact: !!currentWorkspace?.primaryArtifact,
+        supplementaryCount: currentWorkspace?.supplementaryArtifacts?.length || 0,
+        totalArtifacts: artifacts.length,
+        hasExistingArtifacts,
+        sessionId: currentSession?.id
+      });
+    }
+  }, [currentWorkspace?.primaryArtifact?.id, artifacts.length, currentSession?.id]);
 
   const handleScopedInstruction = (scopedData) => {
     const { type, highlightedText } = scopedData;
@@ -228,10 +348,6 @@ export const ChatWindow = ({
             <p className="text-gray-600 max-w-md mb-6">
               Ask questions about Plaid APIs, create implementation guides, or generate code samples for specific use cases.
             </p>
-            <ChatModeSelector 
-              selectedMode={currentSession?.mode || 'solution_guide'} 
-              onModeChange={onModeChange}
-            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
               {[
                 "Generate a solution guide for integrating Plaid Link web SDK with products auth and identity",
@@ -256,11 +372,10 @@ export const ChatWindow = ({
           </div>
         ) : (
           <>
-            <ChatModeSelector 
-              selectedMode={currentSession?.mode || 'solution_guide'} 
-              onModeChange={onModeChange}
-            />
             {messages.map((message, index) => {
+              // Find artifact for this message
+              const messageArtifact = getMessageArtifact(message, index);
+              
               // Use HighlightableMessage for assistant responses with substantial content
               if (message.role === 'assistant' && message.content && message.content.length > 200) {
                 const linkedArtifact = getLinkedArtifact ? getLinkedArtifact(message.id) : null;
@@ -268,33 +383,55 @@ export const ChatWindow = ({
                 const messageChanges = []; // TODO: Implement filtering logic
                 
                 return (
-                  <HighlightableMessage 
-                    key={index} 
-                    message={message} 
-                    onCreateArtifact={() => handleSaveAsArtifact(message.content)}
-                    onCreateManualArtifact={onCreateManualArtifact}
-                    onScopedInstruction={handleScopedInstruction}
-                    markdownComponents={components}
-                    linkedArtifact={linkedArtifact}
-                    recentChanges={messageChanges}
-                    onViewArtifact={onViewArtifact}
-                    onDismissChange={onDismissChange}
-                  />
+                  <div key={index}>
+                    <HighlightableMessage 
+                      message={message} 
+                      onScopedInstruction={handleScopedInstruction}
+                      markdownComponents={components}
+                      linkedArtifact={linkedArtifact}
+                      recentChanges={messageChanges}
+                      onViewArtifact={onViewArtifact}
+                      onDismissChange={onDismissChange}
+                      // Removed: onCreateArtifact and onMergeWithArtifact buttons
+                      // Removed: hasExistingArtifacts prop
+                    />
+                    {/* Claude Desktop style artifact icon */}
+                    {messageArtifact && (
+                      <ArtifactIcon
+                        artifact={messageArtifact}
+                        onView={onViewArtifact}
+                        onDownload={onDownloadArtifact}
+                        className="ml-12 -mt-2"
+                        isArtifactPanelOpen={artifactPanelOpen && selectedArtifact?.id === messageArtifact.id}
+                      />
+                    )}
+                  </div>
                 );
               }
               
               // Use regular Message for user messages and short assistant responses
               return (
-                <Message 
-                  key={index} 
-                  message={message} 
-                  onCreateArtifact={() => handleSaveAsArtifact(message.content)}
-                  onCreateManualArtifact={onCreateManualArtifact}
-                  markdownComponents={components}
-                />
+                <div key={index}>
+                  <Message 
+                    message={message} 
+                    markdownComponents={components}
+                    // Removed: onCreateArtifact and onMergeWithArtifact buttons
+                    // Removed: hasExistingArtifacts prop
+                  />
+                  {/* Show artifact icon for any message that generated an artifact */}
+                  {messageArtifact && (
+                    <ArtifactIcon
+                      artifact={messageArtifact}
+                      onView={onViewArtifact}
+                      onDownload={onDownloadArtifact}
+                      className="ml-12 -mt-2"
+                      isArtifactPanelOpen={artifactPanelOpen && selectedArtifact?.id === messageArtifact.id}
+                    />
+                  )}
+                </div>
               );
             })}
-            {isLoading && (
+            {isLoading && !isMergingContent && (
               <div className="flex items-center space-x-2 p-4 rounded-lg bg-gray-50 max-w-3xl my-2">
                 <div className="flex space-x-2">
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -302,6 +439,16 @@ export const ChatWindow = ({
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
                 <span className="text-sm text-gray-500">Thinking...</span>
+              </div>
+            )}
+            {isMergingContent && (
+              <div className="flex items-center space-x-2 p-4 rounded-lg bg-blue-50 border border-blue-200 max-w-3xl my-2">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+                <span className="text-sm text-blue-700 font-medium">Merging content... Please wait</span>
               </div>
             )}
           </>
@@ -319,101 +466,30 @@ export const ChatWindow = ({
             onEditTemplate={onEditTemplate}
           />
           
-          {/* Artifact Targeting UI */}
-          {targetingAnalysis && ArtifactTargeting.getSessionArtifacts(artifacts, currentSession?.id).length > 0 && (
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2 text-sm">
-                {targetMode === 'auto' && targetingAnalysis.isModification ? (
-                  <>
-                    <EditIcon size={14} className="text-blue-600" />
-                    <span className="text-gray-700">
-                      Will update: <strong>{selectedArtifact?.title || 'Latest artifact'}</strong>
-                    </span>
-                    <span className="text-xs text-gray-500">({targetingAnalysis.confidence > 0.7 ? 'High' : targetingAnalysis.confidence > 0.5 ? 'Medium' : 'Low'} confidence)</span>
-                  </>
-                ) : targetMode === 'update' && selectedArtifact ? (
-                  <>
-                    <EditIcon size={14} className="text-blue-600" />
-                    <span className="text-gray-700">
-                      Will update: <strong>{selectedArtifact.title}</strong>
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <PlusIcon size={14} className="text-green-600" />
-                    <span className="text-gray-700">Will create new artifact</span>
-                  </>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-1">
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setShowTargetSelector(!showTargetSelector)}
-                    className="flex items-center gap-1 px-2 py-1 text-xs bg-white border rounded hover:bg-gray-50"
-                  >
-                    {targetMode === 'auto' ? 'Auto' : targetMode === 'update' ? 'Update' : 'Create'}
-                    <ChevronDownIcon size={12} />
-                  </button>
-                  
-                  {showTargetSelector && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setShowTargetSelector(false)}
-                      />
-                      <div className="absolute right-0 top-full mt-1 bg-white border rounded-lg shadow-lg p-1 z-20 min-w-48">
-                        <button
-                          type="button"
-                          onClick={() => { setTargetMode('auto'); setShowTargetSelector(false); }}
-                          className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-50 ${
-                            targetMode === 'auto' ? 'bg-blue-50 text-blue-700' : ''
-                          }`}
-                        >
-                          Auto-detect (recommended)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setTargetMode('create'); setShowTargetSelector(false); }}
-                          className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-50 ${
-                            targetMode === 'create' ? 'bg-green-50 text-green-700' : ''
-                          }`}
-                        >
-                          Always create new
-                        </button>
-                        {ArtifactTargeting.getSessionArtifacts(artifacts, currentSession?.id).length > 0 && (
-                          <>
-                            <div className="border-t my-1" />
-                            <div className="px-2 py-1 text-xs text-gray-500 font-medium">Update existing:</div>
-                            {ArtifactTargeting.getSessionArtifacts(artifacts, currentSession?.id).map(artifact => (
-                              <button
-                                key={artifact.id}
-                                type="button"
-                                onClick={() => {
-                                  setTargetMode('update');
-                                  setSelectedArtifact(artifact);
-                                  setShowTargetSelector(false);
-                                }}
-                                className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-50 ${
-                                  targetMode === 'update' && selectedArtifact?.id === artifact.id ? 'bg-orange-50 text-orange-700' : ''
-                                }`}
-                              >
-                                <div className="flex items-center gap-1">
-                                  <FileTextIcon size={10} />
-                                  <span className="truncate">{artifact.title}</span>
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+          
+          {/* Merge Mode Selector */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <label htmlFor="merge-mode" className="text-sm font-medium text-gray-700">
+                Response Mode:
+              </label>
+              <select
+                id="merge-mode"
+                value={mergeMode}
+                onChange={(e) => onMergeModeChange?.(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="chat_only">Chat Only</option>
+                <option value="merge_response">Merge Response</option>
+              </select>
             </div>
-          )}
+            <div className="text-xs text-gray-500">
+              {mergeMode === 'chat_only' ? 
+                'Responses stay in chat' : 
+                'Responses auto-merge to guide'
+              }
+            </div>
+          </div>
           
           <div className="flex items-end space-x-2">
             <div className="flex-1 relative">
@@ -421,12 +497,15 @@ export const ChatWindow = ({
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask a question about Plaid..."
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition"
+                placeholder={isMergingContent ? "AI is merging content..." : "Ask a question about Plaid..."}
+                disabled={isMergingContent}
+                className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition ${
+                  isMergingContent ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '200px' }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey && !isMergingContent) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
@@ -435,9 +514,9 @@ export const ChatWindow = ({
             </div>
             <button
               type="submit"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || isMergingContent || !input.trim()}
               className={`p-3 rounded-lg ${
-                isLoading || !input.trim()
+                isLoading || isMergingContent || !input.trim()
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               } transition-colors`}

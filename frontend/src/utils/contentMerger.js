@@ -1,15 +1,39 @@
 /**
  * Smart Content Merging System
  * Handles intelligent merging of partial updates with existing artifacts
+ * 
+ * UPDATED: Now uses AI-powered merging via Claude for intelligent content integration
+ * The local algorithms are preserved but commented out for potential future reversion
  */
+
+import { AIService } from '../services/aiService';
 
 export class ContentMerger {
   /**
    * Extract clean content from AI response, removing conversational parts
+   * NOW USES AI: This method now uses Claude to intelligently strip conversational content
    * @param {string} rawContent - Raw AI response
    * @returns {string} Clean content suitable for artifacts
    */
-  static extractCleanContent(rawContent) {
+  static async extractCleanContent(rawContent) {
+    try {
+      // Use AI-powered text stripping for better results
+      const cleanContent = await AIService.stripText(rawContent);
+      return cleanContent;
+    } catch (error) {
+      console.error('AI text stripping failed, falling back to local algorithm:', error);
+      // Fallback to local algorithm if AI fails
+      return this.extractCleanContentLocal(rawContent);
+    }
+  }
+
+  /**
+   * LOCAL ALGORITHM (PRESERVED): Extract clean content using local patterns
+   * This is the original local algorithm, preserved for fallback use
+   * @param {string} rawContent - Raw AI response
+   * @returns {string} Clean content suitable for artifacts
+   */
+  static extractCleanContentLocal(rawContent) {
     if (!rawContent) return '';
 
     const lines = rawContent.split('\n');
@@ -81,15 +105,40 @@ export class ContentMerger {
   }
   /**
    * Merge new content with existing artifact content
+   * NOW USES AI: This method now uses Claude for intelligent content merging
    * @param {string} existingContent - Original artifact content
    * @param {string} rawNewContent - Raw new content from Claude
    * @param {Object} modificationScope - Scope analysis from ArtifactDetector
    * @param {boolean} isFromScopedInstruction - Whether this update is from a scoped instruction
    * @returns {Object} Merge result with content and change metadata
    */
-  static mergeContent(existingContent, rawNewContent, modificationScope = null, isFromScopedInstruction = false) {
+  static async mergeContent(existingContent, rawNewContent, modificationScope = null, isFromScopedInstruction = false) {
+    try {
+      // Use AI-powered merging for intelligent content integration
+      const mergeInstructions = isFromScopedInstruction 
+        ? 'This is a scoped instruction update - apply changes precisely to the specified section'
+        : 'Merge the new content intelligently with the existing content';
+      
+      return await AIService.mergeContent(existingContent, rawNewContent, modificationScope, mergeInstructions);
+    } catch (error) {
+      console.error('AI merge failed, falling back to local algorithm:', error);
+      // Fallback to local algorithm if AI fails
+      return this.mergeContentLocal(existingContent, rawNewContent, modificationScope, isFromScopedInstruction);
+    }
+  }
+
+  /**
+   * LOCAL ALGORITHM (PRESERVED): Merge using local algorithms
+   * This is the original local merge algorithm, preserved for fallback use
+   * @param {string} existingContent - Original artifact content
+   * @param {string} rawNewContent - Raw new content from Claude
+   * @param {Object} modificationScope - Scope analysis from ArtifactDetector
+   * @param {boolean} isFromScopedInstruction - Whether this update is from a scoped instruction
+   * @returns {Object} Merge result with content and change metadata
+   */
+  static async mergeContentLocal(existingContent, rawNewContent, modificationScope = null, isFromScopedInstruction = false) {
     // Extract clean content first
-    const newContent = this.extractCleanContent(rawNewContent);
+    const newContent = await this.extractCleanContentLocal(rawNewContent);
     
     if (!newContent.trim()) {
       return {
@@ -132,20 +181,21 @@ export class ContentMerger {
 
     // If it's not a partial update, perform intelligent merging
     if (!modificationScope?.isPartialUpdate) {
-      return this.performIntelligentMerge(existingContent, newContent);
+      return this.performIntelligentMergeLocal(existingContent, newContent);
     }
 
     // Handle partial updates intelligently
-    return this.mergePartialUpdate(existingContent, newContent, modificationScope);
+    return this.mergePartialUpdateLocal(existingContent, newContent, modificationScope);
   }
 
   /**
-   * Perform intelligent merging by analyzing and combining sections
+   * LOCAL ALGORITHM (PRESERVED): Perform intelligent merging by analyzing and combining sections
+   * This is the original local merge algorithm, preserved for fallback use
    * @param {string} existingContent 
    * @param {string} newContent 
    * @returns {Object}
    */
-  static performIntelligentMerge(existingContent, newContent) {
+  static performIntelligentMergeLocal(existingContent, newContent) {
     const existingSections = this.parseSections(existingContent);
     const newSections = this.parseSections(newContent);
     const changes = [];
@@ -234,13 +284,14 @@ export class ContentMerger {
   }
 
   /**
-   * Merge partial updates with existing content
+   * LOCAL ALGORITHM (PRESERVED): Merge partial updates with existing content
+   * This is the original local partial merge algorithm, preserved for fallback use
    * @param {string} existingContent 
    * @param {string} newContent 
    * @param {Object} modificationScope 
    * @returns {Object}
    */
-  static mergePartialUpdate(existingContent, newContent, modificationScope) {
+  static mergePartialUpdateLocal(existingContent, newContent, modificationScope) {
     const changes = [];
     let mergedContent = existingContent;
 
@@ -670,13 +721,33 @@ export class ContentMerger {
 
   /**
    * Preview merge result without actually merging
+   * NOW USES AI: This method now uses Claude for intelligent merge preview
    * @param {string} existingContent 
    * @param {string} newContent 
    * @returns {string}
    */
-  static previewMerge(existingContent, newContent) {
+  static async previewMerge(existingContent, newContent) {
+    try {
+      // Use AI-powered merge preview
+      const result = await AIService.previewMerge(existingContent, newContent, { isPartialUpdate: true });
+      return result.previewContent;
+    } catch (error) {
+      console.error('AI preview failed, falling back to local algorithm:', error);
+      // Fallback to local algorithm
+      return this.previewMergeLocal(existingContent, newContent);
+    }
+  }
+
+  /**
+   * LOCAL ALGORITHM (PRESERVED): Preview merge result using local algorithms
+   * This is the original local preview algorithm, preserved for fallback use
+   * @param {string} existingContent 
+   * @param {string} newContent 
+   * @returns {string}
+   */
+  static async previewMergeLocal(existingContent, newContent) {
     // Use the same merge logic but return the result
-    const result = this.mergeContent(existingContent, newContent, { isPartialUpdate: true }, false);
+    const result = await this.mergeContentLocal(existingContent, newContent, { isPartialUpdate: true }, false);
     return result.mergedContent;
   }
 

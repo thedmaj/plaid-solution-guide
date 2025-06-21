@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTemplateContext } from '../contexts/TemplateContext';
 import { parseTemplate } from '../hooks/useTemplates';
+import { useAuth } from '../hooks/useAuth';
 
 const TemplateEditor = ({ isOpen, onClose, templateId = null }) => {
   const { createTemplate, updateTemplate, deleteTemplate, getTemplate, reloadTemplates } = useTemplateContext();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -11,9 +13,13 @@ const TemplateEditor = ({ isOpen, onClose, templateId = null }) => {
     template_type: 'format',
     tags: []
   });
+  const [copyToAllUsers, setCopyToAllUsers] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  // Check if current user is admin
+  const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN';
 
   // Load template data if editing
   useEffect(() => {
@@ -43,11 +49,37 @@ const TemplateEditor = ({ isOpen, onClose, templateId = null }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      let savedTemplate;
       if (templateId) {
-        await updateTemplate(templateId, formData);
+        savedTemplate = await updateTemplate(templateId, formData);
       } else {
-        await createTemplate(formData);
+        savedTemplate = await createTemplate(formData);
       }
+      
+      // If admin and copyToAllUsers is checked, distribute to all users
+      if (isAdmin && copyToAllUsers && savedTemplate) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/templates/${savedTemplate.id}/distribute`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to distribute template to all users');
+          }
+          
+          const result = await response.json();
+          alert(`Template successfully copied to ${result.copied_to_users} users!`);
+        } catch (error) {
+          console.error('Error distributing template:', error);
+          alert('Template saved, but failed to copy to all users. Please try again or contact support.');
+        }
+      }
+      
       // Reload templates to ensure UI is up to date
       await reloadTemplates();
       onClose();
@@ -200,6 +232,30 @@ const TemplateEditor = ({ isOpen, onClose, templateId = null }) => {
                   <option value="knowledge">📚 Knowledge Template</option>
                 </select>
               </div>
+              
+              {/* Admin Option - Copy to All Users */}
+              {isAdmin && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      id="copyToAllUsers"
+                      type="checkbox"
+                      checked={copyToAllUsers}
+                      onChange={(e) => setCopyToAllUsers(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="copyToAllUsers" className="text-sm font-medium text-blue-900 cursor-pointer">
+                        Copy template to all users
+                      </label>
+                      <p className="text-xs text-blue-700 mt-1">
+                        When checked, this template will be copied to every user's template library. 
+                        Each user will get their own independent copy that they can modify.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Template Content */}

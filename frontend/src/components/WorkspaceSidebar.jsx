@@ -16,9 +16,11 @@ import {
   FolderIcon,
   ChevronRightIcon,
   ChevronDownIcon,
-  TrashIcon
+  TrashIcon,
+  SettingsIcon
 } from 'lucide-react';
 import { CreateUserOverlay } from './CreateUserOverlay';
+import AdminConsole from './AdminConsole';
 
 export const WorkspaceSidebar = ({ 
   isOpen, 
@@ -39,6 +41,7 @@ export const WorkspaceSidebar = ({
 }) => {
   const [activeTab, setActiveTab] = useState('chats');
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showAdminConsole, setShowAdminConsole] = useState(false);
   const [expandedWorkspaces, setExpandedWorkspaces] = useState(new Set());
   const [confirmDelete, setConfirmDelete] = useState(null); // Track which session to confirm delete
   
@@ -413,29 +416,49 @@ export const WorkspaceSidebar = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3">
+            {/* User Info */}
             <div className="flex items-center gap-2">
               <UserIcon size={16} className="text-gray-500" />
               <span className="text-sm text-gray-700">{user?.email || 'User'}</span>
+              {(user?.role === 'ADMIN' || user?.role === 'admin') && (
+                <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                  Admin
+                </span>
+              )}
             </div>
             
-            <div className="flex items-center gap-1">
-              {user?.is_admin && (
+            {/* Admin Actions (if admin) */}
+            {(user?.role === 'ADMIN' || user?.role === 'admin') && (
+              <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                <button
+                  onClick={() => setShowAdminConsole(true)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex-1"
+                  title="Admin Console"
+                >
+                  <SettingsIcon size={14} />
+                  <span>Admin Console</span>
+                </button>
                 <button
                   onClick={() => setShowCreateUser(true)}
-                  className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors"
-                  title="Create new user"
+                  className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
+                  title="Quick Create User"
                 >
-                  <UserPlusIcon size={16} />
+                  <UserPlusIcon size={14} />
                 </button>
-              )}
-              
+              </div>
+            )}
+
+            
+            {/* Logout */}
+            <div className="flex justify-end">
               <button
                 onClick={onLogout}
-                className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
                 title="Logout"
               >
-                <LogOutIcon size={16} />
+                <LogOutIcon size={14} />
+                <span>Logout</span>
               </button>
             </div>
           </div>
@@ -446,6 +469,12 @@ export const WorkspaceSidebar = ({
         <CreateUserOverlay
           onClose={() => setShowCreateUser(false)}
           onSuccess={handleCreateUserSuccess}
+        />
+      )}
+
+      {showAdminConsole && (
+        <AdminConsole
+          onClose={() => setShowAdminConsole(false)}
         />
       )}
     </>

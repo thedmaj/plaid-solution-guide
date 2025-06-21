@@ -1,83 +1,80 @@
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
+import { queryKeys, queryOptions } from '../utils/queryClient';
 
 export const useChatSession = (onNewAssistantMessage) => {
-  const [sessions, setSessions] = useState([]);
+  const queryClient = useQueryClient();
   const [currentSession, setCurrentSession] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState('solution_guide');
   
-  // Load sessions from the backend
-  useEffect(() => {
-    const loadSessions = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setSessions([]);
-          setCurrentSession(null);
-          setMessages([]);
-          return;
-        }
-
-        const response = await fetch('/api/chat/sessions', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('📊 Loaded sessions from backend:', {
-            count: data.length,
-            sessions: data.map(s => ({ id: s.id, title: s.title, type: typeof s.id }))
-          });
-          
-          // Validate session data structure
-          const validSessions = data.filter(session => {
-            const isValid = session && session.id && typeof session.id !== 'undefined';
-            if (!isValid) {
-              console.error('❌ Invalid session found:', session);
-            }
-            return isValid;
-          });
-          
-          if (validSessions.length !== data.length) {
-            console.warn('⚠️ Some sessions were filtered out due to invalid data');
-          }
-          
-          setSessions(validSessions);
-          
-          // Load the most recent session by default
-          if (validSessions.length > 0) {
-            const lastSession = validSessions[0];
-            console.log('🔄 Auto-loading most recent session:', {
-              id: lastSession.id,
-              title: lastSession.title,
-              mode: lastSession.mode
-            });
-            setCurrentSession(lastSession);
-            setSelectedMode(lastSession.mode || 'solution_guide');
-            await loadSession(lastSession.id);
-          } else {
-            createNewSession();
-          }
-        }
-      } catch (error) {
-        console.error('Error loading sessions:', error);
-        createNewSession();
-      }
-    };
-    
-    loadSessions();
-  }, [localStorage.getItem('token')]);
-  
-  const createNewSession = async (mode = selectedMode) => {
-    try {
+  // Fetch sessions with React Query
+  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
+    queryKey: queryKeys.sessions(),
+    queryFn: async () => {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) return [];
 
-      // Ensure we're only sending the mode as a string
+      const response = await fetch('/api/chat/sessions', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load sessions');
+      }
+
+      const data = await response.json();
+      console.log('📊 Loaded sessions from backend:', {
+        count: data.length,
+        sessions: data.map(s => ({ id: s.id, title: s.title, type: typeof s.id }))
+      });
+      
+      // Validate session data structure
+      const validSessions = data.filter(session => {
+        const isValid = session && session.id && typeof session.id !== 'undefined';
+        if (!isValid) {
+          console.error('❌ Invalid session found:', session);
+        }
+        return isValid;
+      });
+      
+      if (validSessions.length !== data.length) {
+        console.warn('⚠️ Some sessions were filtered out due to invalid data');
+      }
+      
+      return validSessions;
+    },
+    ...queryOptions.frequent,
+    enabled: !!localStorage.getItem('token')
+  });
+
+  // Auto-load most recent session
+  useEffect(() => {
+    if (sessions.length > 0 && !currentSession) {
+      const lastSession = sessions[0];
+      console.log('🔄 Auto-loading most recent session:', {
+        id: lastSession.id,
+        title: lastSession.title,
+        mode: lastSession.mode
+      });
+      setCurrentSession(lastSession);
+      setSelectedMode(lastSession.mode || 'solution_guide');
+      loadSession(lastSession.id);
+    } else if (sessions.length === 0 && !sessionsLoading && !currentSession) {
+      createNewSession();
+    }
+  }, [sessions, currentSession, sessionsLoading]);
+  
+  // Create new session mutation
+  const createSessionMutation = useMutation({
+    mutationFn: async (mode = selectedMode) => {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
       const sessionMode = typeof mode === 'string' ? mode : selectedMode;
 
       const response = await fetch('/api/chat/sessions', {
@@ -86,23 +83,28 @@ export const useChatSession = (onNewAssistantMessage) => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          mode: sessionMode
-        })
+        body: JSON.stringify({ mode: sessionMode })
       });
 
-      if (response.ok) {
-        const newSession = await response.json();
-        setSessions(prevSessions => [newSession, ...prevSessions]);
-        setCurrentSession(newSession);
-        setSelectedMode(sessionMode);
-        setMessages([]);
-        return newSession;
+      if (!response.ok) {
+        throw new Error('Failed to create session');
       }
-    } catch (error) {
+
+      return response.json();
+    },
+    onSuccess: (newSession, mode) => {
+      // Update cache with new session
+      queryClient.setQueryData(queryKeys.sessions(), (old = []) => [newSession, ...old]);
+      setCurrentSession(newSession);
+      setSelectedMode(mode);
+      setMessages([]);
+    },
+    onError: (error) => {
       console.error('Error creating new session:', error);
     }
-  };
+  });
+
+  const createNewSession = (mode = selectedMode) => createSessionMutation.mutate(mode);
   
   const handleModeChange = async (mode) => {
     try {
@@ -135,8 +137,8 @@ export const useChatSession = (onNewAssistantMessage) => {
           mode: mode // Use the requested mode
         }));
         
-        // Update the session in the sessions list
-        setSessions(prevSessions => 
+        // Update the session in the React Query cache
+        queryClient.setQueryData(queryKeys.sessions(), (prevSessions = []) => 
           prevSessions.map(session => 
             session.id === currentSession.id 
               ? { ...session, mode: mode } // Use the requested mode
@@ -155,30 +157,18 @@ export const useChatSession = (onNewAssistantMessage) => {
     }
   };
   
-  const loadSession = async (sessionId) => {
-    try {
-      console.log('🔄 useChatSession: Loading session...', { sessionId, type: typeof sessionId });
-      setIsLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('❌ No token found when loading session');
-        setIsLoading(false);
-        return;
-      }
-
-      // Ensure sessionId is a string and validate it
-      if (!sessionId || sessionId === null || sessionId === undefined) {
-        console.error('❌ Invalid sessionId provided:', sessionId);
-        setIsLoading(false);
-        return;
-      }
+  // Load messages for a specific session with React Query
+  const { data: sessionMessages = [], isLoading: messagesLoading } = useQuery({
+    queryKey: queryKeys.sessionMessages(currentSession?.id),
+    queryFn: async () => {
+      if (!currentSession?.id) return [];
       
-      // Convert to string and validate it's not empty
-      const stringSessionId = String(sessionId).trim();
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const stringSessionId = String(currentSession.id).trim();
       if (!stringSessionId || stringSessionId === 'null' || stringSessionId === 'undefined') {
-        console.error('❌ Invalid sessionId after conversion:', stringSessionId);
-        setIsLoading(false);
-        return;
+        throw new Error('Invalid session ID');
       }
       
       console.log('📨 Loading session with ID:', stringSessionId);
@@ -189,62 +179,67 @@ export const useChatSession = (onNewAssistantMessage) => {
         }
       });
 
-      console.log('📡 Session load response:', { 
-        ok: response.ok, 
-        status: response.status, 
-        statusText: response.statusText 
-      });
+      if (!response.ok) {
+        throw new Error(`Failed to load session: ${response.status}`);
+      }
 
-      if (response.ok) {
-        const sessionMessages = await response.json();
-        console.log('📨 Loaded messages:', { 
-          count: sessionMessages?.length, 
-          firstMessage: sessionMessages?.[0]?.role 
-        });
-        
-        // Validate messages array
-        if (!Array.isArray(sessionMessages)) {
-          console.error('❌ Invalid messages format:', sessionMessages);
-          setMessages([]);
-        } else {
-          setMessages(sessionMessages);
-        }
-        
-        // Update current session and mode
-        const session = sessions.find(s => s.id === stringSessionId);
-        console.log('🔍 Found session in list:', { 
-          found: !!session, 
-          sessionTitle: session?.title,
-          sessionMode: session?.mode 
-        });
-        
-        if (session) {
-          setCurrentSession(session);
-          setSelectedMode(session.mode || 'solution_guide');
-        } else {
-          console.warn('⚠️ Session not found in sessions list:', stringSessionId);
-        }
+      const sessionMessages = await response.json();
+      console.log('📨 Loaded messages:', { 
+        count: sessionMessages?.length, 
+        firstMessage: sessionMessages?.[0]?.role 
+      });
+      
+      if (!Array.isArray(sessionMessages)) {
+        throw new Error('Invalid messages format');
+      }
+      
+      return sessionMessages;
+    },
+    ...queryOptions.frequent,
+    enabled: !!currentSession?.id && !!localStorage.getItem('token')
+  });
+
+  // Update local messages when session messages change
+  useEffect(() => {
+    setMessages(sessionMessages);
+  }, [sessionMessages]);
+
+  const loadSession = async (sessionId) => {
+    try {
+      console.log('🔄 useChatSession: Loading session...', { sessionId, type: typeof sessionId });
+      
+      // Ensure sessionId is a string and validate it
+      if (!sessionId || sessionId === null || sessionId === undefined) {
+        console.error('❌ Invalid sessionId provided:', sessionId);
+        return;
+      }
+      
+      // Convert to string and validate it's not empty
+      const stringSessionId = String(sessionId).trim();
+      if (!stringSessionId || stringSessionId === 'null' || stringSessionId === 'undefined') {
+        console.error('❌ Invalid sessionId after conversion:', stringSessionId);
+        return;
+      }
+      
+      // Update current session and mode
+      const session = sessions.find(s => s.id === stringSessionId);
+      console.log('🔍 Found session in list:', { 
+        found: !!session, 
+        sessionTitle: session?.title,
+        sessionMode: session?.mode 
+      });
+      
+      if (session) {
+        setCurrentSession(session);
+        setSelectedMode(session.mode || 'solution_guide');
+        // Messages will be loaded automatically by the React Query hook
       } else {
-        const errorText = await response.text();
-        console.error('❌ Failed to load session:', { 
-          status: response.status, 
-          statusText: response.statusText,
-          error: errorText 
-        });
+        console.warn('⚠️ Session not found in sessions list:', stringSessionId);
       }
     } catch (error) {
       console.error('❌ Error loading session:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        sessionId
-      });
-      
-      // Reset to empty state on error
       setMessages([]);
       setCurrentSession(null);
-    } finally {
-      setIsLoading(false);
     }
   };
   
@@ -264,7 +259,7 @@ export const useChatSession = (onNewAssistantMessage) => {
 
       if (response.ok) {
         const updatedSession = await response.json();
-        setSessions(prevSessions => 
+        queryClient.setQueryData(queryKeys.sessions(), (prevSessions = []) => 
           prevSessions.map(session => 
             session.id === sessionId ? updatedSession : session
           )
@@ -293,7 +288,7 @@ export const useChatSession = (onNewAssistantMessage) => {
 
       if (response.ok) {
         // Remove session from list
-        setSessions(prevSessions => 
+        queryClient.setQueryData(queryKeys.sessions(), (prevSessions = []) => 
           prevSessions.filter(session => session.id !== sessionId)
         );
         
@@ -402,7 +397,7 @@ export const useChatSession = (onNewAssistantMessage) => {
         setCurrentSession(updatedSession);
         
         // Update sessions list
-        setSessions(prevSessions => 
+        queryClient.setQueryData(queryKeys.sessions(), (prevSessions = []) => 
           prevSessions.map(session => 
             session.id === updatedSession.id ? updatedSession : session
           )
@@ -450,7 +445,7 @@ export const useChatSession = (onNewAssistantMessage) => {
     sessions,
     currentSession,
     messages,
-    isLoading,
+    isLoading: isLoading || messagesLoading || sessionsLoading,
     selectedMode,
     createNewSession,
     loadSession,

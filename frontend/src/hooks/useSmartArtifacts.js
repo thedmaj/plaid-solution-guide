@@ -162,7 +162,7 @@ export const useSmartArtifacts = () => {
       const modificationScope = ContentMerger.analyzeModificationScope(message.content);
       
       // Merge content intelligently (this will clean the content automatically)
-      const mergeResult = ContentMerger.mergeContent(
+      const mergeResult = await ContentMerger.mergeContent(
         existingArtifact.content,
         message.content,
         modificationScope,

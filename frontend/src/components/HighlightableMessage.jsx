@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FileIcon, CopyIcon, CheckIcon, BookmarkIcon, MessageSquareIcon, EditIcon, CodeIcon, FileTextIcon, PlusIcon } from 'lucide-react';
+import { FileIcon, CopyIcon, CheckIcon, BookmarkIcon, MessageSquareIcon, EditIcon, CodeIcon, FileTextIcon, GitMerge } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -8,13 +8,14 @@ import { ArtifactNotification } from './ArtifactNotification';
 export const HighlightableMessage = ({ 
   message, 
   onCreateArtifact, 
-  onCreateManualArtifact,
+  onMergeWithArtifact,
   onScopedInstruction,
   markdownComponents,
   linkedArtifact,
   recentChanges,
   onViewArtifact,
-  onDismissChange
+  onDismissChange,
+  hasExistingArtifacts = false
 }) => {
   const [copied, setCopied] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
@@ -252,20 +253,34 @@ export const HighlightableMessage = ({
           {message.content && message.content.length > 100 && (
             <>
               <button
-                onClick={() => onCreateArtifact()}
+                onClick={() => {
+                  console.log('🎯 Create artifact button clicked in HighlightableMessage.jsx');
+                  if (onCreateArtifact) {
+                    onCreateArtifact();
+                  } else {
+                    console.error('❌ onCreateArtifact prop is missing in HighlightableMessage');
+                  }
+                }}
                 className="text-gray-500 hover:text-gray-700 transition-colors p-1"
                 title="Save as artifact"
               >
                 <BookmarkIcon size={16} />
               </button>
               
-              {onCreateManualArtifact && (
+              {hasExistingArtifacts && onMergeWithArtifact && (
                 <button
-                  onClick={() => onCreateManualArtifact(message.content)}
+                  onClick={() => {
+                    console.log('🔄 Merge artifact button clicked in HighlightableMessage.jsx');
+                    if (onMergeWithArtifact) {
+                      onMergeWithArtifact(message.content);
+                    } else {
+                      console.error('❌ onMergeWithArtifact prop is missing in HighlightableMessage');
+                    }
+                  }}
                   className="text-blue-500 hover:text-blue-700 transition-colors p-1"
-                  title="Create new artifact"
+                  title="Merge with existing artifact"
                 >
-                  <PlusIcon size={16} />
+                  <GitMerge size={16} />
                 </button>
               )}
             </>

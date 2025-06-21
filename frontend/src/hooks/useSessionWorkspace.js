@@ -47,7 +47,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     autoMergeEnabled: true,
     mergeStrategy: 'always_merge', // Always merge by default
     maxPrimarySize: 50000, // Much larger size limit
-    autoCreateArtifact: true, // Auto-create artifact on first response
+    autoCreateArtifact: false, // Disabled - only create artifacts when user explicitly requests
     filterConversationalText: true // Remove assistant conversational text
   });
 
@@ -61,13 +61,58 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     if (!workspaces.has(sessionId)) {
       console.log('🆕 Initializing new workspace for session:', sessionId);
       
-      // Check if there are existing artifacts for this session
-      const sessionArtifacts = artifacts.filter(a => a.metadata?.sessionId === sessionId);
-      const primaryArtifact = sessionArtifacts.find(a => a.metadata?.role === 'primary');
-      const supplementaryArtifacts = sessionArtifacts.filter(a => a.metadata?.role === 'supplementary');
+      // Check if there are existing artifacts for this session with improved detection
+      const sessionArtifacts = artifacts.filter(a => {
+        // Check multiple possible sessionId locations
+        const artifactSessionId = a.metadata?.sessionId || a.session_id || a.sessionId;
+        return artifactSessionId === sessionId;
+      });
+      
+      // Enhanced debug logging to understand artifact detection
+      console.log('🔍 Enhanced artifact filtering debug:', {
+        sessionId,
+        totalArtifacts: artifacts.length,
+        artifactDetails: artifacts.map(a => ({
+          id: a.id,
+          title: a.title,
+          metadataSessionId: a.metadata?.sessionId,
+          session_id: a.session_id,
+          sessionIdField: a.sessionId,
+          hasMetadata: !!a.metadata,
+          metadataKeys: a.metadata ? Object.keys(a.metadata) : []
+        })),
+        sessionArtifactsFound: sessionArtifacts.length,
+        sessionArtifactIds: sessionArtifacts.map(a => a.id)
+      });
+      
+      // Find primary artifact - prefer explicitly marked, fallback to first/most recent
+      let primaryArtifact = sessionArtifacts.find(a => a.metadata?.role === 'primary');
+      if (!primaryArtifact && sessionArtifacts.length > 0) {
+        // If no explicitly marked primary, use the most recently updated artifact
+        primaryArtifact = sessionArtifacts.reduce((latest, current) => 
+          new Date(current.updated_at || current.created_at) > new Date(latest.updated_at || latest.created_at) 
+            ? current : latest
+        );
+        console.log('🔄 No explicit primary artifact, using most recent:', primaryArtifact.title);
+      }
+      
+      const supplementaryArtifacts = sessionArtifacts.filter(a => 
+        a.metadata?.role === 'supplementary' || (a.id !== primaryArtifact?.id)
+      );
       
       console.log('🔍 Found existing artifacts for session:', {
         sessionId,
+        totalArtifacts: artifacts.length,
+        sessionArtifactsCount: sessionArtifacts.length,
+        sessionArtifactIds: sessionArtifacts.map(a => a.id),
+        sessionArtifactMetadata: sessionArtifacts.map(a => ({ 
+          id: a.id, 
+          title: a.title,
+          sessionId: a.metadata?.sessionId,
+          session_id: a.session_id,
+          sessionIdField: a.sessionId,
+          role: a.metadata?.role 
+        })),
         primaryArtifact: primaryArtifact?.id,
         supplementaryCount: supplementaryArtifacts.length
       });
@@ -156,7 +201,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     }
 
     // Filter out conversational text from assistant responses
-    const cleanContent = ContentMerger.extractCleanContent(content);
+    const cleanContent = await ContentMerger.extractCleanContent(content);
     console.log('🧹 Cleaned content:', { 
       original: content?.length || 0, 
       cleaned: cleanContent?.length || 0,
@@ -181,8 +226,13 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     console.log('🏢 Workspace state check:', {
       hasPrimaryArtifact: !!workspace.primaryArtifact,
       primaryArtifactId: workspace.primaryArtifact?.id,
+      supplementaryCount: workspace.supplementaryArtifacts?.length || 0,
+      workspaceExists: !!workspace,
+      workspaceMetadata: workspace?.metadata,
       shouldAutoCreate,
-      autoCreateEnabled: workspaceSettings.autoCreateArtifact
+      autoCreateEnabled: workspaceSettings.autoCreateArtifact,
+      sessionId,
+      allWorkspaces: Array.from(workspaces.keys())
     });
 
     // If no primary artifact exists and auto-create is enabled, create one for solution guides
@@ -328,7 +378,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     });
 
     try {
-      const cleanContent = ContentMerger.extractCleanContent(content);
+      const cleanContent = await ContentMerger.extractCleanContent(content);
       console.log('🧹 Clean content extracted:', cleanContent.length, 'chars');
       
       const mergedContent = await performContentMerge(
@@ -524,7 +574,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
       const detection = detectArtifact(content, 'assistant');
       const artifactData = {
         title: detection.suggestedTitle || `Related - ${new Date().toLocaleDateString()}`,
-        content: ContentMerger.extractCleanContent(content),
+        content: await ContentMerger.extractCleanContent(content),
         type: detection.artifactType || 'markdown',
         metadata: {
           sessionId,
@@ -571,7 +621,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
   /**
    * Create merge suggestion for user decision
    */
-  const createMergeSuggestion = (content, messageId, analysis, workspace) => {
+  const createMergeSuggestion = async (content, messageId, analysis, workspace) => {
     console.log('🔔 Creating merge suggestion:', { 
       contentLength: content.length, 
       messageId, 
@@ -582,7 +632,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     const suggestion = {
       id: uuidv4(),
       sessionId: workspace.sessionId,
-      content: ContentMerger.extractCleanContent(content),
+      content: await ContentMerger.extractCleanContent(content),
       messageId,
       analysis,
       targetArtifact: workspace.primaryArtifact,
@@ -680,10 +730,10 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
    */
   const updateArtifactWithContent = async (artifact, content, messageId, source = 'manual_edit') => {
     try {
-      const cleanContent = ContentMerger.extractCleanContent(content);
+      const cleanContent = await ContentMerger.extractCleanContent(content);
       
       // For manual edits, use smart merging
-      const mergeResult = ContentMerger.mergeContent(
+      const mergeResult = await ContentMerger.mergeContent(
         artifact.content,
         cleanContent,
         null, // No specific scope
@@ -748,7 +798,7 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
   const createManualArtifact = async (content, title, sessionId, type = 'markdown') => {
     try {
       const workspace = workspaces.get(sessionId) || initializeWorkspace(sessionId);
-      const cleanContent = ContentMerger.extractCleanContent(content);
+      const cleanContent = await ContentMerger.extractCleanContent(content);
       
       const artifactData = {
         title: title || generateArtifactTitle(cleanContent) || `Guide - ${new Date().toLocaleDateString()}`,
@@ -821,35 +871,14 @@ export const useSessionWorkspace = (sessionId, artifacts, artifactOperations) =>
     }));
   }, []);
 
-  // Initialize workspace when session changes
+  // Unified workspace initialization and artifact synchronization
   useEffect(() => {
-    if (sessionId && !workspaces.has(sessionId)) {
-      initializeWorkspace(sessionId);
+    // TEMPORARILY DISABLED TO FIX INFINITE LOOP
+    // TODO: Re-enable workspace sync after fixing the loop
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Workspace sync disabled temporarily');
     }
-  }, [sessionId, workspaces, initializeWorkspace]);
-
-  // Sync artifacts with workspaces
-  useEffect(() => {
-    setWorkspaces(prev => {
-      const updated = new Map(prev);
-      
-      // Update workspaces with current artifact data
-      for (const [sessionId, workspace] of updated) {
-        if (workspace.primaryArtifact) {
-          const currentArtifact = artifacts.find(a => a.id === workspace.primaryArtifact.id);
-          if (currentArtifact) {
-            workspace.primaryArtifact = currentArtifact;
-          }
-        }
-
-        workspace.supplementaryArtifacts = workspace.supplementaryArtifacts
-          .map(artifact => artifacts.find(a => a.id === artifact.id))
-          .filter(Boolean);
-      }
-      
-      return updated;
-    });
-  }, [artifacts]);
+  }, [sessionId, artifacts]);
 
   return {
     // Core workspace data
