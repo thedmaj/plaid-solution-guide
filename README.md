@@ -193,6 +193,10 @@ The script will automatically install all dependencies including:
 - **python-dotenv** - Environment variable management
 - **pydantic** - Data validation and settings management
 - **python-multipart** - File upload support
+- **markdown** - For processing markdown content
+- **PyJWT** - For JWT token handling
+- **websockets** - For WebSocket communication
+- **jinja2** - For HTML templating
 
 **Frontend Dependencies:**
 - **React 18+** - Modern UI framework

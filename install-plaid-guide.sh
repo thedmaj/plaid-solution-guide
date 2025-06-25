@@ -71,6 +71,10 @@ echo "   • httpx & aiohttp (HTTP clients)"
 echo "   • python-dotenv (environment configuration)"
 echo "   • pydantic (data validation)"
 echo "   • python-multipart (file upload support)"
+echo "   • markdown (for processing markdown content)"
+echo "   • PyJWT (for JWT token handling)"
+echo "   • websockets (for WebSocket communication)"
+echo "   • jinja2 (for HTML templating)"
 
 # Setup environment file
 echo "🔧 Setting up environment configuration..."
