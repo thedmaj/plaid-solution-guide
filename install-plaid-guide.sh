@@ -58,7 +58,19 @@ echo "🔌 Activating virtual environment..."
 source venv/bin/activate
 
 echo "📥 Installing Python dependencies..."
+echo "   Installing core dependencies..."
 pip install -r requirements.txt
+
+echo "✅ Dependencies Installed: Successfully installed all required Python packages:"
+echo "   • SQLAlchemy (for database operations)"
+echo "   • FastAPI & Uvicorn (web framework)"
+echo "   • python-jose & cryptography (authentication)"
+echo "   • passlib & bcrypt (password hashing)"
+echo "   • anthropic (Claude AI client)"
+echo "   • httpx & aiohttp (HTTP clients)"
+echo "   • python-dotenv (environment configuration)"
+echo "   • pydantic (data validation)"
+echo "   • python-multipart (file upload support)"
 
 # Setup environment file
 echo "🔧 Setting up environment configuration..."

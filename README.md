@@ -171,7 +171,36 @@ graph TD
 
 ### 🚀 Quick Install Script
 
-Save this script as `install-plaid-guide.sh` and run it:
+The installation script is included in the repository. To run it:
+
+```bash
+# Make the script executable (if needed)
+chmod +x install-plaid-guide.sh
+
+# Run the installation script
+./install-plaid-guide.sh
+```
+
+The script will automatically install all dependencies including:
+
+**Backend Dependencies:**
+- **SQLAlchemy** - Database operations and ORM
+- **FastAPI & Uvicorn** - Modern web framework and ASGI server
+- **python-jose & cryptography** - JWT authentication and security
+- **passlib & bcrypt** - Password hashing and verification
+- **anthropic** - Claude AI client library
+- **httpx & aiohttp** - HTTP clients for API calls
+- **python-dotenv** - Environment variable management
+- **pydantic** - Data validation and settings management
+- **python-multipart** - File upload support
+
+**Frontend Dependencies:**
+- **React 18+** - Modern UI framework
+- **React Query** - Server state management
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Beautiful icons
+
+### Installation Script Example:
 
 ```bash
 #!/bin/bash
