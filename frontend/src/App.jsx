@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { WorkspaceSidebar } from './components/WorkspaceSidebar';
 import { ChatWindow } from './components/ChatWindow';
 import { ArtifactPanel } from './components/ArtifactPanel';
@@ -8,8 +8,6 @@ import { useChatSession } from './hooks/useChatSession';
 import { useSmartArtifacts } from './hooks/useSmartArtifacts';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { GlobalNotifications } from './components/GlobalNotifications';
-// Removed: WorkspaceHeader - using simplified session artifact header
-// Removed: useSessionWorkspace - simplified to direct artifact operations
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DebugPanel } from './components/DebugPanel';
 import TemplateEditor from './components/TemplateEditor';
@@ -18,12 +16,12 @@ import { TemplateProvider } from './contexts/TemplateContext';
 import { ArtifactCreationDialog } from './components/ArtifactCreationDialog';
 import { ContentMerger } from './utils/contentMerger';
 import { SmartLabeling } from './utils/smartLabeling';
+import { ErrorToast } from './components/ErrorToast';
 
 function App() {
   const { user, isLoading: authLoading, login, logout } = useAuth();
   const chatInputRef = useRef(null);
   
-  // SIMPLIFIED: Removed complex scoped instruction tracking
   
   // Get smart artifacts hook first
   const { 
@@ -43,6 +41,7 @@ function App() {
 
   const { 
     messages, 
+    setMessages,
     sendMessage, 
     isLoading: chatLoading, 
     currentSession,
@@ -53,11 +52,61 @@ function App() {
     handleModeChange
   } = useChatSession();
 
-  // SIMPLIFIED: Direct artifact operations without workspace complexity
   
-  // SIMPLIFIED: Remove complex workspace system - using simple session-based approach
-  const createSessionArtifact = async (title, content, type = 'markdown', chatInstruction = '') => {
-    // NEW artifacts always start at version 1
+  // CRITICAL: Function to assign artifact ID to a message
+  // This function is ESSENTIAL for making artifact icons appear in chat messages
+  // DO NOT remove or modify without ensuring artifact icons continue to work
+  // WARNING: Removing this function will break artifact icon display entirely
+  const assignArtifactToMessage = useCallback((messageId, artifactId) => {
+    if (!messageId || !artifactId) {
+      console.error('❌ ARTIFACT ICON: Invalid parameters for assignArtifactToMessage:', { messageId, artifactId });
+      return;
+    }
+    
+    console.log('🔗 ARTIFACT ICON: Assigning artifact ID to message:', { messageId, artifactId });
+    
+    setMessages(prevMessages => {
+      // Find the target message
+      const targetMessage = prevMessages.find(msg => msg.id === messageId);
+      if (!targetMessage) {
+        console.error('❌ ARTIFACT ICON: Target message not found:', messageId);
+        return prevMessages;
+      }
+      
+      // Check if message already has this artifact ID to prevent unnecessary updates
+      if (targetMessage?.artifactId === artifactId) {
+        console.log('🚫 ARTIFACT ICON: Message already has this artifact ID, skipping update');
+        return prevMessages;
+      }
+      
+      console.log('✅ ARTIFACT ICON: Updating message with artifact ID');
+      const updatedMessages = prevMessages.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, artifactId: artifactId }
+          : msg
+      );
+      
+      // CRITICAL: Verify the assignment worked
+      const updatedMessage = updatedMessages.find(msg => msg.id === messageId);
+      if (updatedMessage?.artifactId === artifactId) {
+        console.log('✅ ARTIFACT ICON: Successfully assigned artifact to message:', {
+          messageId: updatedMessage.id,
+          artifactId: updatedMessage.artifactId,
+          messageContent: updatedMessage.content?.substring(0, 50) + '...'
+        });
+      } else {
+        console.error('❌ ARTIFACT ICON: Assignment failed! Message does not have artifact ID:', {
+          messageId,
+          expectedArtifactId: artifactId,
+          actualArtifactId: updatedMessage?.artifactId
+        });
+      }
+      
+      return updatedMessages;
+    });
+  }, [setMessages]);
+  
+  const createSessionArtifact = async (title, content, type = 'markdown', chatInstruction = '', messageHash = null) => {
     const version = 1;
     
     // Use smart labeling for title if not provided or generic
@@ -65,7 +114,6 @@ function App() {
     if (!title || title.includes('Plaid Guide -') || title === 'New Conversation') {
       finalTitle = SmartLabeling.generateArtifactTitle(chatInstruction || currentChatInstruction, content, version);
     }
-    // Don't add version suffix for version 1
     
     const smartLabel = SmartLabeling.generateLabel(chatInstruction || currentChatInstruction, content);
     
@@ -77,13 +125,13 @@ function App() {
       version: version,
       smartLabel: smartLabel,
       originalInstruction: chatInstruction || currentChatInstruction,
-      isNew: true // Mark as new for UI indication
+      isNew: true,
+      sourceMessageHash: messageHash // Add for idempotency tracking
     };
     
     return await createArtifact(finalTitle, content, type, metadata);
   };
 
-  // SIMPLIFIED: Using direct updateArtifact calls instead of wrapper
 
   // Get the primary artifact for current session
   const sessionArtifact = artifacts.find(a => 
@@ -99,6 +147,7 @@ function App() {
   const [userClosedPanel, setUserClosedPanel] = useState(false); // Track if user deliberately closed panel
   const [mergeMode, setMergeMode] = useState('chat_only'); // User preference: 'chat_only' or 'merge_response'
   const [currentChatInstruction, setCurrentChatInstruction] = useState(''); // Track original user instruction for smart labeling
+  const [globalError, setGlobalError] = useState(null); // Global error state for user notifications
   
   // Reset merge state when switching to chat_only mode
   useEffect(() => {
@@ -108,10 +157,6 @@ function App() {
     }
   }, [mergeMode]);
   
-  // Debug current merge state
-  useEffect(() => {
-    console.log('🔍 Current merge state:', { isMergingContent, mergeMode });
-  }, [isMergingContent, mergeMode]);
   
   // Template system state
   const [templateLibraryOpen, setTemplateLibraryOpen] = useState(false);
@@ -126,10 +171,6 @@ function App() {
     title: ''
   });
   
-  // Debug dialog state changes
-  useEffect(() => {
-    console.log('🔍 DEBUG - artifactCreationDialog state:', artifactCreationDialog);
-  }, [artifactCreationDialog]);
 
   // Global error handling
   useEffect(() => {
@@ -206,126 +247,342 @@ function App() {
   // REMOVED: Auto-loading of artifacts - now click-based like Claude Desktop
   // Artifacts only load when user clicks the artifact icon
 
-  // Track last processed message to avoid reprocessing old messages
-  const [lastProcessedMessageIndex, setLastProcessedMessageIndex] = useState(-1);
+  // Track last processed message to avoid reprocessing old messages  
+  const lastProcessedMessageIndexRef = useRef(-1);
   
-  // SIMPLIFIED: Auto-generate artifacts for ALL substantial assistant responses (Claude Desktop style)
+  
+  // ======================================================= 
+  // CRITICAL SECTION: ARTIFACT CREATION AND ASSIGNMENT
+  // =======================================================
+  // ESSENTIAL: Auto-generate artifacts for ALL substantial assistant responses (Claude Desktop style)
+  // WARNING: This useEffect is CRITICAL for artifact icon functionality
+  // DO NOT remove or modify without ensuring artifact icons continue to work
+  // 
+  // IMPORTANT FIX: This useEffect creates artifacts for substantial responses AND handles streaming
+  // KEY BEHAVIOR: When messages are streaming, skip processing but don't update lastProcessedIndex
+  // This allows re-processing when streaming completes to create artifacts and show icons
+  // 
+  // ARTIFACT ICON DEPENDENCY: The EyeIcon/EyeOffIcon that appears after chat messages
+  // depends on this useEffect creating artifacts and assigning them to messages
   useEffect(() => {
+    
     const processNewAssistantMessage = async () => {
-      if (!messages.length || !currentSession) return;
       
-      // Only process if we have new messages
-      if (messages.length <= lastProcessedMessageIndex + 1) return;
-      
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role !== 'assistant') {
-        setLastProcessedMessageIndex(messages.length - 1);
+      if (!messages.length || !currentSession) {
+        console.log('🚫 Early return: no messages or session');
         return;
       }
+      
+      // Only process if we have new messages
+      if (messages.length <= lastProcessedMessageIndexRef.current + 1) {
+        console.log('🚫 Early return: no new messages to process');
+        return;
+      }
+      
+      console.log('✅ New messages detected, continuing with processing');
+      
+      const lastMessage = messages[messages.length - 1];
+      console.log('📝 Processing last message:', {
+        id: lastMessage.id,
+        role: lastMessage.role,
+        contentLength: lastMessage.content?.length,
+        hasArtifactId: !!lastMessage.artifactId,
+        streaming: lastMessage.streaming
+      });
+      
+      if (lastMessage.role !== 'assistant') {
+        console.log('🚫 Not an assistant message, updating index');
+        lastProcessedMessageIndexRef.current = messages.length - 1;
+        return;
+      }
+      
+      // CRITICAL: Skip if message is still loading/streaming
+      // WARNING: DO NOT MODIFY THIS LOGIC WITHOUT TESTING ARTIFACT ICONS
+      // This logic is ESSENTIAL for artifact icon functionality:
+      // 1. When streaming: Exit early but DON'T update lastProcessedIndex
+      // 2. When complete: Re-run this function to create artifacts
+      // 3. Updating lastProcessedIndex here would prevent re-processing completed messages
+      if (lastMessage.streaming || lastMessage.loading) {
+        console.log('🚫 Message still loading/streaming, skipping processing');
+        return; // CRITICAL: Don't update lastProcessedIndex - we need to try again when complete
+      }
+      
+      // Skip if this message already has an artifactId (already processed)
+      if (lastMessage.artifactId) {
+        console.log('🚫 Message already has artifactId, skipping processing');
+        lastProcessedMessageIndexRef.current = messages.length - 1;
+        return;
+      }
+      
+      console.log('✅ Message is complete and ready for processing');
       
       // Skip if message is too short to be substantial
       const content = lastMessage.content || '';
-      if (content.length < 300) { // Increased threshold for artifact generation
-        setLastProcessedMessageIndex(messages.length - 1);
+      if (content.length < 300) { // Restore threshold for artifact generation
+        console.log('🚫 Message too short for artifact generation:', content.length);
+        lastProcessedMessageIndexRef.current = messages.length - 1;
         return;
       }
       
+      console.log('✅ Message qualifies for artifact processing, length:', content.length);
+      
       try {
+        // Enhanced idempotency check to prevent merge redos on session reload
         // Check if this message already has an artifact (prevent duplicates on refresh)
         const existingArtifact = artifacts.find(a => 
           a.metadata?.sessionId === currentSession?.id &&
           Math.abs(new Date(a.created_at).getTime() - new Date(lastMessage.timestamp || new Date()).getTime()) < 30000
         );
         
-        if (existingArtifact) {
-          console.log('🔍 Artifact already exists for this message, skipping creation');
-          setLastProcessedMessageIndex(messages.length - 1);
+        // Also check if this message already has an artifactId (stronger check)
+        const messageHasArtifact = lastMessage.artifactId || existingArtifact;
+        
+        // Check if this exact message content was already processed (content hash check)
+        const messageContentHash = btoa(content.substring(0, 200)); // Simple hash of first 200 chars
+        const existingProcessedArtifact = artifacts.find(a => 
+          a.metadata?.sessionId === currentSession?.id &&
+          a.metadata?.sourceMessageHash === messageContentHash
+        );
+        
+        if (messageHasArtifact || existingProcessedArtifact) {
+          console.log('🔍 Message already processed - skipping to prevent merge redo', {
+            artifactId: existingArtifact?.id || existingProcessedArtifact?.id,
+            artifactTitle: existingArtifact?.title || existingProcessedArtifact?.title,
+            hasMessageArtifactId: !!lastMessage.artifactId,
+            foundByHash: !!existingProcessedArtifact,
+            foundByTimestamp: !!existingArtifact
+          });
+          
+          // Make sure the message has the artifact ID
+          const targetArtifact = existingArtifact || existingProcessedArtifact;
+          if (!lastMessage.artifactId && targetArtifact) {
+            console.log('🔗 Adding missing artifactId to existing message');
+            assignArtifactToMessage(lastMessage.id, targetArtifact.id);
+          }
+          lastProcessedMessageIndexRef.current = messages.length - 1;
           return;
         }
         
+        // Get current merge mode and session artifact from latest state
+        const currentMergeMode = mergeMode;
+        const currentSessionArtifact = artifacts.find(a => 
+          a.metadata?.sessionId === currentSession?.id && a.metadata?.role === 'primary'
+        );
+        
         // ALWAYS generate artifact for substantial responses (Claude Desktop style)
-        if (mergeMode === 'merge_response' && sessionArtifact) {
+        if (currentMergeMode === 'merge_response' && currentSessionArtifact) {
           // Merge mode: merge with existing artifact
           setIsMergingContent(true);
           
           console.log('🔄 Auto-merging with existing session artifact');
           const mergeResult = await ContentMerger.mergeContent(
-            sessionArtifact.content,
+            currentSessionArtifact.content,
             content,
             null, // No modification scope
             false // Not from scoped instruction
           );
           
-          // Update metadata for version tracking
+          // Update metadata for version tracking and idempotency
           const updatedMetadata = {
-            ...sessionArtifact.metadata,
-            version: (sessionArtifact.metadata?.version || 1) + 1,
+            ...currentSessionArtifact.metadata,
+            version: (currentSessionArtifact.metadata?.version || 1) + 1,
             isNew: true,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
+            sourceMessageHash: messageContentHash // Add for idempotency tracking
           };
           
-          await updateArtifact(sessionArtifact.id, {
+          const updatedArtifact = await updateArtifact(currentSessionArtifact.id, {
             content: mergeResult.mergedContent,
             metadata: updatedMetadata
           });
           
-          // Mark artifact in message for inline display (show icon after merge)
-          lastMessage.artifactId = sessionArtifact.id;
+          console.log('🔄 Artifact updated after merge:', {
+            id: updatedArtifact?.id,
+            title: updatedArtifact?.title,
+            contentLength: updatedArtifact?.content?.length,
+            version: updatedArtifact?.metadata?.version
+          });
+          
+          // CRITICAL: Mark artifact in message for inline display (show icon after merge)
+          // ESSENTIAL: This ensures artifact icons appear after merge operations
+          if (updatedArtifact) {
+            console.log('🔗 ARTIFACT ICON: Assigning artifact after auto-merge', {
+              messageId: lastMessage.id,
+              artifactId: updatedArtifact.id,
+              artifactTitle: updatedArtifact.title,
+              version: updatedArtifact.metadata?.version
+            });
+            
+            // IMMEDIATE assignment for merge
+            assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+            
+            // Backup assignments to ensure icon appears after merge
+            setTimeout(() => {
+              console.log('🔗 ARTIFACT ICON: Backup assignment after auto-merge');
+              assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+            }, 100);
+            
+            setTimeout(() => {
+              console.log('🔗 ARTIFACT ICON: Final backup assignment after auto-merge');
+              assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+            }, 500);
+          }
+          
+          
         } else {
           // Check if this is a merge-related request even in Chat Only mode
           const isMergeRequest = currentChatInstruction.toLowerCase().includes('merge') ||
                                 content.toLowerCase().includes('merged') ||
                                 content.toLowerCase().includes('combining');
           
-          if (isMergeRequest && sessionArtifact) {
+          if (isMergeRequest && currentSessionArtifact) {
             // User explicitly requested merge - update artifact and show icon
             console.log('🔄 Manual merge detected - updating artifact version');
             
             // Update artifact metadata to indicate manual merge and increment version
             const updatedMetadata = {
-              ...sessionArtifact.metadata,
-              version: (sessionArtifact.metadata?.version || 1) + 1,
+              ...currentSessionArtifact.metadata,
+              version: (currentSessionArtifact.metadata?.version || 1) + 1,
               isNew: true,
               lastUpdated: new Date().toISOString(),
-              manualMerge: true
+              manualMerge: true,
+              sourceMessageHash: messageContentHash // Add for idempotency tracking
             };
             
-            await updateArtifact(sessionArtifact.id, {
+            const updatedArtifact = await updateArtifact(currentSessionArtifact.id, {
               metadata: updatedMetadata
             });
             
-            lastMessage.artifactId = sessionArtifact.id;
+            // CRITICAL: Use the returned updatedArtifact.id to ensure artifact icon appears
+            if (updatedArtifact) {
+              console.log('🔗 ARTIFACT ICON: Assigning artifact after manual merge', {
+                messageId: lastMessage.id,
+                artifactId: updatedArtifact.id,
+                artifactTitle: updatedArtifact.title,
+                version: updatedArtifact.metadata?.version
+              });
+              
+              // IMMEDIATE assignment for manual merge
+              assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+              
+              // Backup assignments to ensure icon appears after manual merge
+              setTimeout(() => {
+                console.log('🔗 ARTIFACT ICON: Backup assignment after manual merge');
+                assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+              }, 100);
+              
+              setTimeout(() => {
+                console.log('🔗 ARTIFACT ICON: Final backup assignment after manual merge');
+                assignArtifactToMessage(lastMessage.id, updatedArtifact.id);
+              }, 500);
+            }
+            
           } else {
             // Create new artifact for substantial responses (only if one doesn't exist)
-            console.log('🆕 Auto-creating artifact for substantial response');
+            console.log('🆕 ARTIFACT ICON: Creating new artifact for substantial response');
             
-            const newArtifact = await createSessionArtifact('', content, 'markdown', currentChatInstruction);
+            // ENHANCED DEBUGGING: Check createArtifact function availability
+            console.log('🔍 ARTIFACT ICON: Checking createArtifact function:', {
+              createArtifactExists: typeof createArtifact === 'function',
+              currentSessionExists: !!currentSession,
+              currentSessionId: currentSession?.id,
+              contentLength: content?.length,
+              currentChatInstruction: currentChatInstruction
+            });
+            
+            const newArtifact = await createSessionArtifact('', content, 'markdown', currentChatInstruction, messageContentHash);
             if (newArtifact) {
-              // Mark artifact in message for inline display
-              lastMessage.artifactId = newArtifact.id;
+              console.log('✅ ARTIFACT ICON: New artifact created:', {
+                id: newArtifact.id,
+                title: newArtifact.title,
+                messageId: lastMessage.id,
+                contentLength: newArtifact.content?.length,
+                artifactType: newArtifact.type,
+                artifactMetadata: newArtifact.metadata
+              });
+              
+              // CRITICAL: Mark artifact in message for inline display
+              // This assignment is essential for artifact icons to appear
+              console.log('🔗 ARTIFACT ICON: About to assign artifact to message', {
+                messageId: lastMessage.id,
+                artifactId: newArtifact.id,
+                artifactTitle: newArtifact.title,
+                messageRole: lastMessage.role,
+                messageContentLength: lastMessage.content?.length
+              });
+              
+              // IMMEDIATE assignment + delayed backup to ensure icon appears
+              assignArtifactToMessage(lastMessage.id, newArtifact.id);
+              
+              // Backup assignment with delay to ensure state synchronization
+              setTimeout(() => {
+                console.log('🔗 ARTIFACT ICON: Backup assignment for reliability');
+                assignArtifactToMessage(lastMessage.id, newArtifact.id);
+              }, 100);
+              
+              // Additional backup after longer delay
+              setTimeout(() => {
+                console.log('🔗 ARTIFACT ICON: Final backup assignment');
+                assignArtifactToMessage(lastMessage.id, newArtifact.id);
+              }, 500);
+            } else {
+              console.error('❌ ARTIFACT ICON: Failed to create artifact - createSessionArtifact returned null/undefined');
+              console.error('❌ ARTIFACT ICON: Debugging artifact creation failure:', {
+                createArtifactFunction: typeof createArtifact,
+                currentSession: currentSession,
+                contentProvided: !!content,
+                contentLength: content?.length
+              });
             }
           }
         }
       } catch (error) {
         console.error('Error in auto-processing:', error);
+        setGlobalError(`Failed to process artifact: ${error.message}`);
       } finally {
         setIsMergingContent(false);
-        setLastProcessedMessageIndex(messages.length - 1);
+        lastProcessedMessageIndexRef.current = messages.length - 1;
       }
     };
 
-    processNewAssistantMessage();
-  }, [messages.length]); // Only depend on message count, not the messages themselves
+    // Only process if messages length changed and we have new messages
+    const currentLength = messages.length;
+    const lastProcessedLength = lastProcessedMessageIndexRef.current + 1;
+    
+    
+    if (currentLength > lastProcessedLength) {
+      processNewAssistantMessage();
+    } else {
+      // No new messages to process based on length comparison
+    }
+  }, [messages.length, currentSession?.id, messages[messages.length - 1]?.streaming, messages[messages.length - 1]?.loading]); 
+  // CRITICAL DEPENDENCIES EXPLANATION:
+  // - messages.length: Re-run when new messages are added
+  // - currentSession?.id: Re-run when session changes
+  // - streaming/loading status: ESSENTIAL for artifact icons - re-run when streaming completes
+  // WARNING: DO NOT REMOVE streaming/loading dependencies - this breaks artifact icon creation
+  // The streaming dependencies ensure artifacts are created AFTER messages finish streaming
+  // =======================================================
+  // END CRITICAL SECTION: ARTIFACT CREATION AND ASSIGNMENT
+  // =======================================================
   
   // Reset message tracking when session changes
   useEffect(() => {
-    setLastProcessedMessageIndex(-1);
+    lastProcessedMessageIndexRef.current = -1;
   }, [currentSession?.id]);
   
-  const handleSendMessage = async (message) => {
+  // Reset template selection when session changes (default to "No Template")
+  useEffect(() => {
+    if (currentSession?.id) {
+      setSelectedTemplate(null);
+      console.log('🔄 Template reset to "No Template" for new session:', currentSession.id);
+    }
+  }, [currentSession?.id]);
+  
+  const handleSendMessage = async (message, selectedTemplate = null) => {
     // Track the user instruction for smart labeling
     setCurrentChatInstruction(message);
-    await sendMessage(message);
+    await sendMessage(message, selectedTemplate);
     // Artifact processing is now handled automatically by the handleNewAssistantMessage callback
   };
   
@@ -340,6 +597,16 @@ function App() {
       setArtifactPanelOpen(false);
       setUserClosedPanel(true);
     } else {
+      // Always get the freshest artifact from state before selecting
+      const freshArtifact = artifacts.find(a => a.id === artifactId);
+      console.log('🔄 handleViewArtifact: Fresh artifact data:', {
+        id: freshArtifact?.id,
+        title: freshArtifact?.title,
+        contentLength: freshArtifact?.content?.length,
+        version: freshArtifact?.metadata?.version,
+        lastUpdated: freshArtifact?.metadata?.lastUpdated
+      });
+      
       // Select and open artifact in panel (click-based loading)
       selectArtifact(artifactId);
       setArtifactPanelOpen(true);
@@ -497,24 +764,24 @@ function App() {
   };
 
   // Helper function to force refresh artifact panel
-  const forceRefreshArtifactPanel = (artifactId) => {
-    console.log('🔄 Force refreshing artifact panel for:', artifactId);
-    
-    // Show refresh state
-    setIsRefreshingArtifact(true);
-    
-    // Method 1: Close and reopen with delay
-    setArtifactPanelOpen(false);
-    
-    // Method 2: Force re-mount by updating key
-    setArtifactPanelKey(prev => prev + 1);
-    
-    setTimeout(() => {
-      selectArtifact(artifactId);
-      setArtifactPanelOpen(true);
-      setIsRefreshingArtifact(false);
-    }, 150); // Slightly longer delay to ensure complete refresh
-  };
+  // const forceRefreshArtifactPanel = (artifactId) => {
+  //   console.log('🔄 Force refreshing artifact panel for:', artifactId);
+  //   
+  //   // Show refresh state
+  //   setIsRefreshingArtifact(true);
+  //   
+  //   // Method 1: Close and reopen with delay
+  //   setArtifactPanelOpen(false);
+  //   
+  //   // Method 2: Force re-mount by updating key
+  //   setArtifactPanelKey(prev => prev + 1);
+  //   
+  //   setTimeout(() => {
+  //     selectArtifact(artifactId);
+  //     setArtifactPanelOpen(true);
+  //     setIsRefreshingArtifact(false);
+  //   }, 150); // Slightly longer delay to ensure complete refresh
+  // };
 
   // Template system handlers
   const handleCreateTemplate = () => {
@@ -783,7 +1050,7 @@ function App() {
           {artifactPanelOpen && (
             <ErrorBoundary fallback="Error loading artifact panel">
               <ArtifactPanel 
-                key={artifactPanelKey} // Force re-mount when key changes
+                key={`${artifactPanelKey}-${selectedArtifact?.id}-${selectedArtifact?.updated_at || selectedArtifact?.metadata?.lastUpdated}`} // Force re-mount when artifact content changes
                 artifact={selectedArtifact}
                 onUpdate={updateArtifact}
                 onDownload={downloadArtifact}
@@ -850,6 +1117,16 @@ function App() {
           currentSession={currentSession}
         />
       )}
+
+      {/* Global Error Toast */}
+      <ErrorToast
+        error={globalError}
+        onDismiss={() => setGlobalError(null)}
+        onRetry={() => {
+          // Could implement retry logic here if needed
+          setGlobalError(null);
+        }}
+      />
         </div>
     </TemplateProvider>
   );

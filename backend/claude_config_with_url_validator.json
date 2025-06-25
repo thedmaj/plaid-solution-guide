@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "askbill": {
+      "command": "python",
+      "args": ["/path/to/your/askbill_mcp_server.py"],
+      "env": {}
+    },
+    "url-validator": {
+      "command": "python", 
+      "args": ["/Users/dmajetic/Development/plaid-solution-guide/backend/url_validator_mcp.py"],
+      "env": {}
+    }
+  },
+  "workflow": {
+    "description": "Query AskBill and automatically validate/clean URLs in response",
+    "steps": [
+      "1. Query AskBill for technical documentation",
+      "2. Use url-validator to clean URLs in the response", 
+      "3. Present cleaned response to user"
+    ]
+  }
+}

@@ -116,8 +116,8 @@ export class ContentMerger {
     try {
       // Use AI-powered merging for intelligent content integration
       const mergeInstructions = isFromScopedInstruction 
-        ? 'This is a scoped instruction update - apply changes precisely to the specified section'
-        : 'Merge the new content intelligently with the existing content';
+        ? 'This is a scoped instruction update - apply changes precisely to the specified section. CRITICAL ANTI-TRUNCATION RULES: NEVER truncate any content in a merge. NEVER use phrases like "[Previous content remains unchanged through X section]" or "[Remaining content remains unchanged from Y through Z section]". NEVER reference previous sections with "as mentioned above" or "in the previous section". ALWAYS include complete sections in their entirety. The merged document must be complete, standalone, and self-contained. Include ALL sections completely - never use truncation references.'
+        : 'Merge the new content intelligently with the existing content. CRITICAL ANTI-TRUNCATION RULES: NEVER truncate any content in a merge. NEVER use phrases like "[Previous content remains unchanged through X section]" or "[Remaining content remains unchanged from Y through Z section]". NEVER reference previous sections with "as mentioned above", "in the previous section", "refer to the section above", or similar cross-references. ALWAYS include complete sections in their entirety. The final merged document must be completely standalone and self-contained. Each section must contain all necessary information and context. Write as if this is the only document the reader will see. Include ALL sections completely - never use truncation references.';
       
       return await AIService.mergeContent(existingContent, rawNewContent, modificationScope, mergeInstructions);
     } catch (error) {

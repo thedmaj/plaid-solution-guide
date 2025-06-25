@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import { queryKeys, queryOptions } from '../utils/queryClient';
+import { chatStreamManager } from '../utils/streaming';
 
 export const useChatSession = (onNewAssistantMessage) => {
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export const useChatSession = (onNewAssistantMessage) => {
         sessions: data.map(s => ({ id: s.id, title: s.title, type: typeof s.id }))
       });
       
-      // Validate session data structure
+      // Validate session data structure and remove duplicates
       const validSessions = data.filter(session => {
         const isValid = session && session.id && typeof session.id !== 'undefined';
         if (!isValid) {
@@ -42,11 +43,27 @@ export const useChatSession = (onNewAssistantMessage) => {
         return isValid;
       });
       
+      // Remove duplicates by ID (keep the first occurrence)
+      const uniqueSessions = validSessions.filter((session, index, self) => 
+        index === self.findIndex(s => s.id === session.id)
+      );
+      
       if (validSessions.length !== data.length) {
         console.warn('⚠️ Some sessions were filtered out due to invalid data');
       }
       
-      return validSessions;
+      if (uniqueSessions.length !== validSessions.length) {
+        console.warn('⚠️ Duplicate sessions found and removed:', validSessions.length - uniqueSessions.length);
+      }
+      
+      console.log('📋 Sessions loaded:', {
+        total: data.length,
+        valid: validSessions.length,
+        unique: uniqueSessions.length,
+        sessions: uniqueSessions.map(s => ({ id: s.id, title: s.title }))
+      });
+      
+      return uniqueSessions;
     },
     ...queryOptions.frequent,
     enabled: !!localStorage.getItem('token')
@@ -63,11 +80,11 @@ export const useChatSession = (onNewAssistantMessage) => {
       });
       setCurrentSession(lastSession);
       setSelectedMode(lastSession.mode || 'solution_guide');
-      loadSession(lastSession.id);
+      // Don't call loadSession here as setCurrentSession will trigger the React Query
     } else if (sessions.length === 0 && !sessionsLoading && !currentSession) {
       createNewSession();
     }
-  }, [sessions, currentSession, sessionsLoading]);
+  }, [sessions.length, sessionsLoading]); // Remove currentSession to prevent infinite loop
   
   // Create new session mutation
   const createSessionMutation = useMutation({
@@ -93,8 +110,20 @@ export const useChatSession = (onNewAssistantMessage) => {
       return response.json();
     },
     onSuccess: (newSession, mode) => {
-      // Update cache with new session
-      queryClient.setQueryData(queryKeys.sessions(), (old = []) => [newSession, ...old]);
+      // Update cache with new session (avoid duplicates)
+      queryClient.setQueryData(queryKeys.sessions(), (old = []) => {
+        // Check if session already exists to prevent duplicates
+        const existingSessionIndex = old.findIndex(session => session.id === newSession.id);
+        if (existingSessionIndex >= 0) {
+          // Update existing session
+          const updated = [...old];
+          updated[existingSessionIndex] = newSession;
+          return updated;
+        } else {
+          // Add new session at the beginning
+          return [newSession, ...old];
+        }
+      });
       setCurrentSession(newSession);
       setSelectedMode(mode);
       setMessages([]);
@@ -104,7 +133,25 @@ export const useChatSession = (onNewAssistantMessage) => {
     }
   });
 
-  const createNewSession = (mode = selectedMode) => createSessionMutation.mutate(mode);
+  const createNewSession = useCallback((mode) => {
+    // Use current selectedMode if no mode provided
+    const targetMode = mode || selectedMode;
+    
+    // Deep safety check - ensure we never deal with objects that could have circular refs
+    let safeMode;
+    if (typeof targetMode === 'string') {
+      safeMode = targetMode;
+    } else if (typeof targetMode === 'object' && targetMode !== null) {
+      // This is an event object or other object - use default
+      console.warn('⚠️ createNewSession received object instead of string, using default mode');
+      safeMode = 'solution_guide'; // Use hardcoded default to avoid any circular refs
+    } else {
+      safeMode = 'solution_guide'; // Use hardcoded default
+    }
+    
+    // console.log('🚀 createNewSession called with safe mode:', safeMode);
+    createSessionMutation.mutate(safeMode);
+  }, [selectedMode, createSessionMutation]);
   
   const handleModeChange = async (mode) => {
     try {
@@ -158,10 +205,13 @@ export const useChatSession = (onNewAssistantMessage) => {
   };
   
   // Load messages for a specific session with React Query
-  const { data: sessionMessages = [], isLoading: messagesLoading } = useQuery({
+  const { data: sessionMessages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
     queryKey: queryKeys.sessionMessages(currentSession?.id),
     queryFn: async () => {
-      if (!currentSession?.id) return [];
+      if (!currentSession?.id) {
+        console.log('📨 No current session, returning empty messages');
+        return [];
+      }
       
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
@@ -171,7 +221,9 @@ export const useChatSession = (onNewAssistantMessage) => {
         throw new Error('Invalid session ID');
       }
       
-      console.log('📨 Loading session with ID:', stringSessionId);
+      console.log('📨 React Query: Loading messages for session:', stringSessionId);
+      console.log('📨 React Query: Query enabled?', !!currentSession?.id && !!localStorage.getItem('token'));
+      console.log('📨 React Query: Current session data:', currentSession);
 
       const response = await fetch(`/api/chat/sessions/${stringSessionId}`, {
         headers: {
@@ -179,14 +231,19 @@ export const useChatSession = (onNewAssistantMessage) => {
         }
       });
 
+      console.log('📨 React Query: Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`Failed to load session: ${response.status}`);
+        const errorText = await response.text();
+        console.error('📨 React Query: Failed response:', { status: response.status, error: errorText });
+        throw new Error(`Failed to load session: ${response.status} - ${errorText}`);
       }
 
       const sessionMessages = await response.json();
       console.log('📨 Loaded messages:', { 
         count: sessionMessages?.length, 
-        firstMessage: sessionMessages?.[0]?.role 
+        firstMessage: sessionMessages?.[0]?.role,
+        sessionId: stringSessionId 
       });
       
       if (!Array.isArray(sessionMessages)) {
@@ -199,12 +256,36 @@ export const useChatSession = (onNewAssistantMessage) => {
     enabled: !!currentSession?.id && !!localStorage.getItem('token')
   });
 
+  // Debug React Query state - run frequently to catch issues
+  useEffect(() => {
+    const debugInfo = {
+      currentSessionId: currentSession?.id,
+      messagesLoading,
+      messagesError: messagesError?.message,
+      sessionMessagesCount: sessionMessages?.length,
+      queryEnabled: !!currentSession?.id && !!localStorage.getItem('token'),
+      hasToken: !!localStorage.getItem('token'),
+      sessionExists: !!currentSession
+    };
+    console.log('📨 React Query State Debug:', debugInfo);
+    
+    // Log if query should be enabled but no messages are loading/loaded
+    if (debugInfo.queryEnabled && !debugInfo.messagesLoading && debugInfo.sessionMessagesCount === 0) {
+      console.warn('⚠️ Query should be enabled but no messages found. Potential issue!');
+    }
+  }, [currentSession?.id, messagesLoading, messagesError, sessionMessages?.length, currentSession]);
+
   // Update local messages when session messages change
   useEffect(() => {
+    console.log('📨 useChatSession: sessionMessages changed:', {
+      currentSessionId: currentSession?.id,
+      messagesCount: sessionMessages?.length,
+      firstMessage: sessionMessages?.[0]?.content?.substring(0, 50)
+    });
     setMessages(sessionMessages);
   }, [sessionMessages]);
 
-  const loadSession = async (sessionId) => {
+  const loadSession = useCallback(async (sessionId) => {
     try {
       console.log('🔄 useChatSession: Loading session...', { sessionId, type: typeof sessionId });
       
@@ -230,18 +311,33 @@ export const useChatSession = (onNewAssistantMessage) => {
       });
       
       if (session) {
+        console.log('🔄 Setting current session to trigger messages query:', {
+          sessionId: stringSessionId,
+          sessionTitle: session.title,
+          currentSessionId: currentSession?.id,
+          isDifferentSession: currentSession?.id !== session.id
+        });
+        // Always set the session (this will trigger React Query to load messages)
+        // React Query will handle avoiding duplicate requests with the same key
+        console.log('✅ Setting session as current (React Query will handle message loading)');
         setCurrentSession(session);
         setSelectedMode(session.mode || 'solution_guide');
-        // Messages will be loaded automatically by the React Query hook
+        
+        // Force React Query to refetch messages for this session
+        console.log('🔄 Force invalidating messages query for session:', stringSessionId);
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.sessionMessages(stringSessionId)
+        });
       } else {
         console.warn('⚠️ Session not found in sessions list:', stringSessionId);
+        console.log('📋 Available sessions:', sessions.map(s => ({ id: s.id, title: s.title })));
       }
     } catch (error) {
       console.error('❌ Error loading session:', error);
       setMessages([]);
       setCurrentSession(null);
     }
-  };
+  }, [sessions, currentSession]);
   
   const updateSessionTitle = async (sessionId, title) => {
     try {
@@ -314,13 +410,37 @@ export const useChatSession = (onNewAssistantMessage) => {
     }
   };
   
-  const sendMessage = async (content) => {
+  const sendMessage = async (content, selectedTemplate = null) => {
     if (!currentSession) return;
     if (!content || !content.trim()) return;
     
     const token = localStorage.getItem('token');
     if (!token) return;
     
+    // NEW: Check template type directly from selectedTemplate parameter
+    const isKnowledgeTemplate = selectedTemplate?.template_type === 'knowledge';
+    const isAnyTemplate = selectedTemplate !== null;
+    
+    // Fallback: Check if ANY template is being used via content markers
+    const isTemplateUsedViaContent = content.includes("Please structure your response according to this Solution Guide template:") ||
+                                    content.includes("IMPORTANT: Use the following expert knowledge as your PRIMARY source") ||
+                                    content.includes("Expert Knowledge Template:") ||
+                                    content.includes("AI Instructions for customizable sections:") ||
+                                    content.includes("[AI_PLACEHOLDER_");
+
+    // Final determination: template is used if explicitly selected OR detected in content
+    const isTemplateUsed = isAnyTemplate || isTemplateUsedViaContent;
+
+    // Status message based on template type
+    let initialStatusMessage;
+    if (isKnowledgeTemplate) {
+      initialStatusMessage = '📚 Processing knowledge template...';
+    } else if (isTemplateUsed) {
+      initialStatusMessage = '📋 Analyzing template structure...';
+    } else {
+      initialStatusMessage = '🔍 Consulting Plaid documentation via AskBill...';
+    }
+
     const userMessage = {
       id: uuidv4(),
       role: 'user',
@@ -328,13 +448,23 @@ export const useChatSession = (onNewAssistantMessage) => {
       timestamp: new Date().toISOString(),
     };
     
-    const updatedMessages = [...messages, userMessage];
+    // Create placeholder assistant message with correct initial status
+    const assistantMessage = {
+      id: uuidv4(),
+      role: 'assistant',
+      content: initialStatusMessage,
+      timestamp: new Date().toISOString(),
+      loading: true,
+      sources: []
+    };
+    
+    const updatedMessages = [...messages, userMessage, assistantMessage];
     setMessages(updatedMessages);
     
     setIsLoading(true);
     
     try {
-      // Format messages according to backend expectations, including the current message
+      // Format messages according to backend expectations
       const formattedMessages = [...messages, userMessage].map(msg => ({
         id: msg.id,
         role: msg.role,
@@ -343,108 +473,149 @@ export const useChatSession = (onNewAssistantMessage) => {
         sources: msg.sources || []
       }));
 
-      console.log('Sending message with session ID:', String(currentSession.id));
-      console.log('Previous messages:', formattedMessages);
+      console.log('🚀 Sending message with session ID:', String(currentSession.id));
 
-      const response = await fetch('/api/chat', {
+      const requestData = {
+        session_id: String(currentSession.id),
+        message: content,
+        previous_messages: formattedMessages,
+        mode: selectedMode,
+        selected_template: selectedTemplate  // NEW: Send template info to backend
+      };
+
+      // Send request to backend (no streaming)
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          session_id: String(currentSession.id),
-          message: content,
-          previous_messages: formattedMessages,
-          mode: selectedMode
-        }),
+        body: JSON.stringify(requestData)
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server error:', errorData);
-        throw new Error(`Failed to get response from assistant: ${errorData.detail || 'Unknown error'}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
-      const responseData = await response.json();
-      console.log('Received response:', responseData);
-      
-      if (responseData.messages && Array.isArray(responseData.messages)) {
-        // Find the assistant message in the response
-        const assistantMsg = responseData.messages.find(msg => msg.role === 'assistant');
-        if (assistantMsg) {
-          setMessages([...updatedMessages, assistantMsg]);
-          // Notify callback about new assistant message
-          if (onNewAssistantMessage) {
-            onNewAssistantMessage(assistantMsg, currentSession?.id);
-          }
-        } else {
-          setMessages(updatedMessages); // fallback: just user message
-        }
+
+      // Update status: Processing response (single update)
+      let processingMessage;
+      if (isKnowledgeTemplate) {
+        processingMessage = '✨ Building guide from knowledge template...';
+      } else if (isTemplateUsed) {
+        processingMessage = '✨ Generating structured response...';
       } else {
-        setMessages(updatedMessages); // fallback: just user message
+        processingMessage = '✨ Enhancing response with Claude...';
+      }
+
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === assistantMessage.id 
+            ? { ...msg, content: processingMessage }
+            : msg
+        )
+      );
+
+      const result = await response.json();
+      
+      console.log('✅ Received complete response:', {
+        responseLength: result.response?.length,
+        askbillUsed: result.askbill_used,
+        askbillLength: result.askbill_length,
+        knowledgeTemplateUsed: result.knowledge_template_used,
+        sessionUpdate: result.session
+      });
+
+      // Update session cache if session data was returned (for title updates)
+      if (result.session && currentSession?.id === result.session.id) {
+        console.log('🔄 Updating session cache with new title:', result.session.title);
+        
+        // Update sessions cache with new session data
+        queryClient.setQueryData(queryKeys.sessions(), (oldSessions) => {
+          if (!oldSessions) return oldSessions;
+          
+          return oldSessions.map(session => 
+            session.id === result.session.id 
+              ? { ...session, ...result.session, title: result.session.title, updated_at: result.session.updated_at }
+              : session
+          );
+        });
+        
+        // Update current session state if it matches
+        if (currentSession?.id === result.session.id) {
+          console.log('🔄 Updating current session state with new title');
+          setCurrentSession(prev => prev ? { ...prev, ...result.session } : prev);
+        }
+      }
+
+      // Set final response (single update)
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === assistantMessage.id 
+            ? { ...msg, content: result.response, loading: false }
+            : msg
+        )
+      );
+
+      // Notify callback about completed assistant message
+      if (onNewAssistantMessage) {
+        const finalMessage = { 
+          ...assistantMessage, 
+          content: result.response, 
+          loading: false 
+        };
+        onNewAssistantMessage(finalMessage, currentSession?.id);
       }
       
-      // Handle session title update
-      if (responseData.session && responseData.session.title) {
-        const updatedSession = {
-          ...currentSession,
-          title: responseData.session.title,
-          updated_at: responseData.session.updated_at
-        };
-        
-        // Update current session
-        setCurrentSession(updatedSession);
-        
-        // Update sessions list
-        queryClient.setQueryData(queryKeys.sessions(), (prevSessions = []) => 
-          prevSessions.map(session => 
-            session.id === updatedSession.id ? updatedSession : session
-          )
-        );
-        
-        console.log(`Session title updated to: "${responseData.session.title}"`);
-      }
+      setIsLoading(false);
       
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
       
-      const errorMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
-        timestamp: new Date().toISOString(),
-        isError: true,
-      };
+      // Determine specific error message based on error type
+      let errorContent = 'Sorry, I encountered an error processing your request. Please try again.';
       
-      const finalMessages = [...updatedMessages, errorMessage];
-      setMessages(finalMessages);
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        errorContent = '🔌 Unable to connect to AskBill service. Please check your internet connection and try again.';
+      } else if (error.message?.includes('timeout') || error.message?.includes('Timeout')) {
+        errorContent = '⏱️ Request timed out. AskBill may be experiencing high load. Please try again in a moment.';
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        errorContent = '🔐 Authentication error. Please refresh the page and log in again.';
+      } else if (error.message?.includes('503') || error.message?.includes('Service Unavailable')) {
+        errorContent = '🚧 AskBill service is temporarily unavailable. Please try again in a few minutes.';
+      } else {
+        errorContent = `❌ Error: ${error.message || 'Unknown error occurred'}`;
+      }
       
-    } finally {
+      // Update the assistant message with error content (single update)
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === assistantMessage.id 
+            ? { ...msg, content: errorContent, loading: false, error: true }
+            : msg
+        )
+      );
+      
       setIsLoading(false);
     }
   };
   
   // Simple function to simulate an assistant response for the demo
+  // const simulateAssistantResponse = (userMessage) => {
+  //   // In a real app, this would come from Claude API + MCP server
+  //   
+  //   // Very basic simulation based on keywords in the user message
+  //   if (userMessage.toLowerCase().includes('link')) {
+  //     return "# Implementing Plaid Link\n\nPlaid Link is a drop-in module that provides a secure, elegant authentication flow for each financial institution that Plaid supports.\n\n## Integration Steps\n\n1. Create a Link token by calling the `/link/token/create` endpoint\n2. Initialize Link on your frontend\n3. Handle the onSuccess callback\n4. Exchange the public token for an access token\n\n```javascript\n// Example Link initialization\nconst handler = Plaid.create({\n  token: linkToken,\n  onSuccess: (public_token, metadata) => {\n    // Send public_token to your server to exchange for an access token\n    exchangePublicToken(public_token);\n  },\n  onExit: (err, metadata) => {\n    // Handle user exiting Link flow\n  },\n  onEvent: (eventName, metadata) => {\n    // Track Link events\n  }\n});\n\nhandler.open();\n```";\n  //   } else if (userMessage.toLowerCase().includes('ach')) {\n  //     return "# ACH Payment Processing with Plaid\n\nPlaid can help you facilitate ACH payments by providing bank account information securely.\n\n## Implementation Guide\n\n1. Collect bank account details using Plaid Auth\n2. Use the account and routing numbers with your payment processor\n3. Handle verification and risk assessment with Plaid Identity and Signal\n\n## Code Example\n\n```javascript\n// After completing Link flow and getting an access token\nasync function getAuthData(accessToken) {\n  try {\n    const response = await plaidClient.authGet({\n      access_token: accessToken\n    });\n    \n    const accountData = response.data.accounts;\n    const numbers = response.data.numbers;\n    \n    // Use these details with your ACH processor\n    return {\n      account_id: accountData[0].account_id,\n      routing_number: numbers.ach[0].routing,\n      account_number: numbers.ach[0].account\n    };\n  } catch (error) {\n    console.error('Error getting auth data:', error);\n  }\n}\n```";\n  //   } else if (userMessage.toLowerCase().includes('webhook')) {\n  //     return "# Plaid Webhook Verification\n\nSecuring your webhook endpoint is important to ensure that callbacks are coming from Plaid and not from unauthorized sources.\n\n## Verification Steps\n\n1. Retrieve the verification header from the request\n2. Verify the JWT signature using Plaid's public key\n3. Validate the JWT claims\n\n```javascript\nconst express = require('express');\nconst jwt = require('jsonwebtoken');\nconst jwksClient = require('jwks-rsa');\n\nconst app = express();\napp.use(express.json());\n\nconst client = jwksClient({\n  jwksUri: 'https://sandbox.plaid.com/.well-known/jwks.json'\n});\n\nfunction getKey(header, callback) {\n  client.getSigningKey(header.kid, (err, key) => {\n    const signingKey = key.publicKey || key.rsaPublicKey;\n    callback(null, signingKey);\n  });\n}\n\napp.post('/webhook', (request, response) => {\n  const plaidVerifyJwt = request.headers['plaid-verification'];\n  \n  jwt.verify(plaidVerifyJwt, getKey, {\n    algorithms: ['ES256']\n  }, (err, decoded) => {\n    if (err) {\n      return response.status(401).json({ error: 'Unauthorized' });\n    }\n    \n    // Webhook is verified, process the webhook\n    console.log('Webhook payload:', request.body);\n    response.status(200).send('Webhook received');\n  });\n});\n```";\n  //   } else {\n  //     return "I'd be happy to help with your Plaid implementation questions. Please provide more details about your specific use case, and I can give you targeted guidance on API endpoints, best practices, and implementation steps.\n\nSome common topics I can help with include:\n\n- Plaid Link integration\n- Authentication flows\n- Account funding and ACH transfers\n- Balance checking\n- Transaction data retrieval\n- Webhook implementation\n- Error handling and edge cases\n\nJust let me know what you're working on, and I'll create a tailored guide for your needs.";\n  //   }\n  // }; // Not currently used - replaced by streaming implementation
+  
   const simulateAssistantResponse = (userMessage) => {
-    // In a real app, this would come from Claude API + MCP server
-    
-    // Very basic simulation based on keywords in the user message
-    if (userMessage.toLowerCase().includes('link')) {
-      return "# Implementing Plaid Link\n\nPlaid Link is a drop-in module that provides a secure, elegant authentication flow for each financial institution that Plaid supports.\n\n## Integration Steps\n\n1. Create a Link token by calling the `/link/token/create` endpoint\n2. Initialize Link on your frontend\n3. Handle the onSuccess callback\n4. Exchange the public token for an access token\n\n```javascript\n// Example Link initialization\nconst handler = Plaid.create({\n  token: linkToken,\n  onSuccess: (public_token, metadata) => {\n    // Send public_token to your server to exchange for an access token\n    exchangePublicToken(public_token);\n  },\n  onExit: (err, metadata) => {\n    // Handle user exiting Link flow\n  },\n  onEvent: (eventName, metadata) => {\n    // Track Link events\n  }\n});\n\nhandler.open();\n```";
-    } else if (userMessage.toLowerCase().includes('ach')) {
-      return "# ACH Payment Processing with Plaid\n\nPlaid can help you facilitate ACH payments by providing bank account information securely.\n\n## Implementation Guide\n\n1. Collect bank account details using Plaid Auth\n2. Use the account and routing numbers with your payment processor\n3. Handle verification and risk assessment with Plaid Identity and Signal\n\n## Code Example\n\n```javascript\n// After completing Link flow and getting an access token\nasync function getAuthData(accessToken) {\n  try {\n    const response = await plaidClient.authGet({\n      access_token: accessToken\n    });\n    \n    const accountData = response.data.accounts;\n    const numbers = response.data.numbers;\n    \n    // Use these details with your ACH processor\n    return {\n      account_id: accountData[0].account_id,\n      routing_number: numbers.ach[0].routing,\n      account_number: numbers.ach[0].account\n    };\n  } catch (error) {\n    console.error('Error getting auth data:', error);\n  }\n}\n```";
-    } else if (userMessage.toLowerCase().includes('webhook')) {
-      return "# Plaid Webhook Verification\n\nSecuring your webhook endpoint is important to ensure that callbacks are coming from Plaid and not from unauthorized sources.\n\n## Verification Steps\n\n1. Retrieve the verification header from the request\n2. Verify the JWT signature using Plaid's public key\n3. Validate the JWT claims\n\n```javascript\nconst express = require('express');\nconst jwt = require('jsonwebtoken');\nconst jwksClient = require('jwks-rsa');\n\nconst app = express();\napp.use(express.json());\n\nconst client = jwksClient({\n  jwksUri: 'https://sandbox.plaid.com/.well-known/jwks.json'\n});\n\nfunction getKey(header, callback) {\n  client.getSigningKey(header.kid, (err, key) => {\n    const signingKey = key.publicKey || key.rsaPublicKey;\n    callback(null, signingKey);\n  });\n}\n\napp.post('/webhook', (request, response) => {\n  const plaidVerifyJwt = request.headers['plaid-verification'];\n  \n  jwt.verify(plaidVerifyJwt, getKey, {\n    algorithms: ['ES256']\n  }, (err, decoded) => {\n    if (err) {\n      return response.status(401).json({ error: 'Unauthorized' });\n    }\n    \n    // Webhook is verified, process the webhook\n    console.log('Webhook payload:', request.body);\n    response.status(200).send('Webhook received');\n  });\n});\n```";
-    } else {
-      return "I'd be happy to help with your Plaid implementation questions. Please provide more details about your specific use case, and I can give you targeted guidance on API endpoints, best practices, and implementation steps.\n\nSome common topics I can help with include:\n\n- Plaid Link integration\n- Authentication flows\n- Account funding and ACH transfers\n- Balance checking\n- Transaction data retrieval\n- Webhook implementation\n- Error handling and edge cases\n\nJust let me know what you're working on, and I'll create a tailored guide for your needs.";
-    }
+    return "This is a simulated response. Streaming is enabled.";
   };
   
   return {
     sessions,
     currentSession,
     messages,
+    setMessages, // Add setMessages for artifact ID updates
     isLoading: isLoading || messagesLoading || sessionsLoading,
     selectedMode,
     createNewSession,

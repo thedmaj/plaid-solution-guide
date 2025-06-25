@@ -15,8 +15,6 @@ export const Message = ({ message, onCreateArtifact, onMergeWithArtifact, markdo
     });
   };
   
-  console.log("Rendering markdown content:", message.content, typeof message.content);
-  
   return (
     <div 
       className={`flex gap-4 p-4 ${
@@ -47,7 +45,6 @@ export const Message = ({ message, onCreateArtifact, onMergeWithArtifact, markdo
         
         <div className="prose prose-blue max-w-none">
           <ErrorBoundary>
-            {console.log('About to render markdown in Message.jsx:', message.content)}
             <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
               {String(message.content)}
             </ReactMarkdown>
@@ -78,42 +75,6 @@ export const Message = ({ message, onCreateArtifact, onMergeWithArtifact, markdo
           >
             {copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
           </button>
-          
-          {message.content && message.content.length > 100 && (
-            <>
-              <button
-                onClick={() => {
-                  console.log('🎯 Create artifact button clicked in Message.jsx');
-                  if (onCreateArtifact) {
-                    onCreateArtifact();
-                  } else {
-                    console.error('❌ onCreateArtifact prop is missing');
-                  }
-                }}
-                className="text-gray-500 hover:text-gray-700 transition-colors p-1"
-                title="Save as artifact"
-              >
-                <BookmarkIcon size={16} />
-              </button>
-              
-              {hasExistingArtifacts && onMergeWithArtifact && (
-                <button
-                  onClick={() => {
-                    console.log('🔄 Merge artifact button clicked in Message.jsx');
-                    if (onMergeWithArtifact) {
-                      onMergeWithArtifact(message.content);
-                    } else {
-                      console.error('❌ onMergeWithArtifact prop is missing');
-                    }
-                  }}
-                  className="text-blue-500 hover:text-blue-700 transition-colors p-1"
-                  title="Merge with existing artifact"
-                >
-                  <GitMerge size={16} />
-                </button>
-              )}
-            </>
-          )}
         </div>
       )}
     </div>

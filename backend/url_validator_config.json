@@ -1,0 +1,177 @@
+{
+  "validator_settings": {
+    "cache_duration_hours": 24,
+    "rate_limit_delay_ms": 100,
+    "request_timeout_seconds": 5,
+    "max_concurrent_validations": 10,
+    "enable_live_validation": true,
+    "enable_claude_corrections": true,
+    "claude_model": "claude-3-haiku-20240307"
+  },
+  
+  "plaid_domains": [
+    "plaid.com",
+    "docs.plaid.com",
+    "dashboard.plaid.com", 
+    "api.plaid.com",
+    "github.com/plaid"
+  ],
+  
+  "documentation_patterns": {
+    "/docs/api/": {
+      "title": "API Reference",
+      "priority": 1,
+      "common_endpoints": [
+        "accounts",
+        "auth",
+        "identity", 
+        "transactions",
+        "assets",
+        "liabilities",
+        "investments",
+        "payment_initiation",
+        "transfer",
+        "link",
+        "item",
+        "institutions",
+        "categories",
+        "sandbox"
+      ]
+    },
+    "/docs/quickstart/": {
+      "title": "Quick Start Guide",
+      "priority": 2
+    },
+    "/docs/auth/": {
+      "title": "Auth Product Documentation",
+      "priority": 3
+    },
+    "/docs/identity/": {
+      "title": "Identity Product Documentation", 
+      "priority": 3
+    },
+    "/docs/transactions/": {
+      "title": "Transactions Product Documentation",
+      "priority": 3
+    },
+    "/docs/assets/": {
+      "title": "Assets Product Documentation",
+      "priority": 3
+    },
+    "/docs/liabilities/": {
+      "title": "Liabilities Product Documentation",
+      "priority": 3
+    },
+    "/docs/investments/": {
+      "title": "Investments Product Documentation",
+      "priority": 3
+    },
+    "/docs/link/": {
+      "title": "Link Documentation",
+      "priority": 3
+    },
+    "/docs/payment-initiation/": {
+      "title": "Payment Initiation Documentation",
+      "priority": 3
+    },
+    "/docs/transfer/": {
+      "title": "Transfer Documentation",
+      "priority": 3
+    },
+    "/docs/monitor/": {
+      "title": "Monitor Documentation",
+      "priority": 3
+    },
+    "/docs/beacon/": {
+      "title": "Beacon Documentation",
+      "priority": 3
+    },
+    "/docs/cra/": {
+      "title": "CRA Documentation",
+      "priority": 3
+    },
+    "/docs/fdx/": {
+      "title": "FDX Documentation",
+      "priority": 3
+    }
+  },
+  
+  "correction_rules": [
+    {
+      "pattern": "https?://(?:www\\.)?pliad\\.com",
+      "replacement": "https://plaid.com",
+      "description": "Fix common typo 'pliad' -> 'plaid'"
+    },
+    {
+      "pattern": "https?://(?:www\\.)?plaid\\.co(?:m|$)",
+      "replacement": "https://plaid.com",
+      "description": "Fix truncated domain"
+    },
+    {
+      "pattern": "https?://(?:www\\.)?docs\\.pliad\\.com",
+      "replacement": "https://docs.plaid.com",
+      "description": "Fix docs subdomain typo"
+    },
+    {
+      "pattern": "^plaid\\.com/",
+      "replacement": "https://plaid.com/",
+      "description": "Add missing protocol"
+    },
+    {
+      "pattern": "^docs\\.plaid\\.com/",
+      "replacement": "https://docs.plaid.com/",
+      "description": "Add missing protocol for docs"
+    },
+    {
+      "pattern": "(https?://[^/]+)//+",
+      "replacement": "\\1/",
+      "description": "Fix double slashes in paths"
+    },
+    {
+      "pattern": "/docs?/api([/#?]|$)",
+      "replacement": "/docs/api\\1",
+      "description": "Fix 'doc' -> 'docs' in API paths"
+    },
+    {
+      "pattern": "/docs?/link([/#?]|$)",
+      "replacement": "/docs/link\\1", 
+      "description": "Fix 'doc' -> 'docs' in Link paths"
+    },
+    {
+      "pattern": "/docs?/auth([/#?]|$)",
+      "replacement": "/docs/auth\\1",
+      "description": "Fix 'doc' -> 'docs' in Auth paths"
+    }
+  ],
+  
+  "intelligent_corrections": {
+    "enable": true,
+    "context_keywords": {
+      "api": ["/docs/api/", "/docs/api/reference/"],
+      "authentication": ["/docs/auth/", "/docs/quickstart/"],
+      "auth": ["/docs/auth/"],
+      "identity": ["/docs/identity/"],
+      "transactions": ["/docs/transactions/"],
+      "link": ["/docs/link/"],
+      "quickstart": ["/docs/quickstart/"],
+      "getting started": ["/docs/quickstart/"],
+      "assets": ["/docs/assets/"],
+      "liabilities": ["/docs/liabilities/"],
+      "investments": ["/docs/investments/"], 
+      "payment": ["/docs/payment-initiation/"],
+      "transfer": ["/docs/transfer/"],
+      "webhook": ["/docs/api/webhooks/"],
+      "sandbox": ["/docs/sandbox/"],
+      "errors": ["/docs/errors/"],
+      "cra": ["/docs/cra/"],
+      "base report": ["/docs/cra/"]
+    }
+  },
+  
+  "monitoring": {
+    "log_corrections": true,
+    "track_validation_stats": true,
+    "alert_on_high_failure_rate": true,
+    "failure_rate_threshold": 0.3
+  }
+}

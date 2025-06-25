@@ -17,9 +17,32 @@ export const DebugPanel = ({
 
     const addLog = (type, ...args) => {
       const timestamp = new Date().toLocaleTimeString();
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ');
+      const message = args.map(arg => {
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            // Handle circular references safely
+            return JSON.stringify(arg, (key, value) => {
+              // Skip circular references and problematic objects
+              if (typeof value === 'object' && value !== null) {
+                if (value.constructor === Window || 
+                    value.constructor === Document ||
+                    value.constructor === HTMLElement ||
+                    key === 'window' || 
+                    key === 'document' ||
+                    key === 'target' ||
+                    key === 'currentTarget' ||
+                    key === 'view') {
+                  return '[Circular/DOM Object]';
+                }
+              }
+              return value;
+            }, 2);
+          } catch (error) {
+            return `[Object: ${arg.constructor?.name || 'Unknown'}]`;
+          }
+        }
+        return String(arg);
+      }).join(' ');
       
       setLogs(prev => [...prev.slice(-50), { type, timestamp, message }]);
     };

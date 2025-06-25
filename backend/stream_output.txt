@@ -1,0 +1,571 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   192    0     0  100   192      0    158  0:00:01  0:00:01 --:--:--   158100   192    0     0  100   192      0     86  0:00:02  0:00:02 --:--:--    86100   192    0     0  100   192      0     59  0:00:03  0:00:03 --:--:--    59100   192    0     0  100   192      0     45  0:00:04  0:00:04 --:--:--    45100   192    0     0  100   192      0     36  0:00:05  0:00:05 --:--:--    36100   192    0     0  100   192      0     30  0:00:06  0:00:06 --:--:--     0100   192    0     0  100   192      0     26  0:00:07  0:00:07 --:--:--     0100   192    0     0  100   192      0     23  0:00:08  0:00:08 --:--:--     0100   192    0     0  100   192      0     20  0:00:09  0:00:09 --:--:--     0100   192    0     0  100   192      0     18  0:00:10  0:00:10 --:--:--     0100   192    0     0  100   192      0     17  0:00:11  0:00:11 --:--:--     0100   192    0     0  100   192      0     15  0:00:12  0:00:12 --:--:--     0100   192    0     0  100   192      0     14  0:00:13  0:00:13 --:--:--     0100   192    0     0  100   192      0     13  0:00:14  0:00:14 --:--:--     0100   192    0     0  100   192      0     12  0:00:16  0:00:15  0:00:01     0100   192    0     0  100   192      0     11  0:00:17  0:00:16  0:00:01     0100   192    0     0  100   192      0     11  0:00:17  0:00:17 --:--:--     0100   192    0     0  100   192      0     10  0:00:19  0:00:18  0:00:01     0100   192    0     0  100   192      0      9  0:00:21  0:00:19  0:00:02     0100   192    0     0  100   192      0      9  0:00:21  0:00:20  0:00:01     0100   192    0     0  100   192      0      9  0:00:21  0:00:21 --:--:--     0100   192    0     0  100   192      0      8  0:00:24  0:00:22  0:00:02     0100   192    0     0  100   192      0      8  0:00:24  0:00:23  0:00:01     0100   192    0     0  100   192      0      7  0:00:27  0:00:24  0:00:03     0100   192    0     0  100   192      0      7  0:00:27  0:00:25  0:00:02     0100   192    0     0  100   192      0      7  0:00:27  0:00:26  0:00:01     0100   192    0     0  100   192      0      7  0:00:27  0:00:27 --:--:--     0100   192    0     0  100   192      0      6  0:00:32  0:00:28  0:00:04     0100   192    0     0  100   192      0      6  0:00:32  0:00:29  0:00:03     0100   192    0     0  100   192      0      6  0:00:32  0:00:30  0:00:02     0100   192    0     0  100   192      0      6  0:00:32  0:00:31  0:00:01     0100   192    0     0  100   192      0      5  0:00:38  0:00:32  0:00:06     0100   192    0     0  100   192      0      5  0:00:38  0:00:33  0:00:05     0100   192    0     0  100   192      0      5  0:00:38  0:00:34  0:00:04     0100   192    0     0  100   192      0      5  0:00:38  0:00:35  0:00:03     0100   192    0     0  100   192      0      5  0:00:38  0:00:36  0:00:02     0100   192    0     0  100   192      0      5  0:00:38  0:00:37  0:00:01     0data: {"type": "start", "timestamp": "2025-06-21T17:24:17.078546"}
+
+data: {"type": "delta", "content": "#"}
+
+data: {"type": "delta", "content": " Plaid Credit Report API (CRA) Implementation"}
+
+data: {"type": "delta", "content": " Guide\n\n## Overview\n\nPlaid's Credit Report"}
+
+data: {"type": "delta", "content": " API (CRA) provides a comprehensive"}
+
+data: {"type": "delta", "content": " solution for accessing consumer credit data directly from credit bureaus. This product"}
+
+data: {"type": "delta", "content": " enables businesses to make informed lending decisions, verify ident"}
+
+data: {"type": "delta", "content": "ities, and assess creditworthiness through"}
+
+data: {"type": "delta", "content": " standardized credit reports.\n\nThe CRA Base"}
+
+data: {"type": "delta", "content": " Report offers a foundational credit report that includes:"}
+
+data: {"type": "delta", "content": "\n- Credit accounts and payment history\n- Public"}
+
+data: {"type": "delta", "content": " records and collections\n- Credit inquiries\n- Personal"}
+
+data: {"type": "delta", "content": " information\n- Credit scores\n\nThis solution"}
+
+data: {"type": "delta", "content": " guide will walk you through implementing Plaid's CRA"}
+
+data: {"type": "delta", "content": " Base Report, including the necessary API calls,"}
+
+data: {"type": "delta", "content": " data flows, and best practices.\n\n## Getting"}
+
+data: {"type": "delta", "content": " Started\n\nBefore implementing Plaid's CRA"}
+
+data: {"type": "delta", "content": ", follow these steps to set up your environment"}
+
+data: {"type": "delta", "content": ":\n\n1. **Create a Plai"}
+
+data: {"type": "delta", "content": "d Developer Account**:\n   - Sign"}
+
+data: {"type": "delta", "content": " up at [https://dashboar"}
+
+data: {"type": "delta", "content": "d.plaid.com/signup](https://"}
+
+data: {"type": "delta", "content": "dashboard.plaid.com/signup)"}
+
+data: {"type": "delta", "content": "\n   - Navigate to the Team Settings"}
+
+data: {"type": "delta", "content": " section to get your client ID and secret\n\n2"}
+
+data: {"type": "delta", "content": ". **Explore Resources**:\n   -"}
+
+data: {"type": "delta", "content": " [Plaid API Reference](https://plai"}
+
+data: {"type": "delta", "content": "d.com/docs/api/)\n   -"}
+
+data: {"type": "delta", "content": " [Plaid Postman Collection](https://"}
+
+data: {"type": "delta", "content": "plaid.com/docs/resources"}
+
+data: {"type": "delta", "content": "/postman/)\n   - ["}
+
+data: {"type": "delta", "content": "Plaid GitHub Sample Apps](https://github"}
+
+data: {"type": "delta", "content": ".com/plaid)"}
+
+data: {"type": "delta", "content": "\n   - [Plaid API Status Page]("}
+
+data: {"type": "delta", "content": "https://status.plaid.com/)\n   - ["}
+
+data: {"type": "delta", "content": "Plaid Support Portal](https://dashboar"}
+
+data: {"type": "delta", "content": "d.plaid.com/support/"}
+
+data: {"type": "delta", "content": "new)\n\n3. **Set Up Your Development Environment"}
+
+data: {"type": "delta", "content": "**:\n   - Install a"}
+
+data: {"type": "delta", "content": " Plaid SDK for your preferred language\n   - Configure"}
+
+data: {"type": "delta", "content": " your environment with your client ID and secret"}
+
+data: {"type": "delta", "content": "\n   - Set up your environment to use"}
+
+data: {"type": "delta", "content": " Sandbox mode initially\n\n## Implementation Flow"}
+
+data: {"type": "delta", "content": "\n\nThe CRA implementation involves several key steps:"}
+
+data: {"type": "delta", "content": "\n\n1. Create a Link token for user authentication\n2. User"}
+
+data: {"type": "delta", "content": " completes the Link flow to authenticate\n3. Exchange the"}
+
+data: {"type": "delta", "content": " public token for an access token\n4. Request"}
+
+data: {"type": "delta", "content": " the CRA Base Report\n5. Handle an"}
+
+data: {"type": "delta", "content": "d process the credit report data\n\nLet's explore"}
+
+data: {"type": "delta", "content": " each step in detail.\n\n## API Endpoints"}
+
+data: {"type": "delta", "content": "\n\nThe primary API endpoints you'll use"}
+
+data: {"type": "delta", "content": " for CRA implementation are:\n\n*"}
+
+data: {"type": "delta", "content": " Create Link Token: `/link/token/create`"}
+
+data: {"type": "delta", "content": "\n* Exchange Public Token: `/item/public"}
+
+data: {"type": "delta", "content": "_token/exchange`\n* Create"}
+
+data: {"type": "delta", "content": " CRA Asset Report: `/cra/base"}
+
+data: {"type": "delta", "content": "_report/create`\n* Get CRA Asset"}
+
+data: {"type": "delta", "content": " Report: `/cra/base_report/"}
+
+data: {"type": "delta", "content": "get`\n* Refresh CRA Asset Report:"}
+
+data: {"type": "delta", "content": " `/cra/base_report/refresh`"}
+
+data: {"type": "delta", "content": "\n\n## Implementation Steps\n\n### 1. Create a Link"}
+
+data: {"type": "delta", "content": " Token\n\nFirst, create a Link token to initialize"}
+
+data: {"type": "delta", "content": " the Plaid Link flow:\n\n```curl"}
+
+data: {"type": "delta", "content": "\ncurl -X POST https://sandbox"}
+
+data: {"type": "delta", "content": ".plaid.com/link/token/"}
+
+data: {"type": "delta", "content": "create \\\n  -H "}
+
+data: {"type": "delta", "content": "'Content-Type: application/json' \\"}
+
+data: {"type": "delta", "content": "\n  -H 'PLAID-CLIENT-"}
+
+data: {"type": "delta", "content": "ID: YOUR_CLIENT_ID' \\"}
+
+data: {"type": "delta", "content": "\n  -H 'PLAID-SECRET"}
+
+data: {"type": "delta", "content": ": YOUR_SECRET' \\\n  -"}
+
+data: {"type": "delta", "content": "d '{\n    \"client_id\": \"YOUR_"}
+
+data: {"type": "delta", "content": "CLIENT_ID\",\n    \"secret\": \""}
+
+data: {"type": "delta", "content": "YOUR_SECRET\",\n    \"user\": {\n      \""}
+
+data: {"type": "delta", "content": "client_user_id\": \"unique"}
+
+data: {"type": "delta", "content": "-user-id\"\n    },\n    "}
+
+data: {"type": "delta", "content": "\"client_name\": \"Your App"}
+
+data: {"type": "delta", "content": " Name\",\n    \"products\": [\"cra\"],"}
+
+data: {"type": "delta", "content": "\n    \"language\": \"en\","}
+
+data: {"type": "delta", "content": "\n    \"country_codes\": [\"US\"]"}
+
+data: {"type": "delta", "content": "\n  }'\n```\n\nThe"}
+
+data: {"type": "delta", "content": " response will include a `link_token` that"}
+
+data: {"type": "delta", "content": " you'll use to initialize Plaid Link."}
+
+data: {"type": "delta", "content": "\n\n### 2. Implement Plaid Link"}
+
+data: {"type": "delta", "content": "\n\nIntegrate Plaid Link into your application using"}
+
+data: {"type": "delta", "content": " the token from the previous step:"}
+
+data: {"type": "delta", "content": "\n\n```javascript\nconst handler = Plaid."}
+
+data: {"type": "delta", "content": "create({\n  token: linkToken,\n  on"}
+
+data: {"type": "delta", "content": "Success: (public_token, metadata)"}
+
+data: {"type": "delta", "content": " => {\n    // Send public_token to your"}
+
+data: {"type": "delta", "content": " server\n    exchangePublicToken("}
+
+data: {"type": "delta", "content": "public_token);\n  },\n  "}
+
+data: {"type": "delta", "content": "onExit: (err, metadata) =>"}
+
+data: {"type": "delta", "content": " {\n    // Handle user exiting the Link"}
+
+data: {"type": "delta", "content": " flow\n  },\n  onEvent"}
+
+data: {"type": "delta", "content": ": (eventName, metadata) =>"}
+
+data: {"type": "delta", "content": " {\n    // Track Link events\n  }\n});"}
+
+data: {"type": "delta", "content": "\n\nhandler.open();\n```\n\n### "}
+
+data: {"type": "delta", "content": "3. Exchange the Public Token\n\nAfter the"}
+
+data: {"type": "delta", "content": " user successfully completes the Link flow, exchange the public token"}
+
+data: {"type": "delta", "content": " for an access token:\n\n```curl\ncurl"}
+
+data: {"type": "delta", "content": " -X POST https://sandbox.plaid."}
+
+data: {"type": "delta", "content": "com/item/public_token/exchange \\"}
+
+data: {"type": "delta", "content": "\n  -H 'Content-Type:"}
+
+data: {"type": "delta", "content": " application/json' \\\n  -H "}
+
+data: {"type": "delta", "content": "'PLAID-CLIENT-ID: YOUR"}
+
+data: {"type": "delta", "content": "_CLIENT_ID' \\\n  -H"}
+
+data: {"type": "delta", "content": " 'PLAID-SECRET: YOUR_"}
+
+data: {"type": "delta", "content": "SECRET' \\\n  -"}
+
+data: {"type": "delta", "content": "d '{\n    \"client_id\": \"YOUR"}
+
+data: {"type": "delta", "content": "_CLIENT_ID\",\n    \"secret\":"}
+
+data: {"type": "delta", "content": " \"YOUR_SECRET\",\n    \"public_"}
+
+data: {"type": "delta", "content": "token\": \"PUBLIC_TOKEN\"\n  "}
+
+data: {"type": "delta", "content": "}'\n```\n\nThe response will include an `"}
+
+data: {"type": "delta", "content": "access_token` and an `item_id`"}
+
+data: {"type": "delta", "content": " that you'll use for subsequent API calls."}
+
+data: {"type": "delta", "content": "\n\n### 4. Create a CRA Base Report"}
+
+data: {"type": "delta", "content": "\n\nUse the access token to request"}
+
+data: {"type": "delta", "content": " a CRA Base Report:\n\n```curl"}
+
+data: {"type": "delta", "content": "\ncurl -X POST https://sandbox.plai"}
+
+data: {"type": "delta", "content": "d.com/cra/base_report/"}
+
+data: {"type": "delta", "content": "create \\\n  -H 'Content-"}
+
+data: {"type": "delta", "content": "Type: application/json' \\\n  -"}
+
+data: {"type": "delta", "content": "H 'PLAID-CLIENT-ID"}
+
+data: {"type": "delta", "content": ": YOUR_CLIENT_ID' \\\n  "}
+
+data: {"type": "delta", "content": "-H 'PLAID-SECRET:"}
+
+data: {"type": "delta", "content": " YOUR_SECRET' \\\n  -"}
+
+data: {"type": "delta", "content": "d '{\n    \"client_id\": \"YOUR"}
+
+data: {"type": "delta", "content": "_CLIENT_ID\",\n    \"secret\":"}
+
+data: {"type": "delta", "content": " \"YOUR_SECRET\",\n    \"access_"}
+
+data: {"type": "delta", "content": "token\": \"ACCESS_TOKEN\",\n    \""}
+
+data: {"type": "delta", "content": "days_requested\": 730"}
+
+data: {"type": "delta", "content": "\n  }'\n```\n\nThe response will include"}
+
+data: {"type": "delta", "content": " a `report_id` an"}
+
+data: {"type": "delta", "content": "d an `asset_report_id` that you"}
+
+data: {"type": "delta", "content": "'ll use to retrieve the report.\n\n###"}
+
+data: {"type": "delta", "content": " 5. Retrieve the CRA Base Report"}
+
+data: {"type": "delta", "content": "\n\nOnce the report is ready, retrieve"}
+
+data: {"type": "delta", "content": " it using the report ID:\n\n```curl"}
+
+data: {"type": "delta", "content": "\ncurl -X POST https://sandbox.pl"}
+
+data: {"type": "delta", "content": "aid.com/cra/base_report"}
+
+data: {"type": "delta", "content": "/get \\\n  -H 'Content"}
+
+data: {"type": "delta", "content": "-Type: application/json' \\\n  "}
+
+data: {"type": "delta", "content": "-H 'PLAID-CLIENT-"}
+
+data: {"type": "delta", "content": "ID: YOUR_CLIENT_ID' \\"}
+
+data: {"type": "delta", "content": "\n  -H 'PLAID-SECRET"}
+
+data: {"type": "delta", "content": ": YOUR_SECRET' \\\n  -"}
+
+data: {"type": "delta", "content": "d '{\n    \"client_id\": \"YOUR"}
+
+data: {"type": "delta", "content": "_CLIENT_ID\",\n    \"secret\":"}
+
+data: {"type": "delta", "content": " \"YOUR_SECRET\",\n    \"asset"}
+
+data: {"type": "delta", "content": "_report_id\": \"ASSET"}
+
+data: {"type": "delta", "content": "_REPORT_ID\"\n  }'"}
+
+data: {"type": "delta", "content": "\n```\n\nThe response will contain the complete"}
+
+data: {"type": "delta", "content": " CRA Base Report with credit information"}
+
+data: {"type": "delta", "content": ".\n\n### 6. Refresh"}
+
+data: {"type": "delta", "content": " a CRA Base Report ("}
+
+data: {"type": "delta", "content": "Optional)\n\nTo get updated credit"}
+
+data: {"type": "delta", "content": " information, you can refresh an existing report:\n\n```"}
+
+data: {"type": "delta", "content": "curl\ncurl -X POST https://sandbox."}
+
+data: {"type": "delta", "content": "plaid.com/cra/base_"}
+
+data: {"type": "delta", "content": "report/refresh \\\n  -H '"}
+
+data: {"type": "delta", "content": "Content-Type: application/json' \\"}
+
+data: {"type": "delta", "content": "\n  -H 'PLAID-CLIENT"}
+
+data: {"type": "delta", "content": "-ID: YOUR_CLIENT_ID' \\"}
+
+data: {"type": "delta", "content": "\n  -H 'PLAID-"}
+
+data: {"type": "delta", "content": "SECRET: YOUR_SECRET' \\\n  -"}
+
+data: {"type": "delta", "content": "d '{\n    \"client_id\": \""}
+
+data: {"type": "delta", "content": "YOUR_CLIENT_ID\",\n    \"secret"}
+
+data: {"type": "delta", "content": "\": \"YOUR_SECRET\",\n    \"asset"}
+
+data: {"type": "delta", "content": "_report_id\": \"ASSET_"}
+
+data: {"type": "delta", "content": "REPORT_ID\",\n    \"days"}
+
+data: {"type": "delta", "content": "_requested\": 730\n  }'"}
+
+data: {"type": "delta", "content": "\n```\n\n## Sequence Diagram\n\n```"}
+
+data: {"type": "delta", "content": "mermaid\nsequenceDiagram"}
+
+data: {"type": "delta", "content": "\n    participant User\n    participant Client"}
+
+data: {"type": "delta", "content": " as Your Application (Frontend)\n    participant Server"}
+
+data: {"type": "delta", "content": " as Your Server\n    participant Plaid as Pl"}
+
+data: {"type": "delta", "content": "aid API\n\n    %% Initialize"}
+
+data: {"type": "delta", "content": " Link\n    Server->>"}
+
+data: {"type": "delta", "content": "Plaid: POST /link/token/"}
+
+data: {"type": "delta", "content": "create (with CRA product)\n    "}
+
+data: {"type": "delta", "content": "Plaid-->>Server: link"}
+
+data: {"type": "delta", "content": "_token\n    Server-->>Client"}
+
+data: {"type": "delta", "content": ": link_token\n    \n    %%"}
+
+data: {"type": "delta", "content": " User authentication flow\n    Client"}
+
+data: {"type": "delta", "content": "->>Client: Initialize Plaid Link with"}
+
+data: {"type": "delta", "content": " link_token\n    Client->>User"}
+
+data: {"type": "delta", "content": ": Display Plaid Link interface\n    User->>"}
+
+data: {"type": "delta", "content": "Client: Provide authentication credentials\n    Client->>"}
+
+data: {"type": "delta", "content": "Plaid: Submit credentials\n    Plai"}
+
+data: {"type": "delta", "content": "d-->>Client: public_token\n    "}
+
+data: {"type": "delta", "content": "\n    %% Exchange tokens\n    Client->>"}
+
+data: {"type": "delta", "content": "Server: Send public_token\n    Server->>"}
+
+data: {"type": "delta", "content": "Plaid: POST /item/public_token"}
+
+data: {"type": "delta", "content": "/exchange\n    Plaid-->>Server"}
+
+data: {"type": "delta", "content": ": access_token, item_id\n    "}
+
+data: {"type": "delta", "content": "Server->>Server: Store access_token"}
+
+data: {"type": "delta", "content": " securely\n    \n    %% Create"}
+
+data: {"type": "delta", "content": " CRA Base Report\n    Server->>"}
+
+data: {"type": "delta", "content": "Plaid: POST /cra/base_"}
+
+data: {"type": "delta", "content": "report/create\n    Note over Plaid:"}
+
+data: {"type": "delta", "content": " Process credit report request\n    Plai"}
+
+data: {"type": "delta", "content": "d-->>Server: asset_report_id,"}
+
+data: {"type": "delta", "content": " report_id\n    \n    %% Poll"}
+
+data: {"type": "delta", "content": " for report completion\n    loop Until report is ready"}
+
+data: {"type": "delta", "content": "\n        Server->>Plaid: POST /"}
+
+data: {"type": "delta", "content": "cra/base_report/get\n        "}
+
+data: {"type": "delta", "content": "Plaid-->>Server: Report"}
+
+data: {"type": "delta", "content": " status\n    end\n    \n    "}
+
+data: {"type": "delta", "content": "%% Get completed report\n    Server-"}
+
+data: {"type": "delta", "content": ">>Plaid: POST /cra/"}
+
+data: {"type": "delta", "content": "base_report/get\n    Plai"}
+
+data: {"type": "delta", "content": "d-->>Server: Complete CRA Base Report\n    "}
+
+data: {"type": "delta", "content": "\n    %% Process and display report\n    Server"}
+
+data: {"type": "delta", "content": "->>Server: Process credit data\n    Server--"}
+
+data: {"type": "delta", "content": ">>Client: Send processed credit information"}
+
+data: {"type": "delta", "content": "\n    Client-->>User: Display credit"}
+
+data: {"type": "delta", "content": " report information\n    \n    %% Optional"}
+
+data: {"type": "delta", "content": " refresh flow\n    Note over Server,"}
+
+data: {"type": "delta", "content": "Plaid: Optional: Refresh report later"}
+
+data: {"type": "delta", "content": "\n    Server->>Plaid: POST"}
+
+data: {"type": "delta", "content": " /cra/base_report/refresh"}
+
+data: {"type": "delta", "content": "\n    Plaid-->>Server: New"}
+
+data: {"type": "delta", "content": " asset_report_id\n    Server->>"}
+
+data: {"type": "delta", "content": "Plaid: POST /cra/base_"}
+
+data: {"type": "delta", "content": "report/get\n    Plaid-->>"}
+
+data: {"type": "delta", "content": "Server: Updated CRA Base Report\n```"}
+
+data: {"type": "delta", "content": "\n\n## Understanding the CRA Base Report\n\nThe"}
+
+data: {"type": "delta", "content": " CRA Base Report contains several key sections:\n\n###"}
+
+data: {"type": "delta", "content": " 1. Personal Information\n- Name"}
+
+data: {"type": "delta", "content": ", address, SSN, and other identifying"}
+
+data: {"type": "delta", "content": " information\n- Employment history\n\n### 2. Credit"}
+
+data: {"type": "delta", "content": " Accounts\n- Account type, status"}
+
+data: {"type": "delta", "content": ", and balance\n- Payment history\n- Credit"}
+
+data: {"type": "delta", "content": " limits and utilization\n\n### 3. Public Records"}
+
+data: {"type": "delta", "content": "\n- Bankruptcies, liens, judg"}
+
+data: {"type": "delta", "content": "ments\n- Collections accounts\n\n### 4. Credit"}
+
+data: {"type": "delta", "content": " Inquiries\n- Recent applications for credit\n-"}
+
+data: {"type": "delta", "content": " Soft vs. hard inquiries\n\n### 5. Credit"}
+
+data: {"type": "delta", "content": " Scores\n- FICO scores"}
+
+data: {"type": "delta", "content": "\n- VantageScore ("}
+
+data: {"type": "delta", "content": "if available)\n\n## Best Practices\n\n1."}
+
+data: {"type": "delta", "content": " **Security**:\n   - Never"}
+
+data: {"type": "delta", "content": " store sensitive credit data client-side\n   -"}
+
+data: {"type": "delta", "content": " Implement proper encryption for stored credit"}
+
+data: {"type": "delta", "content": " data\n   - Follow PCI compliance"}
+
+data: {"type": "delta", "content": " guidelines\n\n2. **User Experience**:"}
+
+data: {"type": "delta", "content": "\n   - Clearly explain to users why"}
+
+data: {"type": "delta", "content": " you're requesting credit information\n   - Provide"}
+
+data: {"type": "delta", "content": " context for credit scores and report elements"}
+
+data: {"type": "delta", "content": "\n   - Offer educational resources about credit reports"}
+
+data: {"type": "delta", "content": "\n\n3. **Error Handling**:"}
+
+data: {"type": "delta", "content": "\n   - Implement robust error handling for API failures"}
+
+data: {"type": "delta", "content": "\n   - Have fallback strategies for when"}
+
+data: {"type": "delta", "content": " credit data is unavailable\n   - Monitor"}
+
+data: {"type": "delta", "content": " API response times and implement appropriate"}
+
+data: {"type": "delta", "content": " timeouts\n\n4. **Compliance**:"}
+
+data: {"type": "delta", "content": "\n   - Ensure your use"}
+
+data: {"type": "delta", "content": " case complies with FCRA regulations\n   "}
+
+data: {"type": "delta", "content": "- Provide adverse action notices when require"}
+
+data: {"type": "delta", "content": "d\n   - Maintain proper audit"}
+
+data: {"type": "delta", "content": " trails for credit checks\n\n## Testing"}
+
+data: {"type": "delta", "content": "\n\nIn the Sandbox environment,"}
+
+data: {"type": "delta", "content": " Plaid provides test data for CRA reports"}
+
+data: {"type": "delta", "content": ". You can use these test credentials to simulate different"}
+
+data: {"type": "delta", "content": " credit scenarios:\n\n- Good credit profile"}
+
+data: {"type": "delta", "content": ": `user_good`\n- Average"}
+
+data: {"type": "delta", "content": " credit profile: `user_average`\n-"}
+
+data: {"type": "delta", "content": " Poor credit profile: `user_poor`"}
+
+data: {"type": "delta", "content": "\n\nThe password for all test users is `pass"}
+
+data: {"type": "delta", "content": "_good`.\n\n## Conclusion"}
+
+data: {"type": "delta", "content": "\n\nImplementing Plaid's CRA Base Report provides"}
+
+data: {"type": "delta", "content": " your application with robust credit reporting capabilities."}
+
+data: {"type": "delta", "content": " By following this guide, you can sec"}
+
+data: {"type": "delta", "content": "urely integrate credit data into your lending,"}
+
+data: {"type": "delta", "content": " verification, or financial advisory workflows.\n\nFor"}
+
+data: {"type": "delta", "content": " more detailed information, refer to the ["}
+
+data: {"type": "delta", "content": "Plaid CRA documentation](https://plai"}
+
+data: {"type": "delta", "content": "d.com/docs/api/products/c"}
+
+data: {"type": "delta", "content": "ra/).\n\nIf you encounter any issues during"}
+
+data: {"type": "delta", "content": " implementation, contact Plaid Support through"}
+
+data: {"type": "delta", "content": " the [Support Portal](https://dashboard.plaid.com"}
+
+data: {"type": "delta", "content": "/support/new)."}
+
+data: {"type": "complete", "full_content": "# Plaid Credit Report API (CRA) Implementation Guide\n\n## Overview\n\nPlaid's Credit Report API (CRA) provides a comprehensive solution for accessing consumer credit data directly from credit bureaus. This product enables businesses to make informed lending decisions, verify identities, and assess creditworthiness through standardized credit reports.\n\nThe CRA Base Report offers a foundational credit report that includes:\n- Credit accounts and payment history\n- Public records and collections\n- Credit inquiries\n- Personal information\n- Credit scores\n\nThis solution guide will walk you through implementing Plaid's CRA Base Report, including the necessary API calls, data flows, and best practices.\n\n## Getting Started\n\nBefore implementing Plaid's CRA, follow these steps to set up your environment:\n\n1. **Create a Plaid Developer Account**:\n   - Sign up at [https://dashboard.plaid.com/signup](https://dashboard.plaid.com/signup)\n   - Navigate to the Team Settings section to get your client ID and secret\n\n2. **Explore Resources**:\n   - [Plaid API Reference](https://plaid.com/docs/api/)\n   - [Plaid Postman Collection](https://plaid.com/docs/resources/postman/)\n   - [Plaid GitHub Sample Apps](https://github.com/plaid)\n   - [Plaid API Status Page](https://status.plaid.com/)\n   - [Plaid Support Portal](https://dashboard.plaid.com/support/new)\n\n3. **Set Up Your Development Environment**:\n   - Install a Plaid SDK for your preferred language\n   - Configure your environment with your client ID and secret\n   - Set up your environment to use Sandbox mode initially\n\n## Implementation Flow\n\nThe CRA implementation involves several key steps:\n\n1. Create a Link token for user authentication\n2. User completes the Link flow to authenticate\n3. Exchange the public token for an access token\n4. Request the CRA Base Report\n5. Handle and process the credit report data\n\nLet's explore each step in detail.\n\n## API Endpoints\n\nThe primary API endpoints you'll use for CRA implementation are:\n\n* Create Link Token: `/link/token/create`\n* Exchange Public Token: `/item/public_token/exchange`\n* Create CRA Asset Report: `/cra/base_report/create`\n* Get CRA Asset Report: `/cra/base_report/get`\n* Refresh CRA Asset Report: `/cra/base_report/refresh`\n\n## Implementation Steps\n\n### 1. Create a Link Token\n\nFirst, create a Link token to initialize the Plaid Link flow:\n\n```curl\ncurl -X POST https://sandbox.plaid.com/link/token/create \\\n  -H 'Content-Type: application/json' \\\n  -H 'PLAID-CLIENT-ID: YOUR_CLIENT_ID' \\\n  -H 'PLAID-SECRET: YOUR_SECRET' \\\n  -d '{\n    \"client_id\": \"YOUR_CLIENT_ID\",\n    \"secret\": \"YOUR_SECRET\",\n    \"user\": {\n      \"client_user_id\": \"unique-user-id\"\n    },\n    \"client_name\": \"Your App Name\",\n    \"products\": [\"cra\"],\n    \"language\": \"en\",\n    \"country_codes\": [\"US\"]\n  }'\n```\n\nThe response will include a `link_token` that you'll use to initialize Plaid Link.\n\n### 2. Implement Plaid Link\n\nIntegrate Plaid Link into your application using the token from the previous step:\n\n```javascript\nconst handler = Plaid.create({\n  token: linkToken,\n  onSuccess: (public_token, metadata) => {\n    // Send public_token to your server\n    exchangePublicToken(public_token);\n  },\n  onExit: (err, metadata) => {\n    // Handle user exiting the Link flow\n  },\n  onEvent: (eventName, metadata) => {\n    // Track Link events\n  }\n});\n\nhandler.open();\n```\n\n### 3. Exchange the Public Token\n\nAfter the user successfully completes the Link flow, exchange the public token for an access token:\n\n```curl\ncurl -X POST https://sandbox.plaid.com/item/public_token/exchange \\\n  -H 'Content-Type: application/json' \\\n  -H 'PLAID-CLIENT-ID: YOUR_CLIENT_ID' \\\n  -H 'PLAID-SECRET: YOUR_SECRET' \\\n  -d '{\n    \"client_id\": \"YOUR_CLIENT_ID\",\n    \"secret\": \"YOUR_SECRET\",\n    \"public_token\": \"PUBLIC_TOKEN\"\n  }'\n```\n\nThe response will include an `access_token` and an `item_id` that you'll use for subsequent API calls.\n\n### 4. Create a CRA Base Report\n\nUse the access token to request a CRA Base Report:\n\n```curl\ncurl -X POST https://sandbox.plaid.com/cra/base_report/create \\\n  -H 'Content-Type: application/json' \\\n  -H 'PLAID-CLIENT-ID: YOUR_CLIENT_ID' \\\n  -H 'PLAID-SECRET: YOUR_SECRET' \\\n  -d '{\n    \"client_id\": \"YOUR_CLIENT_ID\",\n    \"secret\": \"YOUR_SECRET\",\n    \"access_token\": \"ACCESS_TOKEN\",\n    \"days_requested\": 730\n  }'\n```\n\nThe response will include a `report_id` and an `asset_report_id` that you'll use to retrieve the report.\n\n### 5. Retrieve the CRA Base Report\n\nOnce the report is ready, retrieve it using the report ID:\n\n```curl\ncurl -X POST https://sandbox.plaid.com/cra/base_report/get \\\n  -H 'Content-Type: application/json' \\\n  -H 'PLAID-CLIENT-ID: YOUR_CLIENT_ID' \\\n  -H 'PLAID-SECRET: YOUR_SECRET' \\\n  -d '{\n    \"client_id\": \"YOUR_CLIENT_ID\",\n    \"secret\": \"YOUR_SECRET\",\n    \"asset_report_id\": \"ASSET_REPORT_ID\"\n  }'\n```\n\nThe response will contain the complete CRA Base Report with credit information.\n\n### 6. Refresh a CRA Base Report (Optional)\n\nTo get updated credit information, you can refresh an existing report:\n\n```curl\ncurl -X POST https://sandbox.plaid.com/cra/base_report/refresh \\\n  -H 'Content-Type: application/json' \\\n  -H 'PLAID-CLIENT-ID: YOUR_CLIENT_ID' \\\n  -H 'PLAID-SECRET: YOUR_SECRET' \\\n  -d '{\n    \"client_id\": \"YOUR_CLIENT_ID\",\n    \"secret\": \"YOUR_SECRET\",\n    \"asset_report_id\": \"ASSET_REPORT_ID\",\n    \"days_requested\": 730\n  }'\n```\n\n## Sequence Diagram\n\n```mermaid\nsequenceDiagram\n    participant User\n    participant Client as Your Application (Frontend)\n    participant Server as Your Server\n    participant Plaid as Plaid API\n\n    %% Initialize Link\n    Server->>Plaid: POST /link/token/create (with CRA product)\n    Plaid-->>Server: link_token\n    Server-->>Client: link_token\n    \n    %% User authentication flow\n    Client->>Client: Initialize Plaid Link with link_token\n    Client->>User: Display Plaid Link interface\n    User->>Client: Provide authentication credentials\n    Client->>Plaid: Submit credentials\n    Plaid-->>Client: public_token\n    \n    %% Exchange tokens\n    Client->>Server: Send public_token\n    Server->>Plaid: POST /item/public_token/exchange\n    Plaid-->>Server: access_token, item_id\n    Server->>Server: Store access_token securely\n    \n    %% Create CRA Base Report\n    Server->>Plaid: POST /cra/base_report/create\n    Note over Plaid: Process credit report request\n    Plaid-->>Server: asset_report_id, report_id\n    \n    %% Poll for report completion\n    loop Until report is ready\n        Server->>Plaid: POST /cra/base_report/get\n        Plaid-->>Server: Report status\n    end\n    \n    %% Get completed report\n    Server->>Plaid: POST /cra/base_report/get\n    Plaid-->>Server: Complete CRA Base Report\n    \n    %% Process and display report\n    Server->>Server: Process credit data\n    Server-->>Client: Send processed credit information\n    Client-->>User: Display credit report information\n    \n    %% Optional refresh flow\n    Note over Server,Plaid: Optional: Refresh report later\n    Server->>Plaid: POST /cra/base_report/refresh\n    Plaid-->>Server: New asset_report_id\n    Server->>Plaid: POST /cra/base_report/get\n    Plaid-->>Server: Updated CRA Base Report\n```\n\n## Understanding the CRA Base Report\n\nThe CRA Base Report contains several key sections:\n\n### 1. Personal Information\n- Name, address, SSN, and other identifying information\n- Employment history\n\n### 2. Credit Accounts\n- Account type, status, and balance\n- Payment history\n- Credit limits and utilization\n\n### 3. Public Records\n- Bankruptcies, liens, judgments\n- Collections accounts\n\n### 4. Credit Inquiries\n- Recent applications for credit\n- Soft vs. hard inquiries\n\n### 5. Credit Scores\n- FICO scores\n- VantageScore (if available)\n\n## Best Practices\n\n1. **Security**:\n   - Never store sensitive credit data client-side\n   - Implement proper encryption for stored credit data\n   - Follow PCI compliance guidelines\n\n2. **User Experience**:\n   - Clearly explain to users why you're requesting credit information\n   - Provide context for credit scores and report elements\n   - Offer educational resources about credit reports\n\n3. **Error Handling**:\n   - Implement robust error handling for API failures\n   - Have fallback strategies for when credit data is unavailable\n   - Monitor API response times and implement appropriate timeouts\n\n4. **Compliance**:\n   - Ensure your use case complies with FCRA regulations\n   - Provide adverse action notices when required\n   - Maintain proper audit trails for credit checks\n\n## Testing\n\nIn the Sandbox environment, Plaid provides test data for CRA reports. You can use these test credentials to simulate different credit scenarios:\n\n- Good credit profile: `user_good`\n- Average credit profile: `user_average`\n- Poor credit profile: `user_poor`\n\nThe password for all test users is `pass_good`.\n\n## Conclusion\n\nImplementing Plaid's CRA Base Report provides your application with robust credit reporting capabilities. By following this guide, you can securely integrate credit data into your lending, verification, or financial advisory workflows.\n\nFor more detailed information, refer to the [Plaid CRA documentation](https://plaid.com/docs/api/products/cra/).\n\nIf you encounter any issues during implementation, contact Plaid Support through the [Support Portal](https://dashboard.plaid.com/support/new).", "timestamp": "2025-06-21T17:24:55.249863"}
+
+100 30995    0 30803  100   192    806      5  0:00:38  0:00:38 --:--:--  6378100 30995    0 30803  100   192    806      5  0:00:38  0:00:38 --:--:--  8055

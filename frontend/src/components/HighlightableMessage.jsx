@@ -249,42 +249,6 @@ export const HighlightableMessage = ({
           >
             {copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
           </button>
-          
-          {message.content && message.content.length > 100 && (
-            <>
-              <button
-                onClick={() => {
-                  console.log('🎯 Create artifact button clicked in HighlightableMessage.jsx');
-                  if (onCreateArtifact) {
-                    onCreateArtifact();
-                  } else {
-                    console.error('❌ onCreateArtifact prop is missing in HighlightableMessage');
-                  }
-                }}
-                className="text-gray-500 hover:text-gray-700 transition-colors p-1"
-                title="Save as artifact"
-              >
-                <BookmarkIcon size={16} />
-              </button>
-              
-              {hasExistingArtifacts && onMergeWithArtifact && (
-                <button
-                  onClick={() => {
-                    console.log('🔄 Merge artifact button clicked in HighlightableMessage.jsx');
-                    if (onMergeWithArtifact) {
-                      onMergeWithArtifact(message.content);
-                    } else {
-                      console.error('❌ onMergeWithArtifact prop is missing in HighlightableMessage');
-                    }
-                  }}
-                  className="text-blue-500 hover:text-blue-700 transition-colors p-1"
-                  title="Merge with existing artifact"
-                >
-                  <GitMerge size={16} />
-                </button>
-              )}
-            </>
-          )}
         </div>
       )}
 

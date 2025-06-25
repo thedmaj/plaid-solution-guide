@@ -230,7 +230,17 @@ export const useSmartArtifacts = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create artifact');
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please refresh the page and log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to create artifacts.');
+        } else if (response.status === 413) {
+          throw new Error('Artifact content is too large. Please reduce the size and try again.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again in a few moments.');
+        } else {
+          throw new Error(`Failed to create artifact (Error ${response.status})`);
+        }
       }
       
       const newArtifact = await response.json();
@@ -266,7 +276,17 @@ export const useSmartArtifacts = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update artifact');
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please refresh the page and log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to edit this artifact.');
+        } else if (response.status === 404) {
+          throw new Error('Artifact not found. It may have been deleted by another user.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again in a few moments.');
+        } else {
+          throw new Error(`Failed to update artifact (Error ${response.status})`);
+        }
       }
       
       const updatedArtifact = await response.json();
@@ -343,6 +363,13 @@ export const useSmartArtifacts = () => {
    */
   const selectArtifact = (artifactId) => {
     const artifact = artifacts.find(artifact => artifact.id === artifactId);
+    console.log('🎯 selectArtifact: Setting selected artifact:', {
+      id: artifact?.id,
+      title: artifact?.title,
+      contentLength: artifact?.content?.length,
+      version: artifact?.metadata?.version,
+      updatedAt: artifact?.updated_at
+    });
     setSelectedArtifact(artifact || null);
   };
 
@@ -353,7 +380,7 @@ export const useSmartArtifacts = () => {
     const artifact = artifacts.find(artifact => artifact.id === artifactId);
     
     if (!artifact) {
-      console.error('Artifact not found');
+      setError('Artifact not found. It may have been deleted.');
       return;
     }
     
@@ -372,7 +399,17 @@ export const useSmartArtifacts = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to download artifact');
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please refresh the page and log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to download this artifact.');
+        } else if (response.status === 404) {
+          throw new Error('Artifact not found. It may have been deleted.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again in a few moments.');
+        } else {
+          throw new Error(`Failed to download artifact (Error ${response.status})`);
+        }
       }
       
       // Get the filename from the Content-Disposition header or use a default

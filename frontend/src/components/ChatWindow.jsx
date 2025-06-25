@@ -47,6 +47,17 @@ export const ChatWindow = ({
   
   // Optimized: Pre-compute artifact mappings for O(1) lookups
   const artifactMappings = useMemo(() => {
+    console.log('🔄 Recomputing artifact mappings with', artifacts.length, 'artifacts');
+    artifacts.forEach(artifact => {
+      console.log('📄 Artifact in mapping:', {
+        id: artifact.id,
+        title: artifact.title,
+        contentLength: artifact.content?.length,
+        version: artifact.metadata?.version,
+        updated: artifact.updated_at
+      });
+    });
+    
     const directIdMap = new Map(); // message.artifactId -> artifact
     const temporalMap = new Map(); // temporal key -> artifact
     const sessionArtifacts = []; // Store session artifacts for fallback
@@ -89,10 +100,12 @@ export const ChatWindow = ({
     };
   }, [artifacts, currentSession?.id]);
 
-  // Optimized helper function with O(1) lookups
+  // CRITICAL: Optimized helper function with O(1) lookups
+  // This function is essential for artifact icon display - DO NOT REMOVE OR MODIFY
   const getMessageArtifact = useCallback((message, messageIndex) => {
     // Null/undefined safety check
     if (!message) {
+      console.log('🚫 ARTIFACT ICON: No message provided');
       return null;
     }
     
@@ -100,7 +113,20 @@ export const ChatWindow = ({
     if (message.artifactId) {
       const artifact = artifactMappings.directIdMap.get(message.artifactId);
       if (artifact) {
+        console.log('✅ ARTIFACT ICON: Found artifact via direct ID:', {
+          messageId: message.id,
+          artifactId: message.artifactId,
+          artifactTitle: artifact.title,
+          artifactContentLength: artifact.content?.length,
+          artifactVersion: artifact.metadata?.version
+        });
         return artifact;
+      } else {
+        console.log('⚠️ ARTIFACT ICON: Message has artifactId but artifact not found in map:', {
+          messageId: message.id,
+          artifactId: message.artifactId,
+          availableArtifacts: Array.from(artifactMappings.directIdMap.keys())
+        });
       }
     }
     
@@ -226,8 +252,8 @@ export const ChatWindow = ({
         console.log('📋 Using template:', selectedTemplate.name);
       }
       
-      // Send the message
-      onSendMessage(messageToSend);
+      // Send the message with template information
+      onSendMessage(messageToSend, selectedTemplate);
       setInput('');
     }
   };
@@ -351,7 +377,7 @@ export const ChatWindow = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
               {[
                 "Generate a solution guide for integrating Plaid Link web SDK with products auth and identity",
-                "Generate a solution guide with implementing CRA base report. Include a mermaid sequence diagram for all API calls",
+                "Generate a solution guide with implementing Consumer Report base report. Include a mermaid sequence diagram for all API calls",
                 "Generate a solution guide the integrating Plaid Transfers. Include a sequence diagram for all API calls including sweeping funds",
                 "List and describe all the fields in the transactions object returned by the transactions/sync product"
               ].map((suggestion, i) => (
@@ -373,8 +399,34 @@ export const ChatWindow = ({
         ) : (
           <>
             {messages.map((message, index) => {
-              // Find artifact for this message
+              // CRITICAL: Find artifact for this message to display artifact icon
+              // This is essential for showing artifact icons in chat messages
               const messageArtifact = getMessageArtifact(message, index);
+              
+              // CRITICAL: Debug logging for artifact icon visibility - DO NOT REMOVE
+              // This helps identify when artifact icons are missing
+              if (message.role === 'assistant' && message.content?.length > 300) {
+                console.log('🔍 ARTIFACT ICON: Checking message for artifact:', {
+                  messageId: message.id,
+                  hasArtifactId: !!message.artifactId,
+                  artifactId: message.artifactId,
+                  foundArtifact: !!messageArtifact,
+                  artifactTitle: messageArtifact?.title,
+                  contentLength: message.content?.length,
+                  timestamp: message.timestamp,
+                  availableArtifacts: artifacts.length
+                });
+                
+                // CRITICAL: Alert if substantial message has no artifact
+                if (!messageArtifact && !message.loading && !message.streaming) {
+                  console.warn('⚠️ ARTIFACT ICON: Substantial assistant message missing artifact!', {
+                    messageId: message.id,
+                    contentLength: message.content?.length,
+                    messageTimestamp: message.timestamp,
+                    availableArtifacts: artifacts.map(a => ({ id: a.id, title: a.title, created: a.created_at }))
+                  });
+                }
+              }
               
               // Use HighlightableMessage for assistant responses with substantial content
               if (message.role === 'assistant' && message.content && message.content.length > 200) {
@@ -392,10 +444,16 @@ export const ChatWindow = ({
                       recentChanges={messageChanges}
                       onViewArtifact={onViewArtifact}
                       onDismissChange={onDismissChange}
-                      // Removed: onCreateArtifact and onMergeWithArtifact buttons
-                      // Removed: hasExistingArtifacts prop
+                      onCreateArtifact={() => handleSaveAsArtifact(message.content)}
+                      onMergeWithArtifact={() => handleMergeWithArtifact(message.content)}
+                      hasExistingArtifacts={hasExistingArtifacts}
                     />
-                    {/* Claude Desktop style artifact icon */}
+                    {/* ======================================================= */}
+                    {/* CRITICAL SECTION: ARTIFACT ICON DISPLAY - DO NOT REMOVE */}
+                    {/* ======================================================= */}
+                    {/* This displays the artifact icon after HighlightableMessage components */}
+                    {/* Removing this will break artifact icon functionality completely */}
+                    {/* This code is ESSENTIAL for showing artifact icons in chat */}
                     {messageArtifact && (
                       <ArtifactIcon
                         artifact={messageArtifact}
@@ -405,6 +463,9 @@ export const ChatWindow = ({
                         isArtifactPanelOpen={artifactPanelOpen && selectedArtifact?.id === messageArtifact.id}
                       />
                     )}
+                    {/* ======================================================= */}
+                    {/* END CRITICAL SECTION: ARTIFACT ICON DISPLAY */}
+                    {/* ======================================================= */}
                   </div>
                 );
               }
@@ -415,10 +476,16 @@ export const ChatWindow = ({
                   <Message 
                     message={message} 
                     markdownComponents={components}
-                    // Removed: onCreateArtifact and onMergeWithArtifact buttons
-                    // Removed: hasExistingArtifacts prop
+                    onCreateArtifact={() => handleSaveAsArtifact(message.content)}
+                    onMergeWithArtifact={() => handleMergeWithArtifact(message.content)}
+                    hasExistingArtifacts={hasExistingArtifacts}
                   />
-                  {/* Show artifact icon for any message that generated an artifact */}
+                  {/* ======================================================= */}
+                  {/* CRITICAL SECTION: ARTIFACT ICON DISPLAY - DO NOT REMOVE */}
+                  {/* ======================================================= */}
+                  {/* This displays the artifact icon after regular Message components */}
+                  {/* Removing this will break artifact icon functionality completely */}
+                  {/* This code is ESSENTIAL for showing artifact icons in chat */}
                   {messageArtifact && (
                     <ArtifactIcon
                       artifact={messageArtifact}
@@ -428,6 +495,9 @@ export const ChatWindow = ({
                       isArtifactPanelOpen={artifactPanelOpen && selectedArtifact?.id === messageArtifact.id}
                     />
                   )}
+                  {/* ======================================================= */}
+                  {/* END CRITICAL SECTION: ARTIFACT ICON DISPLAY */}
+                  {/* ======================================================= */}
                 </div>
               );
             })}
@@ -526,7 +596,10 @@ export const ChatWindow = ({
           </div>
         </form>
         <div className="text-xs text-gray-500 mt-2 text-center">
-          Claude AI is connected to Plaid documentation via AskBill
+          {selectedTemplate 
+            ? `📋 Using Template: ${selectedTemplate.name}`
+            : 'Claude AI is connected to Plaid documentation via AskBill'
+          }
         </div>
       </div>
     </div>

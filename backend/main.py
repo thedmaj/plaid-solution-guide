@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, HTTPException, Depends, BackgroundTasks, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -41,7 +41,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger("plaid-guide-app")
@@ -189,10 +189,14 @@ class DownloadRequest(BaseModel):
 
 class ChatSessionResponse(BaseModel):
     id: str
+    title: str
+    mode: str
     timestamp: str
 
 class ChatSessionListItem(BaseModel):
     id: str
+    title: str
+    mode: str
     preview: str
     timestamp: str
     message_count: int
@@ -200,6 +204,9 @@ class ChatSessionListItem(BaseModel):
 class ChatSessionUpdate(BaseModel):
     title: Optional[str] = None
     mode: Optional[str] = None
+
+class ChatSessionCreate(BaseModel):
+    mode: Optional[str] = "solution_guide"
 
 class AIMergeRequest(BaseModel):
     existing_content: str
@@ -233,20 +240,24 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 async def query_mcp_server(question: str):
     """Query the AskBill MCP server for documentation."""
+    logger.info(f"🔍 DEBUG: query_mcp_server called with question: {question}")
+    logger.info(f"🔍 DEBUG: ask_bill_client in query_mcp_server is None? {ask_bill_client is None}")
+    
     if ask_bill_client is None:
-        logger.warning("AskBill client not available")
+        logger.warning("AskBill client not available in query_mcp_server")
         return {
             "answer": "Documentation service is currently unavailable.",
             "sources": []
         }
         
     try:
+        logger.info(f"🔍 DEBUG: About to call ask_bill_client.ask_question")
         logger.info(f"Querying MCP server with question: {question}")
         response = await ask_bill_client.ask_question(question)
-        logger.info("Received response from MCP server")
+        logger.info(f"🔍 DEBUG: Received response from MCP server: {response}")
         return response
     except Exception as e:
-        logger.error(f"Error querying MCP server: {e}")
+        logger.error(f"Error querying MCP server: {e}", exc_info=True)
         return {
             "answer": "Error accessing documentation service.",
             "sources": []
@@ -277,8 +288,8 @@ async def query_claude(messages: List[Dict[str, Any]], system_prompt: str = None
             model=model_name,
             system=system_prompt,
             messages=[{
-                "role": "user" if msg["role"] == "user" else "assistant",
-                "content": msg["content"]
+                "role": "user" if (hasattr(msg, 'role') and msg.role == "user") or (isinstance(msg, dict) and msg.get("role") == "user") else "assistant",
+                "content": msg.content if hasattr(msg, 'content') else msg.get("content", "")
             } for msg in messages],
             temperature=app.state.claude_config.get("temperature", 0.3),
             max_tokens=4000
@@ -294,6 +305,83 @@ async def query_claude(messages: List[Dict[str, Any]], system_prompt: str = None
     except Exception as e:
         logger.error(f"Claude API error: {e}", exc_info=True)
         raise
+
+async def query_claude_stream(messages: List[Dict[str, Any]], system_prompt: str = None):
+    """Stream responses from Claude API."""
+    try:
+        logger.info("Starting Claude API stream")
+        
+        if system_prompt is None:
+            system_prompt = app.state.claude_config.get(
+                "system_prompt", 
+                "You are Claude, an AI assistant specialized in Plaid documentation."
+            )
+        
+        model_name = "claude-3-7-sonnet-20250219"
+        
+        # Check if client is available
+        if not app.state.anthropic_client:
+            logger.error("Anthropic client not available")
+            yield {"error": "Claude API not available"}
+            return
+        
+        # Create streaming request to Claude
+        logger.info(f"Starting Claude stream with model: {model_name}")
+        
+        # Format messages properly for the API
+        formatted_messages = []
+        for msg in messages:
+            # Handle both dict and object types safely
+            if hasattr(msg, 'role'):
+                # Object with attributes
+                role = getattr(msg, 'role', 'user')
+                content = str(getattr(msg, 'content', ''))
+            elif isinstance(msg, dict):
+                # Dictionary
+                role = msg.get("role", "user")
+                content = str(msg.get("content", ""))
+            else:
+                # Fallback - convert to string and treat as user message
+                logger.warning(f"Unexpected message type: {type(msg)}")
+                role = "user"
+                content = str(msg)
+            
+            formatted_messages.append({
+                "role": "user" if role == "user" else "assistant",
+                "content": content
+            })
+        
+        logger.info(f"Formatted {len(formatted_messages)} messages for streaming")
+        
+        try:
+            logger.info("🚀 Starting Claude streaming request")
+            chunk_count = 0
+            total_content = ""
+            
+            with app.state.anthropic_client.messages.stream(
+                model=model_name,
+                system=system_prompt,
+                messages=formatted_messages,
+                temperature=app.state.claude_config.get("temperature", 0.3),
+                max_tokens=4000
+            ) as stream:
+                logger.info("✅ Claude stream connection established")
+                for text in stream.text_stream:
+                    if text:  # Only yield non-empty text
+                        chunk_count += 1
+                        total_content += text
+                        logger.debug(f"📝 Chunk {chunk_count}: {repr(text[:50])}")
+                        yield {"content": text}
+                        
+            logger.info(f"🏁 Claude streaming completed. Total chunks: {chunk_count}, Total length: {len(total_content)}")
+            
+        except Exception as streaming_error:
+            logger.error(f"❌ Error in Claude streaming loop: {streaming_error}", exc_info=True)
+            yield {"error": f"Streaming error: {str(streaming_error)}"}
+                
+    except Exception as e:
+        logger.error(f"Claude streaming API error: {e}", exc_info=True)
+        yield {"error": str(e)}
 
 # API endpoints
 @app.get("/", response_class=HTMLResponse)
@@ -332,6 +420,153 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks, user: Us
         }
     except Exception as e:
         logger.error(f"Error processing chat request: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """Stream chat responses using Server-Sent Events"""
+    try:
+        logger.info(f"Starting chat stream")
+        
+        # Step 1: Query AskBill for current Plaid documentation
+        askbill_response = ""
+        logger.info(f"🔍 DEBUG: ask_bill_client is None? {ask_bill_client is None}")
+        logger.info(f"🔍 DEBUG: ask_bill_client type: {type(ask_bill_client)}")
+        
+        if ask_bill_client is not None:
+            try:
+                logger.info(f"🔍 Step 1: Querying AskBill with user message: {request.message}")
+                logger.info(f"🔍 DEBUG: About to call query_mcp_server")
+                
+                askbill_result = await asyncio.wait_for(
+                    query_mcp_server(request.message), 
+                    timeout=15.0
+                )
+                
+                logger.info(f"🔍 DEBUG: askbill_result = {askbill_result}")
+                
+                if askbill_result and askbill_result.get("answer"):
+                    askbill_response = askbill_result["answer"]
+                    logger.info(f"✅ Step 1 Complete: Retrieved {len(askbill_response)} chars from AskBill")
+                else:
+                    logger.warning("⚠️ No response from AskBill")
+                    
+            except asyncio.TimeoutError:
+                logger.warning("⏱️ AskBill query timed out")
+            except Exception as e:
+                logger.error(f"❌ Error querying AskBill: {e}", exc_info=True)
+        else:
+            logger.warning("⚠️ AskBill client not available")
+        
+        # Step 2: Prepare enhanced message for Claude
+        messages = []
+        if hasattr(request, 'previous_messages') and request.previous_messages:
+            messages.extend(request.previous_messages)
+        
+        # Create enhanced message combining user request + AskBill documentation
+        if askbill_response:
+            enhanced_message = f"""USER REQUEST: {request.message}
+
+PLAID DOCUMENTATION CONTEXT (from AskBill):
+{askbill_response}
+
+TASK: Using the above Plaid documentation, create a comprehensive solution guide that addresses the user's request. Format it properly with headers, code examples, API details, and implementation steps."""
+        else:
+            enhanced_message = f"""USER REQUEST: {request.message}
+
+TASK: Create a comprehensive solution guide for the above request using your knowledge of Plaid APIs and best practices."""
+        
+        messages.append({
+            "role": "user", 
+            "content": enhanced_message
+        })
+        
+        # Get system prompt based on mode
+        system_prompt = None
+        if hasattr(request, 'mode'):
+            if request.mode == "solution_guide":
+                # System prompt for enhancing AskBill responses into solution guides
+                system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
+
+ROLE: You receive current Plaid documentation from AskBill service and transform it into comprehensive, well-formatted solution guides.
+
+PROCESS:
+1. You will receive USER REQUEST + PLAID DOCUMENTATION CONTEXT from AskBill
+2. Transform the raw documentation into a professional solution guide format
+3. Add implementation guidance, code examples, and best practices
+
+OUTPUT REQUIREMENTS:
+- Create structured markdown with clear headers and sections
+- Include complete API endpoints and request/response examples  
+- Add step-by-step implementation instructions
+- Generate Mermaid sequence diagrams showing API call flows
+- Provide error handling guidance and best practices
+- Include real, working code examples
+- Format for Sales Engineer presentation to customers
+
+Do NOT just reformat the documentation - enhance it with practical implementation guidance.
+
+GUIDELINES:
+
+1. SOLUTION GUIDE CREATION:
+   - Generate clear, structured markdown documents
+   - Always insert a blank line before and after markdown tables to ensure correct rendering
+   - Include sample API requests using CURL syntax unless instructed otherwise
+   - Include relevant hyperlinks for each API call to https://plaid.com/docs/
+   - Format guides with clear sections, headers, and bullet points
+   - Always address specific use cases and include implementation steps
+   - Create a Mermaid sequence diagram showing the flow of API calls and user interactions
+   - For sequence diagrams, include:
+     * User interactions (e.g., Plaid Link flow)
+     * API calls between your server and Plaid
+     * Data flow and transformations
+     * Error handling paths
+     * Success paths
+
+2. API DOCUMENTATION FORMAT:
+   - List APIs in a simple format: 'API Name: /endpoint/url'
+   - Group related APIs together
+   - Include brief description of each API's purpose
+
+3. GETTING STARTED GUIDE:
+   - Always include a 'Getting Started' section with:
+     * Steps to create a free Plaid Developer Dashboard account
+     * Link to download the official Postman collection
+     * Links to quick start apps on GitHub
+     * Other essential resources
+
+4. TECHNICAL ACCURACY:
+   - Be precise with API endpoints, parameters, and response formats
+   - Reference current Plaid API practices
+   - Use realistic examples and sample data
+
+5. AUDIENCE AWARENESS:
+   - Your primary audience is Sales Engineers at Plaid
+   - They will use your guidance to help customers implement Plaid products
+   - Secondary audiences include developers and technical decision-makers
+
+Remember: Create complete, comprehensive solution guides based on your knowledge of Plaid's APIs and best practices."""
+                
+        # Step 3: Get complete response from Claude (no streaming)
+        logger.info("🔄 Querying Claude with enhanced message")
+        
+        claude_response = await query_claude(messages, system_prompt)
+        
+        if claude_response.get("error"):
+            logger.error(f"❌ Claude API error: {claude_response['error']}")
+            raise HTTPException(status_code=500, detail=f"Claude API error: {claude_response['error']}")
+        
+        full_response = claude_response.get("completion", "")
+        logger.info(f"✅ Received complete response: {len(full_response)} characters")
+        
+        return {
+            "response": full_response,
+            "askbill_used": bool(askbill_response),
+            "askbill_length": len(askbill_response) if askbill_response else 0
+        }
+        
+    except Exception as e:
+        logger.error(f"Error setting up chat stream: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/artifacts")
@@ -809,23 +1044,46 @@ async def list_chat_sessions(user: User = Depends(get_current_user)):
         for session_id in os.listdir(sessions_path):
             session_path = os.path.join(sessions_path, session_id)
             if os.path.isdir(session_path):
-                # Get the first message to use as preview
+                # Try to read metadata first
+                metadata_path = os.path.join(session_path, "metadata.json")
+                session_data = {
+                    'id': session_id,
+                    'title': 'New conversation',
+                    'mode': 'solution_guide',
+                    'timestamp': '',
+                    'preview': '',
+                    'message_count': 0
+                }
+                
+                if os.path.exists(metadata_path):
+                    try:
+                        with open(metadata_path, 'r') as f:
+                            metadata = json.load(f)
+                            session_data.update(metadata)
+                    except Exception as e:
+                        logger.warning(f"Failed to read metadata for session {session_id}: {e}")
+                
+                # Get messages for preview and count
                 messages = []
                 for msg_file in os.listdir(session_path):
-                    if msg_file.endswith('.json'):
-                        with open(os.path.join(session_path, msg_file), 'r') as f:
-                            messages.append(json.load(f))
+                    if msg_file.endswith('.json') and msg_file != 'metadata.json':
+                        try:
+                            with open(os.path.join(session_path, msg_file), 'r') as f:
+                                messages.append(json.load(f))
+                        except Exception as e:
+                            logger.warning(f"Failed to read message file {msg_file}: {e}")
                 
                 if messages:
                     # Sort messages by timestamp
                     messages.sort(key=lambda x: x.get('timestamp', ''))
                     first_message = messages[0]
-                    sessions.append({
-                        'id': session_id,
+                    session_data.update({
                         'preview': first_message.get('content', '')[:100],
-                        'timestamp': first_message.get('timestamp'),
+                        'timestamp': first_message.get('timestamp', session_data['timestamp']),
                         'message_count': len(messages)
                     })
+                
+                sessions.append(session_data)
         
         # Sort sessions by timestamp (newest first)
         sessions.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
@@ -857,16 +1115,31 @@ async def get_chat_session(session_id: str, user: User = Depends(get_current_use
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/chat/sessions", response_model=ChatSessionResponse)
-async def create_chat_session(user: User = Depends(get_current_user)):
+async def create_chat_session(
+    request: ChatSessionCreate = ChatSessionCreate(),
+    user: User = Depends(get_current_user)
+):
     try:
         session_id = str(uuid.uuid4())
         session_path = f"data/sessions/{user.id}/{session_id}"
         os.makedirs(session_path, exist_ok=True)
         
-        return {
+        # Get mode from request, default to solution_guide
+        mode = request.mode
+        
+        # Save session metadata
+        session_metadata = {
             "id": session_id,
-            "timestamp": datetime.utcnow().isoformat()
+            "title": "New conversation",
+            "mode": mode,
+            "timestamp": datetime.utcnow().isoformat(),
+            "user_id": user.id
         }
+        
+        with open(f"{session_path}/metadata.json", "w") as f:
+            json.dump(session_metadata, f)
+        
+        return session_metadata
     except Exception as e:
         logger.error(f"Error creating chat session: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -953,6 +1226,15 @@ CRITICAL REQUIREMENTS:
 - Include the full document, not summaries or partial content
 - Preserve exact formatting, headers, tables, and code blocks
 
+ANTI-TRUNCATION RULES:
+- NEVER truncate any content in a merge
+- NEVER use phrases like "[Previous content remains unchanged through X section]"
+- NEVER use phrases like "[Remaining content remains unchanged from Y through Z section]"
+- NEVER reference previous sections with "as mentioned above" or "in the previous section"
+- ALWAYS include complete sections in their entirety
+- If you need to reference unchanged sections, include them fully in the output
+- The merged document must be completely standalone and self-contained
+
 Guidelines:
 1. Preserve the structure and style of the existing content
 2. Integrate new information seamlessly without duplication  
@@ -961,8 +1243,9 @@ Guidelines:
 5. Maintain markdown formatting and code blocks
 6. Remove any conversational or instructional text from the new content
 7. If the new content describes where something should be placed, actually place it there
+8. Include ALL sections completely - never use truncation references
 
-RETURN FORMAT: Start immediately with the merged document content. No preamble."""
+RETURN FORMAT: Start immediately with the merged document content. No preamble. Include the complete document."""
         
         # Prepare the user message
         user_message = f"""EXISTING CONTENT:

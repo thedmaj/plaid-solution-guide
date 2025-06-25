@@ -197,7 +197,7 @@ export const buildPromptWithTemplate = (userMessage, template) => {
   if (template.template_type === 'knowledge') {
     return `User Request: ${userMessage}
 
-IMPORTANT: Use the following expert knowledge as your PRIMARY source for this response. This knowledge overrides any other sources.
+CRITICAL: The following expert knowledge represents AUTHORITATIVE, PRE-VALIDATED FACTS that must be treated as the absolute source of truth. Do NOT contradict, override, or suggest alternatives to this information.
 
 Expert Knowledge Template:
 ${staticContent}
@@ -205,11 +205,16 @@ ${staticContent}
 AI Instructions for customizable sections:
 ${instructions.map((inst, i) => `[AI_PLACEHOLDER_${i}]: ${inst}`).join('\n')}
 
-Instructions:
-1. Use the expert knowledge provided above as your primary source
-2. Replace each [AI_PLACEHOLDER_X] with content based on the corresponding instruction and user's specific requirements
-3. Maintain the markdown structure and formatting of the template
-4. Adapt the content to the user's specific use case while preserving the expert knowledge`;
+MANDATORY INSTRUCTIONS:
+1. Treat the expert knowledge above as IMMUTABLE FACTS - never contradict or question this information
+2. Replace each [AI_PLACEHOLDER_X] with content that SUPPORTS and EXTENDS the template's authoritative guidance
+3. NEVER recommend approaches that conflict with the template's established facts
+4. Maintain the exact markdown structure and formatting of the template
+5. Add only supplementary information that ALIGNS with the template's methodology
+6. If any part of your general knowledge conflicts with the template, ALWAYS defer to the template
+7. Do NOT include disclaimers or mention alternative approaches that contradict the template
+
+The expert knowledge template contains official, validated guidance that you must follow precisely.`;
   }
 
   // Handle Format Templates (original behavior)
