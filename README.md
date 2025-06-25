@@ -43,12 +43,25 @@ The Plaid Solution Guide Generator is an intelligent assistant that helps Sales 
 graph TD
     A[User Request] --> B{Template Selected?}
     B -->|Knowledge Template| C[Use Expert Knowledge]
+    B -->|Format Template| K[Apply Format Structure]
     B -->|No Template| D[Query AskBill MCP]
+    
     D --> E[Get Latest Plaid Docs]
     E --> F[Send to Claude AI]
+    
     C --> G[Send to Claude AI]
+    
+    K --> L{Default System Template?}
+    L -->|Yes - Solution Guide| M[Override with Format Template Structure]
+    L -->|Other Format| N[Apply Format Template]
+    M --> O[Query AskBill for Content]
+    N --> O
+    O --> P[Send Formatted Content to Claude AI]
+    
     F --> H[Generate Solution Guide]
     G --> H
+    P --> H
+    
     H --> I[Create/Update Artifact]
     I --> J[Display in Interface]
 ```
