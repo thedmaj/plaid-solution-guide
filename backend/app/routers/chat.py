@@ -19,7 +19,7 @@ from ..schemas.chat import (
     ChatMessageResponse,
     ChatResponse
 )
-from ..utils.claude import query_claude
+from ..utils.openai import query_openai
 from ..utils.title_generator import generate_session_title
 
 # Import models from main.py for the stream endpoint
@@ -315,7 +315,7 @@ async def send_message(
         else:
             logger.info("No previous messages found")
         
-        # Prepare the conversation history for Claude
+        # Prepare the conversation history for OpenAI
         conversation_history = []
         if message.previous_messages:
             conversation_history = [
@@ -336,24 +336,24 @@ async def send_message(
         
         logger.info(f"Prepared conversation history with {len(conversation_history)} messages")
         
-        # Load Claude configuration
+        # Load OpenAI configuration
         try:
-            config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'claude_config.json')
+            config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'openai_config.json')
             with open(config_path, 'r') as f:
-                claude_config = json.load(f)
-            system_prompt = claude_config.get("system_prompt")
+                openai_config = json.load(f)
+            system_prompt = openai_config.get("system_prompt")
         except Exception as e:
-            logger.error(f"Error loading Claude config: {str(e)}")
+            logger.error(f"Error loading OpenAI config: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="AI service configuration error"
             )
         
-        # Query Claude with the conversation history and system prompt
-        claude_response = await query_claude(conversation_history, system_prompt)
-        response_content = claude_response.get("completion", "")
+        # Query OpenAI with the conversation history and system prompt
+        openai_response = await query_openai(conversation_history, system_prompt)
+        response_content = openai_response.get("completion", "")
         
-        logger.info(f"Received Claude response: {response_content[:100]}...")
+        logger.info(f"Received OpenAI response: {response_content[:100]}...")
         
         assistant_message = ChatMessage(
             session_id=message.session_id,
@@ -438,7 +438,7 @@ async def chat_stream(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Stream chat responses using AskBill + Claude enhancement or Knowledge Templates"""
+    """Stream chat responses using AskBill + OpenAI enhancement or Knowledge Templates"""
     try:
         logger.info(f"Starting chat stream for session {request.session_id}")
         
@@ -517,7 +517,7 @@ async def chat_stream(
         else:
             logger.warning("⚠️ AskBill client not available")
         
-        # Step 2: Prepare enhanced message for Claude
+        # Step 2: Prepare enhanced message for OpenAI
         messages = []
         if hasattr(request, 'previous_messages') and request.previous_messages:
             messages.extend([{
@@ -531,7 +531,7 @@ async def chat_stream(
             enhanced_message = request.message
             logger.info("🧠 Using Knowledge Template: Message used as-is")
         elif askbill_response:
-            # Standard AskBill + Claude flow
+            # Standard AskBill + OpenAI flow
             enhanced_message = f"""USER REQUEST: {request.message}
 
 PLAID DOCUMENTATION CONTEXT (from AskBill):
@@ -549,22 +549,22 @@ TASK: Create a comprehensive solution guide for the above request using your kno
             "content": enhanced_message
         })
         
-        # Step 3: Get complete response from Claude 
-        logger.info("🔄 Querying Claude with enhanced message")
+        # Step 3: Get complete response from OpenAI 
+        logger.info("🔄 Querying OpenAI with enhanced message")
         
         # Load and customize system prompt based on template type
         try:
-            config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'claude_config.json')
+            config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'openai_config.json')
             with open(config_path, 'r') as f:
-                claude_config = json.load(f)
-            base_system_prompt = claude_config.get("system_prompt")
+                openai_config = json.load(f)
+            base_system_prompt = openai_config.get("system_prompt")
         except Exception as e:
-            logger.error(f"Error loading Claude config: {str(e)}")
+            logger.error(f"Error loading OpenAI config: {str(e)}")
             base_system_prompt = None
 
         if is_knowledge_template:
             # For Knowledge Templates, use a specialized system prompt
-            system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
+            system_prompt = """You are an AI specialized in creating professional solution guides for Plaid Sales Engineers.
 
 CRITICAL: You are responding to a user request that uses a Knowledge Template. The template contains EXPERT KNOWLEDGE that represents AUTHORITATIVE, PRE-VALIDATED FACTS and must be treated as the absolute source of truth.
 
@@ -607,7 +607,7 @@ REMEMBER: You are enhancing expert knowledge with your Plaid expertise, not repl
             if base_system_prompt:
                 system_prompt = base_system_prompt
             else:
-                system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
+                system_prompt = """You are an AI specialized in creating professional solution guides for Plaid Sales Engineers.
 
 ROLE: You receive current Plaid documentation from AskBill service and transform it into comprehensive, well-formatted solution guides.
 
@@ -627,13 +627,13 @@ OUTPUT REQUIREMENTS:
 
 Do NOT just reformat the documentation - enhance it with practical implementation guidance."""
         
-        claude_response = await query_claude(messages, system_prompt)
+        openai_response = await query_openai(messages, system_prompt)
         
-        if claude_response.get("error"):
-            logger.error(f"❌ Claude API error: {claude_response['error']}")
-            raise HTTPException(status_code=500, detail=f"Claude API error: {claude_response['error']}")
+        if openai_response.get("error"):
+            logger.error(f"❌ OpenAI API error: {openai_response['error']}")
+            raise HTTPException(status_code=500, detail=f"OpenAI API error: {openai_response['error']}")
         
-        full_response = claude_response.get("completion", "")
+        full_response = openai_response.get("completion", "")
         logger.info(f"✅ Received complete response: {len(full_response)} characters")
         
         # Create assistant message
