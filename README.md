@@ -43,12 +43,25 @@ The Plaid Solution Guide Generator is an intelligent assistant that helps Sales 
 graph TD
     A[User Request] --> B{Template Selected?}
     B -->|Knowledge Template| C[Use Expert Knowledge]
+    B -->|Format Template| K[Apply Format Structure]
     B -->|No Template| D[Query AskBill MCP]
+    
     D --> E[Get Latest Plaid Docs]
     E --> F[Send to Claude AI]
+    
     C --> G[Send to Claude AI]
+    
+    K --> L{Default System Template?}
+    L -->|Yes - Solution Guide| M[Override with Format Template Structure]
+    L -->|Other Format| N[Apply Format Template]
+    M --> O[Query AskBill for Content]
+    N --> O
+    O --> P[Send Formatted Content to Claude AI]
+    
     F --> H[Generate Solution Guide]
     G --> H
+    P --> H
+    
     H --> I[Create/Update Artifact]
     I --> J[Display in Interface]
 ```
@@ -171,7 +184,40 @@ graph TD
 
 ### 🚀 Quick Install Script
 
-Save this script as `install-plaid-guide.sh` and run it:
+The installation script is included in the repository. To run it:
+
+```bash
+# Make the script executable (if needed)
+chmod +x install-plaid-guide.sh
+
+# Run the installation script
+./install-plaid-guide.sh
+```
+
+The script will automatically install all dependencies including:
+
+**Backend Dependencies:**
+- **SQLAlchemy** - Database operations and ORM
+- **FastAPI & Uvicorn** - Modern web framework and ASGI server
+- **python-jose & cryptography** - JWT authentication and security
+- **passlib & bcrypt** - Password hashing and verification
+- **anthropic** - Claude AI client library
+- **httpx & aiohttp** - HTTP clients for API calls
+- **python-dotenv** - Environment variable management
+- **pydantic** - Data validation and settings management
+- **python-multipart** - File upload support
+- **markdown** - For processing markdown content
+- **PyJWT** - For JWT token handling
+- **websockets** - For WebSocket communication
+- **jinja2** - For HTML templating
+
+**Frontend Dependencies:**
+- **React 18+** - Modern UI framework
+- **React Query** - Server state management
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Beautiful icons
+
+### Installation Script Example:
 
 ```bash
 #!/bin/bash
