@@ -71,7 +71,7 @@ export const HighlightingGuide = ({ renderAsHeaderButton = false }) => {
       </div>
       
       <p className="text-sm text-gray-600 mb-3">
-        Select text in Claude's responses to get contextual assistance:
+        Select text in Assistant's responses to get contextual assistance:
       </p>
 
       <div className="space-y-2">
@@ -90,7 +90,7 @@ export const HighlightingGuide = ({ renderAsHeaderButton = false }) => {
 
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs text-gray-500">
-            💡 Tip: Highlight any part of Claude's solution guides to ask follow-up questions or request modifications.
+            💡 Tip: Highlight any part of Assistant's solution guides to ask follow-up questions or request modifications.
           </p>
         </div>
       </div>

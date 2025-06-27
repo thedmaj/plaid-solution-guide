@@ -16,7 +16,7 @@ import markdown
 import pypandoc
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
-import anthropic
+import openai
 from app.auth import (
     verify_password, 
     create_access_token, 
@@ -96,30 +96,30 @@ async def lifespan(app: FastAPI):
         os.makedirs(directory, exist_ok=True)
         logger.info(f"Ensured directory exists: {directory}")
     
-    # Load Claude configuration
+    # Load OpenAI configuration
     try:
-        with open("claude_config.json", "r") as f:
-            app.state.claude_config = json.load(f)
+        with open("openai_config.json", "r") as f:
+            app.state.openai_config = json.load(f)
     except FileNotFoundError:
-        logger.warning("claude_config.json not found, using default configuration")
-        app.state.claude_config = {
-            "system_prompt": "You are Claude, an AI assistant specialized in Plaid documentation.",
+        logger.warning("openai_config.json not found, using default configuration")
+        app.state.openai_config = {
+            "system_prompt": "You are an AI assistant specialized in Plaid documentation.",
             "temperature": 0.3
         }
     
-    # Initialize Anthropic client
+    # Initialize OpenAI client
     try:
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            logger.error("ANTHROPIC_API_KEY environment variable not set")
-            raise ValueError("ANTHROPIC_API_KEY is required")
+            logger.error("OPENAI_API_KEY environment variable not set")
+            raise ValueError("OPENAI_API_KEY is required")
         
-        app.state.anthropic_client = anthropic.Anthropic(api_key=api_key)
-        logger.info("Anthropic client initialized successfully")
+        app.state.openai_client = openai.OpenAI(api_key=api_key)
+        logger.info("OpenAI client initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize Anthropic client: {e}")
+        logger.error(f"Failed to initialize OpenAI client: {e}")
         # Create a dummy client for development
-        app.state.anthropic_client = None
+        app.state.openai_client = None
     
     logger.info("Application startup complete")
     yield
@@ -263,73 +263,97 @@ async def query_mcp_server(question: str):
             "sources": []
         }
 
-async def query_claude(messages: List[Dict[str, Any]], system_prompt: str = None):
-    """Query Claude API with the provided messages."""
+async def query_openai(messages: List[Dict[str, Any]], system_prompt: str = None):
+    """Query OpenAI API with the provided messages."""
     try:
-        logger.info("Querying Claude API")
+        logger.info("Querying OpenAI API")
         
         if system_prompt is None:
-            system_prompt = app.state.claude_config.get(
+            system_prompt = app.state.openai_config.get(
                 "system_prompt", 
-                "You are Claude, an AI assistant specialized in Plaid documentation."
+                "You are an AI assistant specialized in Plaid documentation."
             )
         
-        # Define the model name here
-        model_name = "claude-3-7-sonnet-20250219"  # or another available model
-        
         # Check if client is available
-        if not app.state.anthropic_client:
-            logger.error("Anthropic client not available")
-            return {"error": "Claude API not available"}
+        if not app.state.openai_client:
+            logger.error("OpenAI client not available")
+            return {"error": "OpenAI API not available"}
         
-        # Query Claude API with new messages format
-        logger.info(f"Sending request to Claude with model: {model_name}, system_prompt: {system_prompt}, messages: {messages}")
-        response = app.state.anthropic_client.messages.create(
+        # Format messages for OpenAI API
+        openai_messages = []
+        
+        # Add system prompt if provided
+        if system_prompt:
+            openai_messages.append({"role": "system", "content": system_prompt})
+        
+        # Convert messages to OpenAI format
+        for msg in messages:
+            if hasattr(msg, 'role'):
+                # Object with attributes
+                role = getattr(msg, 'role', 'user')
+                content = str(getattr(msg, 'content', ''))
+            elif isinstance(msg, dict):
+                # Dictionary
+                role = msg.get("role", "user")
+                content = str(msg.get("content", ""))
+            else:
+                # Fallback
+                role = "user"
+                content = str(msg)
+            
+            # Map roles appropriately
+            if role == "assistant":
+                openai_role = "assistant"
+            else:
+                openai_role = "user"
+                
+            openai_messages.append({"role": openai_role, "content": content})
+        
+        model_name = os.getenv("OPENAI_MODEL", "gpt-4")
+        max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "4000"))
+        temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.3"))
+        
+        logger.info(f"Sending request to OpenAI with model: {model_name}")
+        response = app.state.openai_client.chat.completions.create(
             model=model_name,
-            system=system_prompt,
-            messages=[{
-                "role": "user" if (hasattr(msg, 'role') and msg.role == "user") or (isinstance(msg, dict) and msg.get("role") == "user") else "assistant",
-                "content": msg.content if hasattr(msg, 'content') else msg.get("content", "")
-            } for msg in messages],
-            temperature=app.state.claude_config.get("temperature", 0.3),
-            max_tokens=4000
+            messages=openai_messages,
+            max_tokens=max_tokens,
+            temperature=temperature
         )
         
-        logger.info(f"Received response from Claude: {response}")
+        completion_content = response.choices[0].message.content
+        logger.info(f"Received response from OpenAI: {len(completion_content)} characters")
         
-        # response is a Message object from Claude
-        full_text = "".join([block.text for block in response.content if block.type == "text"])
-        
-        # Return only the full markdown text to the frontend
-        return {"completion": full_text}
+        return {"completion": completion_content}
     except Exception as e:
-        logger.error(f"Claude API error: {e}", exc_info=True)
+        logger.error(f"OpenAI API error: {e}", exc_info=True)
         raise
 
-async def query_claude_stream(messages: List[Dict[str, Any]], system_prompt: str = None):
-    """Stream responses from Claude API."""
+async def query_openai_stream(messages: List[Dict[str, Any]], system_prompt: str = None):
+    """Stream responses from OpenAI API."""
     try:
-        logger.info("Starting Claude API stream")
+        logger.info("Starting OpenAI API stream")
         
         if system_prompt is None:
-            system_prompt = app.state.claude_config.get(
+            system_prompt = app.state.openai_config.get(
                 "system_prompt", 
-                "You are Claude, an AI assistant specialized in Plaid documentation."
+                "You are an AI assistant specialized in Plaid documentation."
             )
         
-        model_name = "claude-3-7-sonnet-20250219"
-        
         # Check if client is available
-        if not app.state.anthropic_client:
-            logger.error("Anthropic client not available")
-            yield {"error": "Claude API not available"}
+        if not app.state.openai_client:
+            logger.error("OpenAI client not available")
+            yield {"error": "OpenAI API not available"}
             return
         
-        # Create streaming request to Claude
-        logger.info(f"Starting Claude stream with model: {model_name}")
+        # Format messages for OpenAI API
+        openai_messages = []
+        
+        # Add system prompt if provided
+        if system_prompt:
+            openai_messages.append({"role": "system", "content": system_prompt})
         
         # Format messages properly for the API
-        formatted_messages = []
         for msg in messages:
             # Handle both dict and object types safely
             if hasattr(msg, 'role'):
@@ -346,41 +370,50 @@ async def query_claude_stream(messages: List[Dict[str, Any]], system_prompt: str
                 role = "user"
                 content = str(msg)
             
-            formatted_messages.append({
-                "role": "user" if role == "user" else "assistant",
-                "content": content
-            })
+            # Map roles appropriately
+            if role == "assistant":
+                openai_role = "assistant"
+            else:
+                openai_role = "user"
+                
+            openai_messages.append({"role": openai_role, "content": content})
         
-        logger.info(f"Formatted {len(formatted_messages)} messages for streaming")
+        logger.info(f"Formatted {len(openai_messages)} messages for streaming")
         
         try:
-            logger.info("🚀 Starting Claude streaming request")
+            logger.info("🚀 Starting OpenAI streaming request")
             chunk_count = 0
             total_content = ""
             
-            with app.state.anthropic_client.messages.stream(
+            model_name = os.getenv("OPENAI_MODEL", "gpt-4")
+            max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "4000"))
+            temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.3"))
+            
+            stream = app.state.openai_client.chat.completions.create(
                 model=model_name,
-                system=system_prompt,
-                messages=formatted_messages,
-                temperature=app.state.claude_config.get("temperature", 0.3),
-                max_tokens=4000
-            ) as stream:
-                logger.info("✅ Claude stream connection established")
-                for text in stream.text_stream:
-                    if text:  # Only yield non-empty text
-                        chunk_count += 1
-                        total_content += text
-                        logger.debug(f"📝 Chunk {chunk_count}: {repr(text[:50])}")
-                        yield {"content": text}
+                messages=openai_messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                stream=True
+            )
+            
+            logger.info("✅ OpenAI stream connection established")
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    content = chunk.choices[0].delta.content
+                    chunk_count += 1
+                    total_content += content
+                    logger.debug(f"📝 Chunk {chunk_count}: {repr(content[:50])}")
+                    yield {"content": content}
                         
-            logger.info(f"🏁 Claude streaming completed. Total chunks: {chunk_count}, Total length: {len(total_content)}")
+            logger.info(f"🏁 OpenAI streaming completed. Total chunks: {chunk_count}, Total length: {len(total_content)}")
             
         except Exception as streaming_error:
-            logger.error(f"❌ Error in Claude streaming loop: {streaming_error}", exc_info=True)
+            logger.error(f"❌ Error in OpenAI streaming loop: {streaming_error}", exc_info=True)
             yield {"error": f"Streaming error: {str(streaming_error)}"}
                 
     except Exception as e:
-        logger.error(f"Claude streaming API error: {e}", exc_info=True)
+        logger.error(f"OpenAI streaming API error: {e}", exc_info=True)
         yield {"error": str(e)}
 
 # API endpoints
@@ -458,7 +491,7 @@ async def chat_stream(request: ChatRequest):
         else:
             logger.warning("⚠️ AskBill client not available")
         
-        # Step 2: Prepare enhanced message for Claude
+        # Step 2: Prepare enhanced message for OpenAI
         messages = []
         if hasattr(request, 'previous_messages') and request.previous_messages:
             messages.extend(request.previous_messages)
@@ -486,7 +519,7 @@ TASK: Create a comprehensive solution guide for the above request using your kno
         if hasattr(request, 'mode'):
             if request.mode == "solution_guide":
                 # System prompt for enhancing AskBill responses into solution guides
-                system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
+                system_prompt = """You are an AI specialized in creating professional solution guides for Plaid Sales Engineers.
 
 ROLE: You receive current Plaid documentation from AskBill service and transform it into comprehensive, well-formatted solution guides.
 
@@ -547,16 +580,16 @@ GUIDELINES:
 
 Remember: Create complete, comprehensive solution guides based on your knowledge of Plaid's APIs and best practices."""
                 
-        # Step 3: Get complete response from Claude (no streaming)
-        logger.info("🔄 Querying Claude with enhanced message")
+        # Step 3: Get complete response from OpenAI (no streaming)
+        logger.info("🔄 Querying OpenAI with enhanced message")
         
-        claude_response = await query_claude(messages, system_prompt)
+        openai_response = await query_openai(messages, system_prompt)
         
-        if claude_response.get("error"):
-            logger.error(f"❌ Claude API error: {claude_response['error']}")
-            raise HTTPException(status_code=500, detail=f"Claude API error: {claude_response['error']}")
+        if openai_response.get("error"):
+            logger.error(f"❌ OpenAI API error: {openai_response['error']}")
+            raise HTTPException(status_code=500, detail=f"OpenAI API error: {openai_response['error']}")
         
-        full_response = claude_response.get("completion", "")
+        full_response = openai_response.get("completion", "")
         logger.info(f"✅ Received complete response: {len(full_response)} characters")
         
         return {
@@ -1258,11 +1291,11 @@ NEW CONTENT TO MERGE:
 
 TASK: Merge the new content into the existing content following the system requirements. Return the complete merged document immediately without any explanations."""
         
-        # Query Claude for intelligent merge
-        from app.utils.claude import query_claude
+        # Query OpenAI for intelligent merge
+        from app.utils.openai import query_openai
         messages = [{"role": "user", "content": user_message}]
         
-        response = await query_claude(messages, system_prompt)
+        response = await query_openai(messages, system_prompt)
         merged_content = response.get("completion", "")
         
         return {
@@ -1310,11 +1343,11 @@ Return only the clean content without any conversational wrapper."""
 
 Return only the clean, substantive content."""
         
-        # Query Claude for text stripping
-        from app.utils.claude import query_claude
+        # Query OpenAI for text stripping
+        from app.utils.openai import query_openai
         messages = [{"role": "user", "content": user_message}]
         
-        response = await query_claude(messages, system_prompt)
+        response = await query_openai(messages, system_prompt)
         clean_content = response.get("completion", "")
         
         return {

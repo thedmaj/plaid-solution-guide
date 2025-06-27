@@ -28,7 +28,7 @@ export const Message = ({ message, onCreateArtifact, onMergeWithArtifact, markdo
           </div>
         ) : (
           <div className="bg-indigo-100 text-indigo-800 w-8 h-8 rounded-full flex items-center justify-center">
-            C
+            A
           </div>
         )}
       </div>
@@ -36,7 +36,7 @@ export const Message = ({ message, onCreateArtifact, onMergeWithArtifact, markdo
       <div className="flex-1 min-w-0">
         <div className="flex items-center mb-1">
           <div className="font-medium">
-            {message.role === 'user' ? message.sender || 'You' : 'Claude'}
+            {message.role === 'user' ? message.sender || 'You' : 'Assistant'}
           </div>
           <div className="ml-2 text-xs text-gray-500">
             {new Date(message.timestamp).toLocaleTimeString()}
