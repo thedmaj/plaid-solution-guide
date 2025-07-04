@@ -8,11 +8,6 @@ __pycache__/
 # Environment variables
 .env
 
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
 # Generated files
 temp/
 data/
