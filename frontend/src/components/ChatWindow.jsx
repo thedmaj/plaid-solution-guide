@@ -598,7 +598,7 @@ export const ChatWindow = ({
         <div className="text-xs text-gray-500 mt-2 text-center">
           {selectedTemplate 
             ? `📋 Using Template: ${selectedTemplate.name}`
-            : 'AI Assistant is connected to Plaid documentation via AskBill'
+            : 'Claude AI is connected to Plaid documentation via AskBill'
           }
         </div>
       </div>
