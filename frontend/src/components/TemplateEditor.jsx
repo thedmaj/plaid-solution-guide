@@ -175,7 +175,7 @@ const TemplateEditor = ({ isOpen, onClose, templateId = null }) => {
                 <button
                   onClick={handleSave}
                   disabled={saving || !formData.name.trim() || !formData.content.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium text-white bg-plaid-blue-600 border border-transparent rounded-md hover:bg-plaid-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Save Template'}
                 </button>

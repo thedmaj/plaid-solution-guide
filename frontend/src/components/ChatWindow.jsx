@@ -537,27 +537,46 @@ export const ChatWindow = ({
           />
           
           
-          {/* Merge Mode Selector */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <label htmlFor="merge-mode" className="text-sm font-medium text-gray-700">
-                Response Mode:
-              </label>
-              <select
-                id="merge-mode"
-                value={mergeMode}
-                onChange={(e) => onMergeModeChange?.(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="chat_only">Chat Only</option>
-                <option value="merge_response">Merge Response</option>
-              </select>
+          {/* Response Mode Toggle Selector */}
+          <div className="mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-gray-700">Response Mode:</span>
             </div>
-            <div className="text-xs text-gray-500">
-              {mergeMode === 'chat_only' ? 
-                'Responses stay in chat' : 
-                'Responses auto-merge to guide'
-              }
+            <div className="relative inline-flex bg-gray-100 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => onMergeModeChange?.('chat_only')}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
+                  mergeMode === 'chat_only'
+                    ? 'bg-white text-plaid-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Responses stay in the chat conversation"
+              >
+                Chat Only
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  Responses stay in chat
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-2 border-transparent border-t-gray-900"></div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => onMergeModeChange?.('merge_response')}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
+                  mergeMode === 'merge_response'
+                    ? 'bg-white text-plaid-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Responses automatically merge into the guide"
+              >
+                Auto-Merge
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  Responses auto-merge to guide
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-2 border-transparent border-t-gray-900"></div>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -569,7 +588,7 @@ export const ChatWindow = ({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={isMergingContent ? "AI is merging content..." : "Ask a question about Plaid..."}
                 disabled={isMergingContent}
-                className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition ${
+                className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-plaid-blue-500 focus:border-plaid-blue-500 outline-none resize-none transition ${
                   isMergingContent ? 'bg-gray-100 cursor-not-allowed' : ''
                 }`}
                 rows={1}
@@ -585,10 +604,10 @@ export const ChatWindow = ({
             <button
               type="submit"
               disabled={isLoading || isMergingContent || !input.trim()}
-              className={`p-3 rounded-lg ${
+              className={`p-3 rounded-lg h-[44px] flex items-center justify-center ${
                 isLoading || isMergingContent || !input.trim()
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-plaid-blue-600 text-white hover:bg-plaid-blue-700'
               } transition-colors`}
             >
               <SendIcon size={20} />

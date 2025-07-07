@@ -1390,7 +1390,13 @@ FIELD_ALIASES = {
     "name": "names",
     "email": "emails",
     "phone": "phone_numbers", 
-    "address": "addresses"
+    "address": "addresses",
+    # Common dotted field patterns
+    "latitude": "lat",
+    "longitude": "lon",
+    "postal": "postal_code",
+    "zip": "postal_code",
+    "state": "region"
 }
 
 # Keyword to product mapping
@@ -1433,13 +1439,19 @@ def find_field_url(field_name: str, product_hint: str = None, field_type: str = 
     Find the documentation URL for a specific field
     
     Args:
-        field_name: The field to look up (e.g., "routing", "account_id", "cursor")
+        field_name: The field to look up (e.g., "routing", "account_id", "cursor", "location.lat")
         product_hint: Optional product context (e.g., "auth", "transactions")
         field_type: Type of field - "request" or "response" (default: "response")
     
     Returns:
         Full URL to the field documentation
     """
+    # Handle dotted field references (e.g., "location.lat" -> "lat")
+    # Extract the last part for lookup while preserving original for fallback
+    original_field = field_name
+    if "." in field_name:
+        field_name = field_name.split(".")[-1]  # Get last part (e.g., "lat" from "location.lat")
+    
     # Normalize field name
     normalized_field = FIELD_ALIASES.get(field_name.lower(), field_name.lower())
     field_section = f"{field_type}_fields"
@@ -1471,6 +1483,21 @@ def find_field_url(field_name: str, product_hint: str = None, field_type: str = 
             anchor = config[other_field_type][normalized_field]
             return f"{config['base_url']}{anchor}"
     
+    # If dotted field wasn't found, try searching for the full original field name
+    if "." in original_field:
+        # Try exact match with original dotted field name
+        if product_hint and product_hint in PLAID_API_INDEX:
+            product_config = PLAID_API_INDEX[product_hint]
+            if original_field.lower() in product_config.get(field_section, {}):
+                anchor = product_config[field_section][original_field.lower()]
+                return f"{product_config['base_url']}{anchor}"
+        
+        # Search all products for original dotted field name
+        for product, config in PLAID_API_INDEX.items():
+            if original_field.lower() in config.get(field_section, {}):
+                anchor = config[field_section][original_field.lower()]
+                return f"{config['base_url']}{anchor}"
+    
     # If no specific field found, return base product URL or general docs
     if product_hint and product_hint in PLAID_API_INDEX:
         return PLAID_API_INDEX[product_hint]["base_url"]
@@ -1496,6 +1523,26 @@ def find_product_from_keywords(text: str) -> list:
     
     return list(relevant_products)
 
+def get_field_documentation_url(field_name: str, api_context: str = "transactions") -> str:
+    """
+    Convenience function to get documentation URL for any field, including dotted fields
+    
+    Args:
+        field_name: Field name (e.g., "location.lat", "amount", "personal_finance_category.primary")
+        api_context: API context for better lookup (default: "transactions")
+    
+    Returns:
+        Documentation URL for the field
+    
+    Examples:
+        get_field_documentation_url("location.lat") 
+        # Returns: https://plaid.com/docs/api/products/transactions/#transactions-sync-response-added-location-lat
+        
+        get_field_documentation_url("personal_finance_category.primary")
+        # Returns: https://plaid.com/docs/api/products/transactions/#transactions-sync-response-added-personal-finance-category-primary
+    """
+    return find_field_url(field_name, api_context, "response")
+
 # Usage examples for testing
 if __name__ == "__main__":
     # Test endpoint lookups
@@ -1513,6 +1560,14 @@ if __name__ == "__main__":
     
     # Test cross-field type lookup
     print(f"access_token (auto-detect): {find_field_url('access_token')}")
+    
+    # Test dotted field lookups (NEW!)
+    print("\nTesting dotted field lookups:")
+    print(f"location.lat (transactions): {find_field_url('location.lat', 'transactions', 'response')}")
+    print(f"location.lon (transactions): {find_field_url('location.lon', 'transactions', 'response')}")
+    print(f"location.address (transactions): {find_field_url('location.address', 'transactions', 'response')}")
+    print(f"personal_finance_category.primary (transactions): {find_field_url('personal_finance_category.primary', 'transactions', 'response')}")
+    print(f"personal_finance_category.detailed (transactions): {find_field_url('personal_finance_category.detailed', 'transactions', 'response')}")
     
     # Test keyword detection
     print(f"\nKeyword detection for 'routing number verification': {find_product_from_keywords('routing number verification')}")

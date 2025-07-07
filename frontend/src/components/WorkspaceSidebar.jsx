@@ -211,7 +211,7 @@ export const WorkspaceSidebar = ({
             <div className="p-4">
               <button
                 onClick={() => onCreateNewSession()}
-                className="w-full flex items-center gap-2 p-3 text-left bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                className="w-full flex items-center gap-2 p-3 text-left bg-plaid-blue-600 text-white rounded-lg hover:bg-plaid-blue-700 transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-plaid-blue-500 focus:ring-opacity-50"
               >
                 <PlusIcon size={16} className="text-white" />
                 <span className="text-white">New Chat</span>
@@ -225,7 +225,7 @@ export const WorkspaceSidebar = ({
                       key={session.id}
                       className={`group relative p-3 rounded-lg cursor-pointer transition-colors ${
                         isActive
-                          ? 'bg-blue-50 border border-blue-200'
+                          ? 'bg-plaid-blue-50 border border-plaid-blue-200'
                           : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
@@ -248,11 +248,11 @@ export const WorkspaceSidebar = ({
                       >
                         <MessageSquareIcon 
                           size={16} 
-                          className={isActive ? 'text-blue-600' : 'text-gray-500'} 
+                          className={isActive ? 'text-plaid-blue-600' : 'text-gray-500'} 
                         />
                         <div className="flex-1 min-w-0">
                           <div className={`text-sm font-medium truncate ${
-                            isActive ? 'text-blue-900' : 'text-gray-900'
+                            isActive ? 'text-plaid-blue-900' : 'text-gray-900'
                           }`}>
                             {session.title || 'New conversation'}
                           </div>
@@ -301,17 +301,17 @@ export const WorkspaceSidebar = ({
                       onClick={() => toggleWorkspaceExpansion(group.sessionId)}
                       className={`w-full flex items-center gap-2 p-3 rounded-lg transition-colors ${
                         isActive 
-                          ? 'bg-blue-50 border border-blue-200' 
+                          ? 'bg-plaid-blue-50 border border-plaid-blue-200' 
                           : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
                       }`}
                     >
                       <LayersIcon 
                         size={16} 
-                        className={isActive ? 'text-blue-600' : 'text-gray-600'} 
+                        className={isActive ? 'text-plaid-blue-600' : 'text-gray-600'} 
                       />
                       <div className="flex-1 text-left">
                         <div className={`text-sm font-medium ${
-                          isActive ? 'text-blue-900' : 'text-gray-900'
+                          isActive ? 'text-plaid-blue-900' : 'text-gray-900'
                         }`}>
                           {group.session?.title || 'Workspace'}
                         </div>
@@ -341,17 +341,17 @@ export const WorkspaceSidebar = ({
                             >
                               <FileTextIcon 
                                 size={14} 
-                                className={isPrimary ? 'text-blue-600' : 'text-gray-500'} 
+                                className={isPrimary ? 'text-plaid-blue-600' : 'text-gray-500'} 
                               />
                               <div className="flex-1 min-w-0">
                                 <div className={`text-sm truncate ${
-                                  isPrimary ? 'font-medium text-blue-900' : 'text-gray-900'
+                                  isPrimary ? 'font-medium text-plaid-blue-900' : 'text-gray-900'
                                 }`}>
                                   {artifact.title}
                                 </div>
                                 <div className="text-xs text-gray-500 flex items-center gap-2">
                                   {isPrimary && (
-                                    <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                    <span className="px-1.5 py-0.5 bg-plaid-blue-100 text-plaid-blue-700 rounded text-xs font-medium">
                                       Primary
                                     </span>
                                   )}
@@ -430,10 +430,10 @@ export const WorkspaceSidebar = ({
             
             {/* Admin Actions (if admin) */}
             {(user?.role === 'ADMIN' || user?.role === 'admin') && (
-              <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-plaid-blue-50 rounded-lg">
                 <button
                   onClick={() => setShowAdminConsole(true)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex-1"
+                  className="flex items-center gap-2 px-3 py-2 text-sm bg-plaid-blue-600 text-white rounded hover:bg-plaid-blue-700 transition-colors flex-1"
                   title="Admin Console"
                 >
                   <SettingsIcon size={14} />
@@ -441,7 +441,7 @@ export const WorkspaceSidebar = ({
                 </button>
                 <button
                   onClick={() => setShowCreateUser(true)}
-                  className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
+                  className="p-2 text-plaid-blue-600 hover:text-plaid-blue-700 hover:bg-plaid-blue-100 rounded transition-colors"
                   title="Quick Create User"
                 >
                   <UserPlusIcon size={14} />

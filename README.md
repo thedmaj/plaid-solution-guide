@@ -2,38 +2,30 @@
 
 **AI-Powered Solution Guide Creation for Sales Engineers**
 
-A sophisticated application that combines the power of AskBill MCP service, Knowledge Templates, and Claude AI to generate comprehensive, accurate solution guides for Plaid's customers. Designed specifically for Sales Engineers to quickly create professional documentation and implementation guides.
+An application that combines the power of AskBill MCP service, Knowledge Templates, and Claude AI to rapidly generate comprehensive solution guides. Designed specifically for Sales Engineers to quickly create bespoke PreSales assets and documentation.
 
 ## 🚀 Overview
 
-The Plaid Solution Guide Generator is an intelligent assistant that helps Sales Engineers create detailed, accurate solution guides by leveraging three key technologies:
+The Plaid Solution Guide Generator is an intelligent assistant that helps Sales Engineers create solution guides by leveraging three key technologies:
 
 - **AskBill MCP Service**: Real-time access to current Plaid documentation
-- **Knowledge Templates**: Expert-curated, authoritative content for specific use cases
+- **Knowledge Templates**: Expert-curated, authoritative content for specific use cases that override the AskBill MCP Service when used
+- **Format Templates**: Override the system prompt default format and create your own templates for AI instructions for each section
 - **Claude AI**: Intelligent content generation and enhancement
 
 ## 🎯 Key Features
 
-### ✨ **Intelligent Content Generation**
-- **Auto-Generated Solution Guides**: Creates comprehensive guides based on customer requirements
-- **Smart Title Generation**: Automatically generates descriptive titles like "Identity Verification" or "Plaid Link + Auth Integration"
-- **Real-time Documentation**: Always uses the latest Plaid API documentation via AskBill
-
-### 📝 **Template System**
-- **Knowledge Templates**: Pre-validated expert content for complex implementations
-- **Format Templates**: Standardized structures for consistent documentation
-- **Custom Templates**: Create and save your own reusable templates
 
 ### 🔄 **Response Modes**
 - **Chat Only Mode**: Standard conversational responses
-- **Merge Response Mode**: Automatically merges responses into living documents
+- **Merge Response Mode**: Automatically merges responses into a session artifact in markdown format 
 - **Artifact Creation**: Generates standalone documents that can be exported
 
 ### 🎨 **Advanced Features**
 - **Session Workspaces**: Organize related artifacts and conversations
 - **Version Control**: Track changes and updates to solution guides
 - **Smart Merging**: Intelligently combine new information with existing content
-- **Export Capabilities**: Download guides in multiple formats
+- **Export Capabilities**: Download or copy/paste artifacts 
 
 ## 🧠 How It Works
 
@@ -51,11 +43,7 @@ graph TD
     
     C --> G[Send to Claude AI]
     
-    K --> L{Default System Template?}
-    L -->|Yes - Solution Guide| M[Override with Format Template Structure]
-    L -->|Other Format| N[Apply Format Template]
-    M --> O[Query AskBill for Content]
-    N --> O
+    K --> O[Query AskBill for Content]
     O --> P[Send Formatted Content to Claude AI]
     
     F --> H[Generate Solution Guide]
@@ -91,14 +79,9 @@ graph TD
 
 **When to Use:**
 - Complex implementations requiring specific technical approaches
-- Regulatory compliance scenarios (KYC, AML, etc.)
-- Multi-product integrations with specific architectural patterns
-- Critical customer implementations where accuracy is paramount
+- Circumvent AskBill and use an authoritative source
+- Where accuracy is paramount 
 
-**Examples:**
-- "CRA Base Report Implementation"
-- "Identity + Income Verification Workflow"
-- "Multi-tenant Plaid Link Architecture"
 
 **Benefits:**
 - ✅ Expert-validated content
@@ -110,36 +93,9 @@ graph TD
 *Use for standardized document structures*
 
 **When to Use:**
-- Quick solution guides with consistent formatting
-- Standard implementation patterns
-- Documentation that follows company templates
-- Repetitive use cases with similar structures
+- When you want to create your own solution guide structure 
 
-**Examples:**
-- "Solution Guide Template"
-- "Integration Checklist Format"
-- "API Reference Template"
 
-**Benefits:**
-- ✅ Consistent formatting
-- ✅ Quick generation
-- ✅ Professional appearance
-- ✅ Reusable structures
-
-### **No Template** 🎯
-*Use for custom, flexible responses*
-
-**When to Use:**
-- Unique customer requirements
-- Exploratory conversations
-- Custom implementations
-- When you need maximum flexibility
-
-**Benefits:**
-- ✅ Maximum flexibility
-- ✅ Current documentation via AskBill
-- ✅ Adaptive to any request
-- ✅ Real-time information
 
 ## ⚙️ Response Modes
 
@@ -166,25 +122,144 @@ graph TD
 - **Anthropic API Key** (required for Claude AI)
 - **Plaid VPN Access** (required for AskBill MCP service)
 
+### ⚠️ Important: Virtual Environment Required
+
+**This application MUST be run in a Python virtual environment.** The setup process will automatically create and configure a virtual environment for you. Never install the Python dependencies globally - this can cause conflicts with other Python projects on your system.
+
 ### 🔑 Environment Setup (Required First!)
 
 **Before installation, you need to obtain required API keys:**
 
 #### **1. Get Anthropic API Key**
+0. Ask David M for a key or perform the steps below
 1. Visit [Anthropic Console](https://console.anthropic.com/)
 2. Sign in or create an account
 3. Navigate to **API Keys** section
 4. Create a new API key
 5. Copy the key (starts with `sk-ant-api03-`)
+6. **Keep this key safe** - you'll need it for configuration
 
 #### **2. Verify Plaid VPN Access**
 - Ensure you're connected to Plaid VPN
 - AskBill MCP service requires internal network access
 - Test connectivity to internal documentation service
 
-### 🚀 Quick Install Script
+## 📝 Complete Configuration Guide for Non-Developers
 
-The installation script is included in the repository. To run it:
+### Quick Configuration Summary:
+1. **Make script executable**: `chmod +x install-plaid-guide.sh`
+2. **Run install script**: `./install-plaid-guide.sh`
+3. **Generate JWT key (to add to the .env file)**: `openssl rand -hex 32`
+4. **Find .env file**: `backend/.env` (use `Cmd + Shift + .` on Mac to see hidden files)
+5. **Add your keys**: Edit ANTHROPIC_API_KEY and JWT_SECRET_KEY
+6. **Make launch script executable**: `chmod +x launch.sh`
+7. **Launch**: `./launch.sh`
+### Detailed Step-by-Step Configuration:
+
+#### **Step A: Generate Your JWT Secret Key**
+
+**What is a JWT Secret Key?**
+A JWT (JSON Web Token) secret key is used to secure user sessions. Think of it as a password that only your application knows.
+
+**How to Generate One:**
+
+Open **Terminal** (Applications → Utilities → Terminal) and run ONE of these commands:
+
+**Option 1 - OpenSSL (Recommended):**
+```bash
+openssl rand -hex 32
+```
+
+**Option 2 - Python:**
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+**Option 3 - Node.js:**
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+**Copy the result** - it will be a long string of letters and numbers like:
+```
+a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+```
+
+#### **Step B: Find and Open the .env File**
+
+**📍 Where is the .env file?**
+- **Full path**: `your-project-folder/backend/.env`
+- **The file is HIDDEN** (starts with a dot)
+
+**🔍 How to see hidden files on Mac:**
+1. **Open Finder**
+2. **Navigate to your project folder → backend**
+3. **Press `Cmd + Shift + .` (period key)** to show hidden files
+4. **You should now see `.env` file**
+
+**📂 Alternative - Use Terminal:**
+```bash
+# Navigate to your project
+cd /path/to/your/plaid-solution-guide/backend
+
+# List files including hidden ones
+ls -la
+
+# Open .env with TextEdit
+open -a TextEdit .env
+```
+
+#### **Step C: Edit the .env File**
+
+**📝 How to edit:**
+1. **Right-click** on `.env` file
+2. **Select "Open With"** → **TextEdit** (or your preferred editor)
+3. **Find these lines and replace the placeholder values:**
+
+```bash
+# Replace this line:
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# With your actual key:
+ANTHROPIC_API_KEY=sk-ant-api03-your_actual_key_here
+
+# Replace this line:
+JWT_SECRET_KEY=your_secure_random_key_here  
+# With your generated key:
+JWT_SECRET_KEY=a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+```
+
+**💾 Save the file:** Press `Cmd + S`
+
+#### **Step D: Verify Your Configuration**
+
+Your `.env` file should look like this (with your actual keys):
+
+```bash
+# REQUIRED: Your Anthropic API Key
+ANTHROPIC_API_KEY=sk-ant-api03-HT8x9K2LmF3QrV7nY1dZ6wS4uE5tG8hJ9kM2pN3xR4qT6vW8yA1bC3dF5gH7j
+
+# REQUIRED: AskBill MCP Service URL  
+ASKBILL_URL=wss://hello-finn.herokuapp.com/
+
+# REQUIRED: JWT Secret (your generated key)
+JWT_SECRET_KEY=a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+
+# Optional: Other settings (leave these as-is)
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+PORT=8000
+DATABASE_URL=sqlite:///./plaid_guide.db
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+```
+
+**✅ Configuration Checklist:**
+- [ ] ANTHROPIC_API_KEY starts with `sk-ant-api03-`
+- [ ] JWT_SECRET_KEY is 64 characters long (letters and numbers only)
+- [ ] No spaces around the `=` signs
+- [ ] File saved in `backend/.env`
+
+### 🚀 Quick Install Script (Recommended)
+
+The installation script is included in the repository and **automatically handles virtual environment setup**. To run it:
 
 ```bash
 # Make the script executable (if needed)
@@ -194,7 +269,14 @@ chmod +x install-plaid-guide.sh
 ./install-plaid-guide.sh
 ```
 
-The script will automatically install all dependencies including:
+The script will automatically:
+- ✅ Create a Python virtual environment
+- ✅ Install all Python dependencies in the virtual environment
+- ✅ Install all Node.js dependencies
+- ✅ Initialize the database
+- ✅ Create the launch script
+
+The script installs all dependencies including:
 
 **Backend Dependencies:**
 - **SQLAlchemy** - Database operations and ORM
@@ -344,7 +426,7 @@ echo "📚 See README.md for detailed usage instructions"
 
 ### Manual Installation (Alternative)
 
-If you prefer manual installation:
+If you prefer manual installation, **follow these steps exactly** to ensure proper virtual environment setup:
 
 1. **Clone the repository:**
    ```bash
@@ -352,17 +434,24 @@ If you prefer manual installation:
    cd plaid-solution-guide
    ```
 
-2. **Setup Backend:**
+2. **Setup Backend with Virtual Environment:**
    ```bash
    cd backend
+   
+   # Create virtual environment (REQUIRED)
    python3 -m venv venv
+   
+   # Activate virtual environment (REQUIRED)
    source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install Python dependencies (in virtual environment)
    pip install -r requirements.txt
    
    # Configure environment
    cp .env.sample .env
    # Edit .env with your API keys (see configuration section below)
    
+   # Initialize database
    python init_db.py
    ```
 
@@ -371,6 +460,8 @@ If you prefer manual installation:
    cd ../frontend
    npm install
    ```
+
+**⚠️ Critical Note:** You must activate the virtual environment (`source venv/bin/activate`) every time you work with the backend. The launch script handles this automatically.
 
 ### 🎮 Easy Launch
 
@@ -381,10 +472,13 @@ After installation, use the generated launch script:
 ```
 
 This single command will:
-- Start the backend server on port 8000
-- Start the frontend development server on port 3000
-- Open your browser automatically
-- Handle graceful shutdown with Ctrl+C
+- ✅ **Automatically activate the virtual environment** (no manual activation needed)
+- ✅ Start the backend server on port 8000
+- ✅ Start the frontend development server on port 3000
+- ✅ Open your browser automatically
+- ✅ Handle graceful shutdown with Ctrl+C
+
+**The launch script handles all virtual environment management for you - just run it and go!**
 
 ## 🎯 Getting Started
 
@@ -463,8 +557,25 @@ cd backend
 cp .env.sample .env
 ```
 
-#### **Step 2: Edit .env File**
-Open `backend/.env` and configure the required variables:
+#### **Step 2: Locate and Edit .env File**
+
+**📍 File Location:**
+The `.env` file is located at: `backend/.env` (inside the backend folder)
+
+**💡 Mac Tip - Viewing Hidden Files:**
+The `.env` file starts with a dot, making it hidden on Mac. To see hidden files:
+- **In Finder**: Press `Cmd + Shift + .` (period) to toggle hidden files
+- **Or use Terminal**: `open backend` then press `Cmd + Shift + .` in the opened folder
+
+**✏️ Step-by-Step Editing:**
+
+1. **Navigate to the backend folder** in your project
+2. **Open the `.env` file** with any text editor:
+   - **TextEdit**: Right-click → Open With → TextEdit
+   - **VS Code**: `code backend/.env`
+   - **Nano**: `nano backend/.env`
+
+3. **Edit these required variables:**
 
 ```bash
 # REQUIRED: Your Anthropic API Key
@@ -483,13 +594,55 @@ DATABASE_URL=sqlite:///./plaid_guide.db
 CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
 
+**🔑 How to Add Your JWT Secret:**
+1. **Generate the key** (see Step 3 below)
+2. **Copy the generated key**
+3. **Replace** `your_secure_random_key_here` with your actual key
+4. **Save the file** (`Cmd + S` in most editors)
+
 #### **Step 3: Generate Secure JWT Secret**
+
+**Option 1: Using OpenSSL (Recommended)**
 ```bash
 # Generate a secure JWT secret key
 openssl rand -hex 32
+```
 
-# Or use this Python command
+**Option 2: Using Python**
+```bash
+# Generate using Python
 python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+**Option 3: Using Node.js**
+```bash
+# Generate using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+**Copy the generated key** - it will look something like:
+```
+a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+```
+
+#### **Step 4: Complete Your Configuration**
+
+**📝 Example of a properly configured .env file:**
+```bash
+# REQUIRED: Your Anthropic API Key
+ANTHROPIC_API_KEY=sk-ant-api03-HT8x9K2LmF3QrV7nY1dZ6wS4uE5tG8hJ9kM2pN3xR4qT6vW8yA1bC3dF5gH7j
+
+# REQUIRED: AskBill MCP Service URL
+ASKBILL_URL=wss://hello-finn.herokuapp.com/
+
+# REQUIRED: JWT Secret (your generated key)
+JWT_SECRET_KEY=a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+
+# Optional: Other settings (defaults usually work)
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+PORT=8000
+DATABASE_URL=sqlite:///./plaid_guide.db
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
 
 #### **Critical Configuration Notes:**
@@ -497,6 +650,7 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 - ❌ **Documentation features require ASKBILL_URL and VPN access**
 - ⚠️ **Never commit .env file to version control**
 - 🔒 **Use strong JWT_SECRET_KEY in production**
+- 💾 **Always save the .env file after editing**
 
 ### Verification
 
@@ -567,10 +721,18 @@ cd backend && source venv/bin/activate && python main.py
 - **Invalid JWT Secret**: Ensure `JWT_SECRET_KEY` is set and secure
 - **Environment File**: Verify `backend/.env` exists and is properly configured
 - **API Key Format**: Anthropic keys start with `sk-ant-api03-`
+- **Can't find .env file**: Press `Cmd + Shift + .` in Finder to show hidden files
+- **JWT key format**: Should be a 64-character hex string (no spaces or special characters)
 
 **❌ Backend won't start:**
 - Check Python version (3.8+ required)
-- Verify virtual environment activation: `source backend/venv/bin/activate`
+- **Virtual environment issues:**
+  - Verify virtual environment exists: `ls backend/venv`
+  - If missing, run the install script again: `./install-plaid-guide.sh`
+  - Never install dependencies globally - always use the virtual environment
+- **Common virtual environment errors:**
+  - `ModuleNotFoundError: No module named 'fastapi'` → Virtual environment not activated
+  - `ModuleNotFoundError: No module named 'jwt'` → Missing PyJWT (run `pip install PyJWT` in activated venv)
 - Check if port 8000 is available: `lsof -i :8000`
 - Verify `.env` file exists in `backend/` directory
 - Check backend logs for specific error messages
@@ -607,10 +769,14 @@ Run the verification script to check your installation:
 
 This will check:
 - ✅ Prerequisites (Node.js, Python, Git)
-- ✅ Backend setup (virtual environment, .env configuration)
+- ✅ **Virtual environment setup and activation**
+- ✅ **Python dependencies installed in virtual environment**
+- ✅ Backend setup (.env configuration)
 - ✅ Frontend setup (dependencies)
 - ✅ API key configuration
 - ✅ Port availability
+
+**If verification fails, most issues are related to virtual environment setup. Re-run the install script to fix.**
 
 ### Getting Help
 

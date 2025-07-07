@@ -8,16 +8,16 @@ module.exports = {
     extend: {
       colors: {
         'plaid-blue': {
-          50: '#edf2ff',
-          100: '#dbe4ff',
-          200: '#bac8ff',
-          300: '#91a7ff',
-          400: '#748ffc',
-          500: '#5c7cfa',
-          600: '#4c6ef5',
-          700: '#4263eb',
-          800: '#3b5bdb',
-          900: '#364fc7',
+          50: '#e6f2f8',
+          100: '#cce6f1',
+          200: '#99cce3',
+          300: '#66b3d5',
+          400: '#3399c7',
+          500: '#07578d',
+          600: '#064f7f',
+          700: '#054670',
+          800: '#043e62',
+          900: '#033554',
         },
       },
       typography: {
@@ -47,10 +47,10 @@ module.exports = {
               content: '""',
             },
             a: {
-              color: '#3B82F6',
+              color: '#07578d',
               textDecoration: 'none',
               '&:hover': {
-                color: '#2563EB',
+                color: '#054670',
                 textDecoration: 'underline',
               },
             },

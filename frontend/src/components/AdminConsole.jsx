@@ -40,7 +40,7 @@ export const AdminConsole = ({ onClose }) => {
           <p className="text-gray-600 mb-4">You don't have permission to access the admin console.</p>
           <button
             onClick={onClose}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="w-full bg-plaid-blue-600 text-white py-2 px-4 rounded hover:bg-plaid-blue-700"
           >
             Close
           </button>
@@ -175,7 +175,7 @@ export const AdminConsole = ({ onClose }) => {
           <div className="p-6 border-b bg-gray-50">
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="bg-plaid-blue-600 text-white px-4 py-2 rounded-lg hover:bg-plaid-blue-700 transition-colors flex items-center gap-2"
             >
               <UserPlusIcon size={20} />
               Create New User
@@ -249,7 +249,7 @@ export const AdminConsole = ({ onClose }) => {
                 <div className="md:col-span-2 flex gap-2 pt-4">
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="bg-plaid-blue-600 text-white px-4 py-2 rounded hover:bg-plaid-blue-700 transition-colors"
                   >
                     {editingUser ? 'Update User' : 'Create User'}
                   </button>
@@ -312,7 +312,7 @@ export const AdminConsole = ({ onClose }) => {
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => handleEdit(user)}
-                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                              className="text-plaid-blue-600 hover:text-plaid-blue-800 transition-colors"
                               title="Edit user"
                             >
                               <PencilIcon size={16} />

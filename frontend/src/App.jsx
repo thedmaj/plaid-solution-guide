@@ -145,7 +145,7 @@ function App() {
   const [isMergingContent, setIsMergingContent] = useState(false); // Show merge operation state
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [userClosedPanel, setUserClosedPanel] = useState(false); // Track if user deliberately closed panel
-  const [mergeMode, setMergeMode] = useState('chat_only'); // User preference: 'chat_only' or 'merge_response'
+  const [mergeMode, setMergeMode] = useState('merge_response'); // User preference: 'chat_only' or 'merge_response'
   const [currentChatInstruction, setCurrentChatInstruction] = useState(''); // Track original user instruction for smart labeling
   const [globalError, setGlobalError] = useState(null); // Global error state for user notifications
   
@@ -886,7 +886,7 @@ function App() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
           <div className="text-center mb-8">
-            <img src="/plaid-logo.svg" alt="Plaid Logo" className="h-12 mx-auto mb-4" />
+            <img src="/plaid-logo.jpg" alt="Plaid Logo" className="h-12 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900">Welcome to Plaid Solution Guide</h1>
             <p className="text-gray-600 mt-2">Please sign in to continue</p>
           </div>
@@ -912,7 +912,7 @@ function App() {
                 name="email"
                 defaultValue="admin@example.com"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-plaid-blue-500 focus:border-plaid-blue-500"
               />
             </div>
             
@@ -926,13 +926,13 @@ function App() {
                 name="password"
                 defaultValue="admin123"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-plaid-blue-500 focus:border-plaid-blue-500"
               />
             </div>
             
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-blue-800 text-white rounded hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="w-full py-2 px-4 bg-plaid-blue-800 text-white rounded hover:bg-plaid-blue-900 focus:outline-none focus:ring-2 focus:ring-plaid-blue-500 focus:ring-opacity-50"
             >
               Sign In
             </button>
@@ -995,13 +995,13 @@ function App() {
         
         {/* Session Artifact Header */}
         {sessionArtifact && (
-          <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+          <div className="bg-plaid-blue-50 border-b border-plaid-blue-200 px-4 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-700">Active Guide:</span>
-                <span className="text-sm text-blue-600">{sessionArtifact.title}</span>
+                <span className="text-sm font-medium text-plaid-blue-700">Active Guide:</span>
+                <span className="text-sm text-plaid-blue-600">{sessionArtifact.title}</span>
               </div>
-              <div className="text-xs text-blue-500">
+              <div className="text-xs text-plaid-blue-500">
                 Updated {new Date(sessionArtifact.updated_at).toLocaleTimeString()}
               </div>
             </div>
