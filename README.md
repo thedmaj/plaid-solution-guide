@@ -154,6 +154,7 @@ graph TD
 5. **Add your keys**: Edit ANTHROPIC_API_KEY and JWT_SECRET_KEY
 6. **Make launch script executable**: `chmod +x launch.sh`
 7. **Launch**: `./launch.sh`
+8. **Login**: open browser to http://localhost:3000/ and login with prepopulated username / password
 ### Detailed Step-by-Step Configuration:
 
 #### **Step A: Generate Your JWT Secret Key**
