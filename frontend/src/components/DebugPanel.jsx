@@ -8,6 +8,58 @@ export const DebugPanel = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [logs, setLogs] = useState([]);
+  const [askBillStatus, setAskBillStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+
+  // Function to fetch AskBill status
+  const fetchAskBillStatus = async () => {
+    setStatusLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setAskBillStatus({ status: 'no_auth', icon: '🔒' });
+        return;
+      }
+
+      const response = await fetch('/api/askbill/status', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAskBillStatus(data);
+        console.log('🔍 DEBUG: AskBill status updated', data);
+      } else {
+        setAskBillStatus({ 
+          status: 'fetch_error', 
+          error: `HTTP ${response.status}`,
+          icon: '❌' 
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch AskBill status:', error);
+      setAskBillStatus({ 
+        status: 'fetch_error', 
+        error: error.message,
+        icon: '💥' 
+      });
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // Auto-refresh AskBill status
+  useEffect(() => {
+    if (isOpen) {
+      fetchAskBillStatus();
+      const interval = setInterval(fetchAskBillStatus, 10000); // Refresh every 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     // Capture console logs
@@ -73,7 +125,7 @@ export const DebugPanel = ({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 bg-red-600 text-white px-3 py-2 rounded-lg text-sm z-50"
+        className="fixed bottom-4 right-4 bg-red-600 text-white px-3 py-2 rounded-lg text-sm z-50 hover:bg-red-700 transition-colors"
       >
         Debug Panel
       </button>
@@ -100,6 +152,66 @@ export const DebugPanel = ({
           <div>Primary Artifact: {currentWorkspace?.primaryArtifact?.id || 'None'}</div>
           <div>Artifacts Count: {artifacts.length}</div>
           <div>Messages Count: {messages.length}</div>
+        </div>
+        
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-yellow-400 font-bold">AskBill MCP Status:</h3>
+            <button 
+              onClick={fetchAskBillStatus}
+              disabled={statusLoading}
+              className="text-xs bg-plaid-blue-600 hover:bg-plaid-blue-700 text-white px-2 py-1 rounded disabled:opacity-50"
+            >
+              {statusLoading ? '🔄' : '🔄 Refresh'}
+            </button>
+          </div>
+          
+          {askBillStatus ? (
+            <div className="text-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">{askBillStatus.icon}</span>
+                <span className={`font-bold ${
+                  askBillStatus.status === 'available' ? 'text-green-400' :
+                  askBillStatus.status === 'unavailable' ? 'text-yellow-400' :
+                  'text-red-400'
+                }`}>
+                  {askBillStatus.status.toUpperCase()}
+                </span>
+              </div>
+              
+              {askBillStatus.error && (
+                <div className="text-red-400 mb-2">Error: {askBillStatus.error}</div>
+              )}
+              
+              {askBillStatus.connection_stats && (
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                  <div>Status: <span className="text-cyan-400">{askBillStatus.connection_stats.current_status}</span></div>
+                  <div>Success Rate: <span className="text-green-400">{askBillStatus.connection_stats.success_rate?.toFixed(1)}%</span></div>
+                  <div>Attempts: <span className="text-blue-400">{askBillStatus.connection_stats.connection_attempts}</span></div>
+                  <div>Successful: <span className="text-green-400">{askBillStatus.connection_stats.successful_connections}</span></div>
+                  <div>Failed: <span className="text-red-400">{askBillStatus.connection_stats.failed_connections}</span></div>
+                  <div>Avg Response: <span className="text-yellow-400">{askBillStatus.connection_stats.avg_response_time?.toFixed(2)}s</span></div>
+                  <div>Total Questions: <span className="text-purple-400">{askBillStatus.connection_stats.total_questions}</span></div>
+                  <div>Successful Responses: <span className="text-green-400">{askBillStatus.connection_stats.successful_responses}</span></div>
+                </div>
+              )}
+              
+              {askBillStatus.client_info && (
+                <div className="mt-2 text-xs text-gray-400">
+                  <div>URI: {askBillStatus.client_info.uri}</div>
+                  <div>Anonymous ID: {askBillStatus.client_info.anonymous_id}</div>
+                </div>
+              )}
+              
+              {askBillStatus.connection_stats?.last_error && (
+                <div className="mt-2 text-xs text-red-400">
+                  Last Error: {askBillStatus.connection_stats.last_error}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-gray-400 text-sm">Click refresh to check status</div>
+          )}
         </div>
         
         <div>

@@ -1326,6 +1326,52 @@ Return only the clean, substantive content."""
         logger.error(f"Error in AI text strip: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/askbill/status")
+async def get_askbill_status_endpoint(user: User = Depends(get_current_user)):
+    """Get AskBill connection status and statistics for debugging."""
+    try:
+        if ask_bill_client is None:
+            logger.warning("🚫 ASKBILL STATUS: Client not initialized")
+            return {
+                "status": "unavailable",
+                "error": "AskBill client not initialized",
+                "connection_stats": None,
+                "icon": "🚫"
+            }
+        
+        status = ask_bill_client.get_connection_status()
+        logger.info(f"📊 ASKBILL STATUS: Retrieved status: {status['current_status']}")
+        
+        # Determine icon based on status
+        status_icon = "🔗"
+        if status["current_status"] == "completed":
+            status_icon = "✅"
+        elif status["current_status"] in ["timeout", "connection_closed", "handshake_failed", "websocket_error", "unknown_error"]:
+            status_icon = "❌"
+        elif status["current_status"] in ["connecting", "waiting_response"]:
+            status_icon = "⏳"
+        elif status["current_status"] == "connected":
+            status_icon = "🔗"
+        
+        return {
+            "status": "available",
+            "connection_stats": status,
+            "client_info": {
+                "uri": ask_bill_client.uri,
+                "anonymous_id": ask_bill_client.anonymous_id[:8] + "...",
+                "user_id": ask_bill_client.user_id[:8] + "..."
+            },
+            "icon": status_icon
+        }
+    except Exception as e:
+        logger.error(f"💥 ASKBILL STATUS: Error getting status: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "error": str(e),
+            "connection_stats": None,
+            "icon": "💥"
+        }
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn
