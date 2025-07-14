@@ -11,7 +11,8 @@ import {
   ChevronLeft as CollapseIcon,
   ChevronRight as ExpandIcon,
   MessageSquareIcon,
-  CodeIcon
+  CodeIcon,
+  Copy as CopyIcon
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -42,6 +43,7 @@ export const ArtifactPanel = ({
   const [splitView, setSplitView] = useState(false);
   const [mermaidInitialized, setMermaidInitialized] = useState(false);
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   // Highlighting state for artifact content
   const [contextMenu, setContextMenu] = useState(null);
@@ -300,6 +302,15 @@ export const ArtifactPanel = ({
     }
   };
 
+  const copyToClipboard = () => {
+    if (artifact && artifact.content) {
+      navigator.clipboard.writeText(artifact.content).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+
   const handleDownloadSequenceDiagram = async (diagramElement) => {
     try {
       // Get the SVG element
@@ -318,21 +329,55 @@ export const ArtifactPanel = ({
         }
       }
 
+      // Get dimensions
+      const svgRect = svgElement.getBoundingClientRect();
+      const width = svgRect.width || parseInt(svgClone.getAttribute('width')) || 800;
+      const height = svgRect.height || parseInt(svgClone.getAttribute('height')) || 600;
+
       // Convert SVG to string
       const svgData = new XMLSerializer().serializeToString(svgClone);
       
-      // Create a Blob with the SVG data
+      // Create a canvas element
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas dimensions with higher resolution for better quality
+      const scale = 2;
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      ctx.scale(scale, scale);
+      
+      // Set white background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Create an image from SVG
+      const img = new Image();
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      
-      // Create download link
       const url = URL.createObjectURL(svgBlob);
-      const link = document.createElement('a');
-      link.download = `sequence_diagram_${Date.now()}.svg`;
-      link.href = url;
-      link.click();
       
-      // Cleanup
-      URL.revokeObjectURL(url);
+      img.onload = () => {
+        // Draw the image on canvas
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert canvas to PNG blob
+        canvas.toBlob((blob) => {
+          // Create download link
+          const pngUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `sequence_diagram_${Date.now()}.png`;
+          link.href = pngUrl;
+          link.click();
+          
+          // Cleanup
+          URL.revokeObjectURL(pngUrl);
+        }, 'image/png');
+        
+        // Cleanup SVG URL
+        URL.revokeObjectURL(url);
+      };
+      
+      img.src = url;
     } catch (error) {
       console.error('Error downloading sequence diagram:', error);
     }
@@ -641,6 +686,13 @@ export const ArtifactPanel = ({
                 title="Edit artifact"
               >
                 <EditIcon size={16} />
+              </button>
+              <button
+                onClick={copyToClipboard}
+                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                title="Copy to clipboard"
+              >
+                {copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
               </button>
               <button
                 onClick={handleDownload}
