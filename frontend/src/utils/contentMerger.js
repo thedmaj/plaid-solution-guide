@@ -17,8 +17,31 @@ export class ContentMerger {
    */
   static async extractCleanContent(rawContent) {
     try {
-      // Use AI-powered text stripping for better results
-      const cleanContent = await AIService.stripText(rawContent);
+      // Use AI-powered text stripping with enhanced instructions for removing acknowledgements
+      const stripInstructions = `
+        Remove AI acknowledgements and conversational text from this content, keeping only the solution guide content. 
+        
+        REMOVE:
+        - AI acknowledgements like "I'll help you", "I'll create", "Here's what I'll do"
+        - Conversational phrases like "Let me", "I can", "This will", "Here's the"
+        - Explanatory text about what the AI is doing or will do
+        - Meta-commentary about the solution guide itself
+        
+        KEEP:
+        - All headers, especially the main solution guide title
+        - All substantial content including code, lists, tables, and paragraphs
+        - Technical implementation details
+        - Step-by-step instructions
+        - Code examples and configuration
+        
+        IMPORTANT: 
+        - Look for markers like "--- SOLUTION GUIDE ---" or "# Solution Guide" and extract content after them
+        - Ensure the main title renders properly (should start with # for H1 header)
+        - Keep the structure and formatting intact
+        - Do not remove content that is part of the actual solution guide
+      `;
+      
+      const cleanContent = await AIService.stripText(rawContent, stripInstructions);
       return cleanContent;
     } catch (error) {
       console.error('AI text stripping failed, falling back to local algorithm:', error);
@@ -36,10 +59,17 @@ export class ContentMerger {
   static extractCleanContentLocal(rawContent) {
     if (!rawContent) return '';
 
+    // First, look for solution guide markers and extract content after them
+    const markedContent = this.extractContentAfterMarkers(rawContent);
+    if (markedContent) {
+      rawContent = markedContent;
+    }
+
     const lines = rawContent.split('\n');
     const cleanLines = [];
     let inCodeBlock = false;
     let foundSubstantialContent = false;
+    let skipAcknowledgement = true; // Start by skipping acknowledgement sections
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -50,6 +80,7 @@ export class ContentMerger {
         inCodeBlock = !inCodeBlock;
         cleanLines.push(line);
         foundSubstantialContent = true;
+        skipAcknowledgement = false; // Found substantial content, stop skipping
         continue;
       }
 
@@ -59,24 +90,36 @@ export class ContentMerger {
         continue;
       }
 
-      // Skip conversational/explanatory lines - enhanced patterns
-      const conversationalPatterns = [
+      // Check if this line starts substantial content (stop skipping acknowledgements)
+      if (this.isSubstantialContentStart(trimmed)) {
+        foundSubstantialContent = true;
+        skipAcknowledgement = false;
+      }
+
+      // Enhanced acknowledgement and conversational patterns
+      const acknowledgementPatterns = [
+        /^(i'll help|i'll assist|i'll create|i'll add|i'll update|i'll modify)/i,
         /^(here|i'll|i've|let me|i can|i will|i'm going to|i have|this is|this will|now let me)/i,
         /^(the following|below is|as you can see|you can|note that|remember to)/i,
         /^(this (code|example|implementation|approach|solution))/i,
         /^(based on|according to|in this case|for this)/i,
-        /\b(helps?|allows?|enables?)\b.*\byou\b/i,
-        /^\*\*note:/i,
-        /^\*\*important:/i,
-        /^(i understand|i'll (help|assist|create|add|update|modify))/i,
-        /^(great|excellent|perfect)! (i'll|let me|here)/i,
+        /^(i understand|great|excellent|perfect)/i,
         /^(i'll go ahead and|i'll now|i'll proceed to|i'll start by)/i,
         /^(here's (an? |the )?updated?|here's what)/i,
         /^(i've (created|added|updated|modified))/i,
-        /\b(this will|this should|this provides|this allows)\b/i
+        /\b(helps?|allows?|enables?)\b.*\byou\b/i,
+        /^\*\*note:/i,
+        /^\*\*important:/i,
+        /\b(this will|this should|this provides|this allows)\b/i,
+        // Additional patterns for acknowledgements
+        /^(certainly|absolutely|of course|sure)/i,
+        /^(i'll (be happy to|gladly|definitely))/i,
+        /^(let's|let me (start|begin|create|build))/i,
+        /^(first,? let me|to (start|begin))/i,
+        /^(i'll make sure|i'll ensure)/i
       ];
 
-      const isConversational = conversationalPatterns.some(pattern => 
+      const isAcknowledgement = acknowledgementPatterns.some(pattern => 
         pattern.test(trimmed)
       );
 
@@ -86,22 +129,81 @@ export class ContentMerger {
         trimmed.match(/^\d+\.\s+/) ||   // Numbered lists
         trimmed.match(/^[-*+]\s+/) ||   // Bullet lists
         trimmed.match(/^\|.*\|/) ||     // Tables
-        (trimmed.length > 50 && !isConversational) // Long non-conversational lines
+        (trimmed.length > 50 && !isAcknowledgement) // Long non-acknowledgement lines
       );
+
+      // Skip acknowledgements at the beginning, but include substantial content
+      if (skipAcknowledgement && isAcknowledgement && !isSubstantialContent) {
+        continue;
+      }
 
       if (isSubstantialContent) {
         foundSubstantialContent = true;
+        skipAcknowledgement = false;
         cleanLines.push(line);
-      } else if (foundSubstantialContent && trimmed.length > 0 && !isConversational) {
-        // Include content after we've found substantial content, unless it's conversational
+      } else if (foundSubstantialContent && trimmed.length > 0 && !isAcknowledgement) {
+        // Include content after we've found substantial content, unless it's acknowledgement
         cleanLines.push(line);
       } else if (trimmed === '') {
-        // Keep empty lines for formatting
-        cleanLines.push(line);
+        // Keep empty lines for formatting, but only after substantial content
+        if (!skipAcknowledgement) {
+          cleanLines.push(line);
+        }
       }
     }
 
     return cleanLines.join('\n').trim();
+  }
+
+  /**
+   * Extract content after solution guide markers
+   * @param {string} content - Raw content to process
+   * @returns {string|null} Content after markers, or null if no markers found
+   */
+  static extractContentAfterMarkers(content) {
+    // Define solution guide markers
+    const markers = [
+      /---\s*SOLUTION\s+GUIDE\s*---/i,
+      /===\s*SOLUTION\s+GUIDE\s*===/i,
+      /\*\*\*\s*SOLUTION\s+GUIDE\s*\*\*\*/i,
+      /\[SOLUTION\s+GUIDE\s+BEGINS?\]/i,
+      /\[START\s+SOLUTION\s+GUIDE\]/i,
+      /^\s*#\s+(?:Plaid\s+)?Solution\s+Guide/im, // Headers like "# Solution Guide" or "# Plaid Solution Guide"
+      /BEGIN_SOLUTION_GUIDE/i,
+      /GUIDE_START/i
+    ];
+
+    for (const marker of markers) {
+      const match = content.match(marker);
+      if (match) {
+        const markerIndex = match.index + match[0].length;
+        return content.substring(markerIndex).trim();
+      }
+    }
+
+    // Also look for first substantial header as fallback
+    const headerMatch = content.match(/^#{1,2}\s+[^#\n]+/m);
+    if (headerMatch && headerMatch.index > 100) { // Only if header is not at the very beginning
+      return content.substring(headerMatch.index).trim();
+    }
+
+    return null;
+  }
+
+  /**
+   * Check if a line indicates the start of substantial content
+   * @param {string} line - Trimmed line to check
+   * @returns {boolean} True if this line starts substantial content
+   */
+  static isSubstantialContentStart(line) {
+    return (
+      line.match(/^#{1,6}\s+/) ||    // Any header
+      line.match(/^\d+\.\s+/) ||     // Numbered list
+      line.match(/^[-*+]\s+/) ||     // Bullet list
+      line.match(/^\|.*\|/) ||       // Table
+      line.match(/^```/) ||          // Code block
+      (line.length > 100 && !line.match(/^(i'll|here|let me|this)/i)) // Long substantial line
+    );
   }
   /**
    * Merge new content with existing artifact content

@@ -583,6 +583,11 @@ KNOWLEDGE TEMPLATE RULES:
 
 ROLE: Process the expert knowledge template and user request to create a comprehensive, customized solution guide that strictly adheres to the template's authoritative information while leveraging your Plaid expertise.
 
+IMPORTANT OUTPUT FORMAT:
+- Start your response with a brief acknowledgement if needed, but then include the marker: "--- SOLUTION GUIDE ---" 
+- Follow immediately with the solution guide content starting with a proper # header
+- This helps the frontend automatically extract the clean solution guide content for artifacts
+
 PROCESS:
 1. Treat the expert knowledge as IMMUTABLE FACTS - do not question or modify core information
 2. Replace AI placeholders with content that SUPPORTS and EXTENDS the template's guidance
@@ -605,11 +610,22 @@ REMEMBER: You are enhancing expert knowledge with your Plaid expertise, not repl
         else:
             # Use standard system prompt for AskBill-based responses
             if base_system_prompt:
-                system_prompt = base_system_prompt
+                # Enhance base system prompt with marker instructions
+                system_prompt = f"""{base_system_prompt}
+
+IMPORTANT OUTPUT FORMAT:
+- Start your response with a brief acknowledgement if needed, but then include the marker: "--- SOLUTION GUIDE ---"
+- Follow immediately with the solution guide content starting with a proper # header
+- This helps the frontend automatically extract the clean solution guide content for artifacts"""
             else:
                 system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
 
 ROLE: You receive current Plaid documentation from AskBill service and transform it into comprehensive, well-formatted solution guides.
+
+IMPORTANT OUTPUT FORMAT:
+- Start your response with a brief acknowledgement if needed, but then include the marker: "--- SOLUTION GUIDE ---"
+- Follow immediately with the solution guide content starting with a proper # header
+- This helps the frontend automatically extract the clean solution guide content for artifacts
 
 PROCESS:
 1. You will receive USER REQUEST + PLAID DOCUMENTATION CONTEXT from AskBill
