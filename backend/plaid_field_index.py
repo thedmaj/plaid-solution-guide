@@ -1034,6 +1034,14 @@ PLAID_API_INDEX = {
                 "anchor": "#cracheckbaserepotget",
                 "description": "Retrieve the Base Report component of a Consumer Report"
             },
+            "/cra/check_report/income_insights/get": {
+                "anchor": "#cracheckincomeinsightsget",
+                "description": "Retrieve cash flow insights from user's banks"
+            },
+            "/cra/check_report/network_insights/get": {
+                "anchor": "#crachecknetworkinsightsget",
+                "description": "Retrieve connection insights from Plaid network (beta)"
+            },
             "/cra/check_report/partner_insights/get": {
                 "anchor": "#cracheckpartnerinsightsget",
                 "description": "Retrieve Partner Insights (requires Prism partnership)"
@@ -1041,6 +1049,18 @@ PLAID_API_INDEX = {
             "/cra/check_report/pdf/get": {
                 "anchor": "#cracheckpdfget",
                 "description": "Retrieve a PDF version of the Consumer Report"
+            },
+            "/cra/monitoring_insights/get": {
+                "anchor": "#cramonitoringinsightsget",
+                "description": "Get Cash Flow Updates (beta)"
+            },
+            "/cra/monitoring_insights/subscribe": {
+                "anchor": "#cramonitoringinsightssubscribe",
+                "description": "Subscribe to Cash Flow Updates (beta)"
+            },
+            "/cra/monitoring_insights/unsubscribe": {
+                "anchor": "#cramonitoringinsightsunsubscribe",
+                "description": "Unsubscribe from Cash Flow Updates (beta)"
             }
         },
         "request_fields": {
@@ -1062,7 +1082,22 @@ PLAID_API_INDEX = {
             "insights": "#cra-check-report-create-request-prism-versions-insights",
             
             # Base report get request fields
-            "user_token_get": "#cra-check-base-report-get-request-user-token"
+            "user_token_get": "#cra-check-base-report-get-request-user-token",
+            
+            # Income insights request fields
+            "user_token_income": "#cra-check-income-insights-get-request-user-token",
+            
+            # Network insights request fields
+            "user_token_network": "#cra-check-network-insights-get-request-user-token",
+            
+            # Monitoring insights request fields
+            "user_token_monitoring": "#cra-monitoring-insights-get-request-user-token",
+            "start_date": "#cra-monitoring-insights-get-request-start-date",
+            "end_date": "#cra-monitoring-insights-get-request-end-date",
+            
+            # Subscribe/unsubscribe request fields
+            "insights_webhooks": "#cra-monitoring-insights-subscribe-request-insights-webhooks",
+            "webhook_url": "#cra-monitoring-insights-subscribe-request-webhook-url"
         },
         "response_fields": {
             # Top-level report metadata
@@ -1110,13 +1145,35 @@ PLAID_API_INDEX = {
             "ownership_type": "#cra-check-base-report-get-response-report-items-accounts-owners-ownership-type",
             
             # Legacy fields (deprecated)
-            "account_insights": "#cra-check-base-report-get-response-report-items-accounts-account-insights"
+            "account_insights": "#cra-check-base-report-get-response-report-items-accounts-account-insights",
+            
+            # Income insights response fields
+            "income_insights": "#cra-check-income-insights-get-response-income-insights",
+            "income_summary": "#cra-check-income-insights-get-response-income-summary",
+            "average_monthly_income": "#cra-check-income-insights-get-response-average-monthly-income",
+            "income_frequency": "#cra-check-income-insights-get-response-income-frequency",
+            
+            # Network insights response fields
+            "network_insights": "#cra-check-network-insights-get-response-network-insights",
+            "connection_score": "#cra-check-network-insights-get-response-connection-score",
+            "network_strength": "#cra-check-network-insights-get-response-network-strength",
+            
+            # Monitoring insights response fields
+            "monitoring_insights": "#cra-monitoring-insights-get-response-monitoring-insights",
+            "cash_flow_updates": "#cra-monitoring-insights-get-response-cash-flow-updates",
+            "balance_alerts": "#cra-monitoring-insights-get-response-balance-alerts",
+            "transaction_alerts": "#cra-monitoring-insights-get-response-transaction-alerts"
         },
         "webhooks": {
             "CRA_CHECK_REPORT_READY": "#cra_check_report_ready",
-            "CRA_CHECK_REPORT_ERROR": "#cra_check_report_error"
+            "CRA_CHECK_REPORT_ERROR": "#cra_check_report_error",
+            "INSIGHTS_UPDATED": "#insights_updated",
+            "LARGE_DEPOSIT_DETECTED": "#large_deposit_detected",
+            "LOW_BALANCE_DETECTED": "#low_balance_detected",
+            "NEW_LOAN_PAYMENT_DETECTED": "#new_loan_payment_detected",
+            "NSF_OVERDRAFT_DETECTED": "#nsf_overdraft_detected"
         },
-        "keywords": ["consumer reporting", "CRA", "base report", "credit reporting", "financial report", "account analysis", "transaction history", "prism insights", "partner insights", "consumer report agency", "consumer report", "plaid check", "check"]
+        "keywords": ["consumer reporting", "CRA", "base report", "credit reporting", "financial report", "account analysis", "transaction history", "prism insights", "partner insights", "consumer report agency", "consumer report", "plaid check", "check", "income insights", "network insights", "cash flow", "monitoring", "large deposit", "low balance", "NSF", "overdraft", "loan payment"]
     },
     
     # TRANSFER API - Money movement and ACH transfers
