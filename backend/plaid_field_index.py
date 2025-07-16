@@ -1483,6 +1483,134 @@ PLAID_API_INDEX = {
             "LAYER_AUTHENTICATION_PASSED": "#layer_authentication_passed"
         },
         "keywords": ["layer", "instant onboarding", "user authentication", "identity verification", "simplified flow", "user identity", "account connection", "authentication flow", "onboarding", "session token", "user session"]
+    },
+    
+    # IDENTITY VERIFICATION API - Identity verification and KYC services
+    "identity_verification": {
+        "base_url": "https://plaid.com/docs/api/products/identity-verification/",
+        "general_docs_url": "https://plaid.com/docs/identity-verification/",
+        "endpoints": {
+            "/identity_verification/create": {
+                "anchor": "#identity_verificationcreate",
+                "description": "Create a new Identity Verification for the user"
+            },
+            "/identity_verification/get": {
+                "anchor": "#identity_verificationget",
+                "description": "Retrieve a previously created identity verification"
+            },
+            "/identity_verification/list": {
+                "anchor": "#identity_verificationlist",
+                "description": "Filter and list identity verifications"
+            },
+            "/identity_verification/retry": {
+                "anchor": "#identity_verificationretry",
+                "description": "Allow a user to retry an identity verification"
+            }
+        },
+        "request_fields": {
+            # /identity_verification/create request fields
+            "client_id": "#identity-verification-create-request-client-id",
+            "secret": "#identity-verification-create-request-secret",
+            "client_user_id": "#identity-verification-create-request-client-user-id",
+            "template_id": "#identity-verification-create-request-template-id",
+            "is_shareable": "#identity-verification-create-request-is-shareable",
+            "gave_consent": "#identity-verification-create-request-gave-consent",
+            "user": "#identity-verification-create-request-user",
+            "user_email_address": "#identity-verification-create-request-user-email-address",
+            "user_phone_number": "#identity-verification-create-request-user-phone-number",
+            "user_date_of_birth": "#identity-verification-create-request-user-date-of-birth",
+            "user_name": "#identity-verification-create-request-user-name",
+            "user_address": "#identity-verification-create-request-user-address",
+            "user_id_number": "#identity-verification-create-request-user-id-number",
+            
+            # /identity_verification/get request fields
+            "identity_verification_id": "#identity-verification-get-request-identity-verification-id"
+        },
+        "response_fields": {
+            # Create and get response fields
+            "id": "#identity-verification-create-response-id",
+            "status": "#identity-verification-create-response-status",
+            "steps": "#identity-verification-create-response-steps",
+            "shareable_url": "#identity-verification-create-response-shareable-url",
+            "user": "#identity-verification-create-response-user",
+            "documentary_verification": "#identity-verification-create-response-documentary-verification",
+            "selfie_check": "#identity-verification-create-response-selfie-check",
+            "kyc_check": "#identity-verification-create-response-kyc-check",
+            "risk_check": "#identity-verification-create-response-risk-check",
+            "watchlist_screening": "#identity-verification-create-response-watchlist-screening",
+            
+            # Verification steps
+            "accept_tos": "#identity-verification-steps-accept-tos",
+            "verify_sms": "#identity-verification-steps-verify-sms",
+            "kyc_check_step": "#identity-verification-steps-kyc-check",
+            "documentary_verification_step": "#identity-verification-steps-documentary-verification",
+            "selfie_check_step": "#identity-verification-steps-selfie-check"
+        },
+        "webhooks": {
+            "IDENTITY_VERIFICATION_STATUS_UPDATED": "#identity_verification_status_updated",
+            "IDENTITY_VERIFICATION_STEP_UPDATED": "#identity_verification_step_updated",
+            "IDENTITY_VERIFICATION_RETRIED": "#identity_verification_retried"
+        },
+        "keywords": ["identity verification", "KYC", "know your customer", "document verification", "selfie check", "ID verification", "compliance", "risk assessment", "documentary verification", "identity check", "verification template", "shareable verification"]
+    },
+    
+    # PROTECT API - Fraud protection and Trust Index scoring
+    "protect": {
+        "base_url": "https://plaid.com/docs/api/products/protect/",
+        "general_docs_url": "https://plaid.com/docs/protect/",
+        "endpoints": {
+            "/protect/event/send": {
+                "anchor": "#protectevent_send",
+                "description": "Send a new event to enrich user data and optionally get a Trust Index score"
+            },
+            "/protect/event/get": {
+                "anchor": "#protectevent_get",
+                "description": "Retrieve information about a specific user event"
+            },
+            "/protect/user/insights/get": {
+                "anchor": "#protectuser_insightsget",
+                "description": "Get basic user information related to fraud profile"
+            }
+        },
+        "request_fields": {
+            # /protect/event/send request fields
+            "client_id": "#protect-event-send-request-client-id",
+            "secret": "#protect-event-send-request-secret",
+            "timestamp": "#protect-event-send-request-timestamp",
+            "event": "#protect-event-send-request-event",
+            "user_sign_in": "#protect-event-send-request-event-user-sign-in",
+            "user_sign_up": "#protect-event-send-request-event-user-sign-up",
+            "app_visit": "#protect-event-send-request-event-app-visit",
+            "protect_sdk_session_id": "#protect-event-send-request-protect-sdk-session-id",
+            "request_trust_index": "#protect-event-send-request-request-trust-index",
+            
+            # /protect/event/get request fields
+            "event_id": "#protect-event-get-request-event-id",
+            
+            # /protect/user/insights/get request fields
+            "user_id": "#protect-user-insights-get-request-user-id",
+            "client_user_id": "#protect-user-insights-get-request-client-user-id"
+        },
+        "response_fields": {
+            # Event send/get response fields
+            "event_id": "#protect-event-send-response-event-id",
+            "trust_index": "#protect-event-send-response-trust-index",
+            "trust_index_score": "#protect-event-send-response-trust-index-score",
+            "trust_index_model": "#protect-event-send-response-trust-index-model",
+            "subscores": "#protect-event-send-response-trust-index-subscores",
+            "device_and_connection": "#protect-event-send-response-subscores-device-and-connection",
+            "bank_account_insights": "#protect-event-send-response-subscores-bank-account-insights",
+            "fraud_attributes": "#protect-event-send-response-fraud-attributes",
+            "timestamp": "#protect-event-get-response-timestamp",
+            
+            # User insights response fields
+            "user_id": "#protect-user-insights-get-response-user-id",
+            "latest_scored_event": "#protect-user-insights-get-response-latest-scored-event"
+        },
+        "webhooks": {
+            "PROTECT_USER_EVENT": "#protect_user_event"
+        },
+        "keywords": ["protect", "fraud protection", "trust index", "fraud detection", "risk scoring", "user events", "fraud attributes", "trust scoring", "fraud prevention", "event tracking", "user insights", "fraud analysis"]
     }
 }
 
