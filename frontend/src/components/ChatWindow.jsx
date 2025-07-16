@@ -377,7 +377,7 @@ export const ChatWindow = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
               {[
                 "Generate a solution guide for integrating Plaid Link web SDK with products auth and identity",
-                "Generate a solution guide with implementing Consumer Report base report. Include a mermaid sequence diagram for all API calls",
+                "Generate a solution guide for implementing Plaid Check base report. Include a mermaid sequence diagram for all API calls",
                 "Generate a solution guide the integrating Plaid Transfers. Include a sequence diagram for all API calls including sweeping funds",
                 "List and describe all the fields in the transactions object returned by the transactions/sync product"
               ].map((suggestion, i) => (
