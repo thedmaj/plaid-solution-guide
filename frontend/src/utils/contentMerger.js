@@ -19,26 +19,32 @@ export class ContentMerger {
     try {
       // Use AI-powered text stripping with enhanced instructions for removing acknowledgements
       const stripInstructions = `
-        Remove AI acknowledgements and conversational text from this content, keeping only the solution guide content. 
+        CRITICAL: Extract ONLY the clean solution guide content, removing ALL AI acknowledgements, tool invocations, and conversational text.
         
-        REMOVE:
-        - AI acknowledgements like "I'll help you", "I'll create", "Here's what I'll do"
-        - Conversational phrases like "Let me", "I can", "This will", "Here's the"
-        - Explanatory text about what the AI is doing or will do
-        - Meta-commentary about the solution guide itself
+        REMOVE COMPLETELY:
+        - AI acknowledgements like "I'll help you", "I'll create", "Let me first check", "Here's what I'll do"
+        - Tool invocations like <invoke name="plaid_docs"> or any <invoke>...</invoke> blocks
+        - Conversational phrases like "Let me", "I can", "This will", "Here's the", "Based on", "Using the"
+        - Meta-commentary about checking documentation or what the AI is doing
+        - Any explanatory text about the AI's process or methodology
+        - Everything that appears before solution guide markers like "--- SOLUTION GUIDE ---"
         
-        KEEP:
-        - All headers, especially the main solution guide title
-        - All substantial content including code, lists, tables, and paragraphs
-        - Technical implementation details
-        - Step-by-step instructions
-        - Code examples and configuration
+        KEEP ONLY:
+        - The actual solution guide content starting from the first real header
+        - All headers, especially the main solution guide title (must start with # for H1)
+        - All substantial technical content including code, lists, tables, and paragraphs
+        - Technical implementation details and step-by-step instructions
+        - Code examples, API calls, and configuration details
+        - Mermaid diagrams and technical documentation
         
-        IMPORTANT: 
-        - Look for markers like "--- SOLUTION GUIDE ---" or "# Solution Guide" and extract content after them
-        - Ensure the main title renders properly (should start with # for H1 header)
-        - Keep the structure and formatting intact
-        - Do not remove content that is part of the actual solution guide
+        EXTRACTION RULES:
+        1. If you find "--- SOLUTION GUIDE ---" marker, extract ONLY content after it
+        2. Remove any remaining conversational text even after the marker
+        3. Start with the first substantial header (# Title)
+        4. Ensure proper markdown formatting is preserved
+        5. Do NOT include any AI process descriptions or tool usage explanations
+        
+        OUTPUT: Return ONLY the clean solution guide content with no preamble or explanation.
       `;
       
       const cleanContent = await AIService.stripText(rawContent, stripInstructions);
@@ -59,7 +65,10 @@ export class ContentMerger {
   static extractCleanContentLocal(rawContent) {
     if (!rawContent) return '';
 
-    // First, look for solution guide markers and extract content after them
+    // First, remove tool invocation blocks completely
+    rawContent = this.removeToolInvocations(rawContent);
+    
+    // Then, look for solution guide markers and extract content after them
     const markedContent = this.extractContentAfterMarkers(rawContent);
     if (markedContent) {
       rawContent = markedContent;
@@ -96,8 +105,15 @@ export class ContentMerger {
         skipAcknowledgement = false;
       }
 
-      // Enhanced acknowledgement and conversational patterns
+      // Enhanced acknowledgement and conversational patterns including tool invocations
       const acknowledgementPatterns = [
+        // Tool invocations and documentation checks
+        /^<invoke\s+name=/i,
+        /<\/invoke>/i,
+        /^(let me first check|i'll first check|let me check)/i,
+        /^(plaid's documentation|the documentation|checking.*documentation)/i,
+        
+        // Standard acknowledgements
         /^(i'll help|i'll assist|i'll create|i'll add|i'll update|i'll modify)/i,
         /^(here|i'll|i've|let me|i can|i will|i'm going to|i have|this is|this will|now let me)/i,
         /^(the following|below is|as you can see|you can|note that|remember to)/i,
@@ -111,12 +127,17 @@ export class ContentMerger {
         /^\*\*note:/i,
         /^\*\*important:/i,
         /\b(this will|this should|this provides|this allows)\b/i,
+        
         // Additional patterns for acknowledgements
         /^(certainly|absolutely|of course|sure)/i,
         /^(i'll (be happy to|gladly|definitely))/i,
         /^(let's|let me (start|begin|create|build))/i,
         /^(first,? let me|to (start|begin))/i,
-        /^(i'll make sure|i'll ensure)/i
+        /^(i'll make sure|i'll ensure)/i,
+        
+        // Tool and documentation specific patterns
+        /^(using the|with the above|from the documentation)/i,
+        /^(the .*documentation shows|according to the docs)/i
       ];
 
       const isAcknowledgement = acknowledgementPatterns.some(pattern => 
@@ -161,33 +182,125 @@ export class ContentMerger {
    * @returns {string|null} Content after markers, or null if no markers found
    */
   static extractContentAfterMarkers(content) {
-    // Define solution guide markers
+    // Define solution guide markers in order of priority
     const markers = [
       /---\s*SOLUTION\s+GUIDE\s*---/i,
       /===\s*SOLUTION\s+GUIDE\s*===/i,
       /\*\*\*\s*SOLUTION\s+GUIDE\s*\*\*\*/i,
       /\[SOLUTION\s+GUIDE\s+BEGINS?\]/i,
       /\[START\s+SOLUTION\s+GUIDE\]/i,
-      /^\s*#\s+(?:Plaid\s+)?Solution\s+Guide/im, // Headers like "# Solution Guide" or "# Plaid Solution Guide"
       /BEGIN_SOLUTION_GUIDE/i,
       /GUIDE_START/i
     ];
 
+    // First, try to find explicit markers
     for (const marker of markers) {
       const match = content.match(marker);
       if (match) {
         const markerIndex = match.index + match[0].length;
-        return content.substring(markerIndex).trim();
+        let extractedContent = content.substring(markerIndex).trim();
+        
+        // Additional cleanup after marker extraction
+        extractedContent = this.cleanPostMarkerContent(extractedContent);
+        
+        return extractedContent;
       }
     }
 
-    // Also look for first substantial header as fallback
+    // Fallback: Look for tool invocations followed by substantial content
+    // This handles cases where AI responses include tool calls before the actual content
+    const toolInvocationPattern = /<invoke[^>]*>[\s\S]*?<\/invoke>/gi;
+    const afterToolInvocations = content.replace(toolInvocationPattern, '').trim();
+    
+    if (afterToolInvocations.length < content.length * 0.8) { // If we removed significant content
+      // Look for first substantial header after tool invocations
+      const headerMatch = afterToolInvocations.match(/^#{1,2}\s+[^#\n]+/m);
+      if (headerMatch) {
+        return afterToolInvocations.substring(headerMatch.index).trim();
+      }
+    }
+
+    // Final fallback: Look for first substantial header if it's not at the very beginning
     const headerMatch = content.match(/^#{1,2}\s+[^#\n]+/m);
-    if (headerMatch && headerMatch.index > 100) { // Only if header is not at the very beginning
+    if (headerMatch && headerMatch.index > 200) { // Increased threshold for better detection
       return content.substring(headerMatch.index).trim();
     }
 
     return null;
+  }
+
+  /**
+   * Clean content that appears after solution guide markers
+   * @param {string} content - Content after marker extraction
+   * @returns {string} Cleaned content
+   */
+  static cleanPostMarkerContent(content) {
+    const lines = content.split('\n');
+    const cleanLines = [];
+    let foundSubstantialContent = false;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Skip empty lines at the beginning
+      if (!foundSubstantialContent && trimmed === '') {
+        continue;
+      }
+
+      // Check if this line is substantial content
+      if (this.isSubstantialContentStart(trimmed)) {
+        foundSubstantialContent = true;
+        cleanLines.push(line);
+        continue;
+      }
+
+      // Skip remaining acknowledgements even after marker
+      const postMarkerAcknowledgements = [
+        /^(based on|according to|here's|using the|with the above)/i,
+        /^(let me now|i'll now|now i'll)/i,
+        /^(the documentation shows|from the documentation)/i
+      ];
+
+      const isPostMarkerAck = postMarkerAcknowledgements.some(pattern => 
+        pattern.test(trimmed)
+      );
+
+      if (!foundSubstantialContent && isPostMarkerAck) {
+        continue; // Skip post-marker acknowledgements
+      }
+
+      // Include line if we've found substantial content or if it's substantial itself
+      if (foundSubstantialContent || this.isSubstantialContentStart(trimmed)) {
+        foundSubstantialContent = true;
+        cleanLines.push(line);
+      }
+    }
+
+    return cleanLines.join('\n').trim();
+  }
+
+  /**
+   * Remove tool invocation blocks from content
+   * @param {string} content - Raw content with potential tool invocations
+   * @returns {string} Content with tool invocations removed
+   */
+  static removeToolInvocations(content) {
+    // Remove XML-style tool invocations
+    const toolInvocationPattern = /<invoke[^>]*>[\s\S]*?<\/invoke>/gi;
+    let cleanedContent = content.replace(toolInvocationPattern, '');
+    
+    // Remove any remaining invoke parameter blocks
+    const parameterPattern = /<parameter[^>]*>[\s\S]*?<\/parameter>/gi;
+    cleanedContent = cleanedContent.replace(parameterPattern, '');
+    
+    // Clean up any remaining invoke tags
+    cleanedContent = cleanedContent.replace(/<\/?invoke[^>]*>/gi, '');
+    cleanedContent = cleanedContent.replace(/<\/?parameter[^>]*>/gi, '');
+    
+    // Remove empty lines that might be left behind
+    cleanedContent = cleanedContent.replace(/\n\s*\n\s*\n/g, '\n\n');
+    
+    return cleanedContent.trim();
   }
 
   /**
