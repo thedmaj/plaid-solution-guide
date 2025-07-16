@@ -1432,6 +1432,57 @@ PLAID_API_INDEX = {
             "DEFAULT_UPDATE": "#default_update"
         },
         "keywords": ["account balance", "real-time balance", "current balance", "available balance", "balance inquiry", "account funds", "balance check", "real-time data"]
+    },
+    
+    # LAYER API - Instant onboarding and user authentication
+    "layer": {
+        "base_url": "https://plaid.com/docs/api/products/layer/",
+        "general_docs_url": "https://plaid.com/docs/layer/",
+        "endpoints": {
+            "/session/token/create": {
+                "anchor": "#sessiontokencreate",
+                "description": "Create a Link token for a Layer session"
+            },
+            "/user_account/session/get": {
+                "anchor": "#useraccountsessionget",
+                "description": "Returns user permissioned account data after Layer authentication"
+            }
+        },
+        "request_fields": {
+            # /session/token/create request fields
+            "client_id": "#session-token-create-request-client-id",
+            "secret": "#session-token-create-request-secret",
+            "template_id": "#session-token-create-request-template-id",
+            "user": "#session-token-create-request-user",
+            "client_user_id": "#session-token-create-request-user-client-user-id",
+            "user_id": "#session-token-create-request-user-user-id",
+            "redirect_uri": "#session-token-create-request-user-redirect-uri",
+            "webhook": "#session-token-create-request-user-webhook",
+            
+            # /user_account/session/get request fields
+            "public_token": "#user-account-session-get-request-public-token"
+        },
+        "response_fields": {
+            # Session token response fields
+            "link_token": "#session-token-create-response-link-token",
+            "expiration": "#session-token-create-response-expiration",
+            
+            # User account session response fields
+            "identity": "#user-account-session-get-response-identity",
+            "name": "#user-account-session-get-response-identity-name",
+            "address": "#user-account-session-get-response-identity-address",
+            "phone_number": "#user-account-session-get-response-identity-phone-number",
+            "email": "#user-account-session-get-response-identity-email",
+            "date_of_birth": "#user-account-session-get-response-identity-date-of-birth",
+            "ssn": "#user-account-session-get-response-identity-ssn",
+            "items": "#user-account-session-get-response-items",
+            "item_id": "#user-account-session-get-response-items-item-id",
+            "access_token": "#user-account-session-get-response-items-access-token"
+        },
+        "webhooks": {
+            "LAYER_AUTHENTICATION_PASSED": "#layer_authentication_passed"
+        },
+        "keywords": ["layer", "instant onboarding", "user authentication", "identity verification", "simplified flow", "user identity", "account connection", "authentication flow", "onboarding", "session token", "user session"]
     }
 }
 
