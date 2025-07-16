@@ -1027,39 +1027,39 @@ PLAID_API_INDEX = {
         "general_docs_url": "https://plaid.com/docs/check/",
         "endpoints": {
             "/cra/check_report/create": {
-                "anchor": "#cracheckReportcreate",
+                "anchor": "#cracheck_reportcreate",
                 "description": "Create a Consumer Report for CRA use cases"
             },
             "/cra/check_report/base_report/get": {
-                "anchor": "#cracheckbaserepotget",
+                "anchor": "#cracheck_reportbase_reportget",
                 "description": "Retrieve the Base Report component of a Consumer Report"
             },
             "/cra/check_report/income_insights/get": {
-                "anchor": "#cracheckincomeinsightsget",
+                "anchor": "#cracheck_reportincome_insightsget",
                 "description": "Retrieve cash flow insights from user's banks"
             },
             "/cra/check_report/network_insights/get": {
-                "anchor": "#crachecknetworkinsightsget",
+                "anchor": "#cracheck_reportnetwork_insightsget",
                 "description": "Retrieve connection insights from Plaid network (beta)"
             },
             "/cra/check_report/partner_insights/get": {
-                "anchor": "#cracheckpartnerinsightsget",
+                "anchor": "#cracheck_reportpartner_insightsget",
                 "description": "Retrieve Partner Insights (requires Prism partnership)"
             },
             "/cra/check_report/pdf/get": {
-                "anchor": "#cracheckpdfget",
+                "anchor": "#cracheck_reportpdfget",
                 "description": "Retrieve a PDF version of the Consumer Report"
             },
             "/cra/monitoring_insights/get": {
-                "anchor": "#cramonitoringinsightsget",
+                "anchor": "#cramonitoring_insightsget",
                 "description": "Get Cash Flow Updates (beta)"
             },
             "/cra/monitoring_insights/subscribe": {
-                "anchor": "#cramonitoringinsightssubscribe",
+                "anchor": "#cramonitoring_insightssubscribe",
                 "description": "Subscribe to Cash Flow Updates (beta)"
             },
             "/cra/monitoring_insights/unsubscribe": {
-                "anchor": "#cramonitoringinsightsunsubscribe",
+                "anchor": "#cramonitoring_insightsunsubscribe",
                 "description": "Unsubscribe from Cash Flow Updates (beta)"
             }
         },
