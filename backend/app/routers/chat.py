@@ -92,6 +92,12 @@ async def query_mcp_server(question: str):
         response = await ask_bill_client.ask_question(question)
         logger.info(f"🔍 DEBUG: Received response from MCP server: {response}")
         
+        # Log the raw response from AskBill before any processing
+        logger.info("🔍 QUERY_MCP_SERVER: RAW ASKBILL RESPONSE:")
+        logger.info(f"Answer length: {len(response.get('answer', ''))}")
+        logger.info(f"Sources count: {len(response.get('sources', []))}")
+        logger.info(f"Raw answer: {response.get('answer', '')[:500]}...")  # First 500 chars
+        
         # Enhanced URL validation using Plaid API index
         if response and response.get("answer"):
             try:
@@ -158,7 +164,7 @@ async def create_chat_session(
 ):
     """Create a new chat session for the current user with the specified mode."""
     # Validate mode
-    valid_modes = [ChatMode.SOLUTION_GUIDE, ChatMode.FREE_WHEELIN]
+    valid_modes = [ChatMode.SOLUTION_GUIDE, ChatMode.FREE_WHEELIN, ChatMode.ASKBILL_DIRECT]
     if session_data.mode not in valid_modes:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -234,7 +240,7 @@ async def update_chat_session(
     
     # Update mode if provided
     if mode is not None:
-        valid_modes = [ChatMode.SOLUTION_GUIDE, ChatMode.FREE_WHEELIN]
+        valid_modes = [ChatMode.SOLUTION_GUIDE, ChatMode.FREE_WHEELIN, ChatMode.ASKBILL_DIRECT]
         if mode not in valid_modes:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -489,6 +495,14 @@ async def chat_stream(
         askbill_response = ""
         askbill_used = False
         
+        # Check if we're in ASKBILL_DIRECT mode
+        is_askbill_direct = (request.mode == ChatMode.ASKBILL_DIRECT)
+        
+        # DEBUG: Log the current mode being used
+        logger.info(f"🔍 DEBUG: Chat mode: {request.mode}")
+        logger.info(f"🔍 DEBUG: is_askbill_direct: {is_askbill_direct}")
+        logger.info(f"🔍 DEBUG: is_knowledge_template: {is_knowledge_template}")
+        
         if not is_knowledge_template and ask_bill_client is not None:
             try:
                 logger.info(f"🔍 Step 1: Querying AskBill with user message: {request.message}")
@@ -496,7 +510,7 @@ async def chat_stream(
                 
                 askbill_result = await asyncio.wait_for(
                     query_mcp_server(request.message), 
-                    timeout=15.0
+                    timeout=45.0  # Increased from 15s to 45s for longer responses
                 )
                 
                 logger.info(f"🔍 DEBUG: askbill_result = {askbill_result}")
@@ -504,7 +518,22 @@ async def chat_stream(
                 if askbill_result and askbill_result.get("answer"):
                     askbill_response = askbill_result["answer"]
                     askbill_used = True
-                    logger.info(f"✅ Step 1 Complete: Retrieved {len(askbill_response)} chars from AskBill")
+                    
+                    # Check if this is a partial response
+                    if askbill_result.get("partial_response"):
+                        logger.warning(f"⚠️ Step 1 Partial: Retrieved {len(askbill_response)} chars from AskBill (PARTIAL)")
+                        logger.warning(f"⚠️ Timeout reason: {askbill_result.get('timeout_reason', 'Unknown')}")
+                    else:
+                        logger.info(f"✅ Step 1 Complete: Retrieved {len(askbill_response)} chars from AskBill")
+                    
+                    # DEBUG: Log the raw plaid_docs response for debugging
+                    logger.info("=" * 80)
+                    logger.info("🔍 DEBUG: RAW PLAID_DOCS RESPONSE FROM ASKBILL:")
+                    logger.info("=" * 80)
+                    logger.info(askbill_response)
+                    logger.info("=" * 80)
+                    logger.info("🔍 END RAW PLAID_DOCS RESPONSE")
+                    logger.info("=" * 80)
                 else:
                     logger.warning("⚠️ No response from AskBill")
                     
@@ -526,7 +555,15 @@ async def chat_stream(
             } for msg in request.previous_messages])
         
         # Create enhanced message based on template type
-        if is_knowledge_template:
+        if is_askbill_direct:
+            # For ASKBILL_DIRECT mode, pass the user message directly with AskBill response
+            if askbill_response:
+                enhanced_message = askbill_response
+                logger.info("🎯 Using ASKBILL_DIRECT mode: Passing AskBill response directly")
+            else:
+                enhanced_message = request.message
+                logger.info("🎯 Using ASKBILL_DIRECT mode: No AskBill response, using user message")
+        elif is_knowledge_template:
             # For Knowledge Templates, use the message as-is (already processed by frontend)
             enhanced_message = request.message
             logger.info("🧠 Using Knowledge Template: Message used as-is")
@@ -549,6 +586,24 @@ TASK: Create a comprehensive solution guide for the above request using your kno
             "content": enhanced_message
         })
         
+        # DEBUG: Log the enhanced message that gets sent to Claude
+        logger.info("=" * 80)
+        logger.info("🔍 DEBUG: ENHANCED MESSAGE SENT TO CLAUDE:")
+        logger.info("=" * 80)
+        logger.info(enhanced_message)
+        logger.info("=" * 80)
+        logger.info("🔍 END ENHANCED MESSAGE")
+        logger.info("=" * 80)
+        
+        # Additional logging for AskBill Direct mode
+        if is_askbill_direct:
+            logger.info("🎯 ASKBILL_DIRECT MODE: Comparison of data flow:")
+            logger.info(f"  - AskBill response length: {len(askbill_response)} chars")
+            logger.info(f"  - Enhanced message length: {len(enhanced_message)} chars")
+            logger.info(f"  - Are they the same? {askbill_response == enhanced_message}")
+            if askbill_response != enhanced_message:
+                logger.warning("⚠️ AskBill response differs from enhanced message!")
+        
         # Step 3: Get complete response from Claude 
         logger.info("🔄 Querying Claude with enhanced message")
         
@@ -562,7 +617,18 @@ TASK: Create a comprehensive solution guide for the above request using your kno
             logger.error(f"Error loading Claude config: {str(e)}")
             base_system_prompt = None
 
-        if is_knowledge_template:
+        if is_askbill_direct:
+            # For ASKBILL_DIRECT mode, use the direct wrapper system prompt
+            system_prompt = """You are a thin wrapper around the plaid_docs MCP tool. Your ONLY job is to:
+
+1. Take the EXACT response from plaid_docs
+2. Format it in Markdown only - make NO other modifications to the content
+3. Do NOT add, remove, or change any information
+4. Do NOT add explanations, introductions, or conclusions
+5. Do NOT enhance or expand the content in any way
+
+Simply format the raw plaid_docs response in proper Markdown format and return it exactly as provided."""
+        elif is_knowledge_template:
             # For Knowledge Templates, use a specialized system prompt
             system_prompt = """You are Claude, an AI specialized in creating professional solution guides for Plaid Sales Engineers.
 
@@ -643,6 +709,15 @@ OUTPUT REQUIREMENTS:
 
 Do NOT just reformat the documentation - enhance it with practical implementation guidance."""
         
+        # DEBUG: Log the system prompt being used
+        logger.info("=" * 80)
+        logger.info("🔍 DEBUG: SYSTEM PROMPT SENT TO CLAUDE:")
+        logger.info("=" * 80)
+        logger.info(system_prompt)
+        logger.info("=" * 80)
+        logger.info("🔍 END SYSTEM PROMPT")
+        logger.info("=" * 80)
+        
         claude_response = await query_claude(messages, system_prompt)
         
         if claude_response.get("error"):
@@ -651,6 +726,15 @@ Do NOT just reformat the documentation - enhance it with practical implementatio
         
         full_response = claude_response.get("completion", "")
         logger.info(f"✅ Received complete response: {len(full_response)} characters")
+        
+        # DEBUG: Log Claude's response
+        logger.info("=" * 80)
+        logger.info("🔍 DEBUG: CLAUDE'S RESPONSE:")
+        logger.info("=" * 80)
+        logger.info(full_response)
+        logger.info("=" * 80)
+        logger.info("🔍 END CLAUDE'S RESPONSE")
+        logger.info("=" * 80)
         
         # Create assistant message
         assistant_message = ChatMessage(
@@ -710,6 +794,16 @@ Do NOT just reformat the documentation - enhance it with practical implementatio
                 "id": session.id,
                 "title": session.title,
                 "updated_at": session.updated_at.isoformat()
+            },
+            "debug_info": {
+                "chat_mode": request.mode,
+                "is_askbill_direct": is_askbill_direct,
+                "is_knowledge_template": is_knowledge_template,
+                "raw_askbill_response": askbill_response if askbill_response else None,
+                "enhanced_message": enhanced_message,
+                "system_prompt": system_prompt,
+                "askbill_used": askbill_used,
+                "user_message": request.message
             }
         }
         

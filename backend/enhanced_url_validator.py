@@ -148,82 +148,194 @@ class EnhancedPlaidURLValidator:
         
         return context
     
+    def _get_exact_field_match_url(self, url: str, context: Dict) -> Optional[str]:
+        """Get exact field match URL from index, prioritizing over AI suggestions"""
+        parsed = urlparse(url)
+        
+        # Extract field name from URL anchor
+        field_name = None
+        if "#" in url:
+            anchor = url.split("#")[-1]
+            # Try to extract field name from anchor patterns
+            # Common patterns: #field-name, #transactionlocation-field, #auth-get-response-field
+            if "-" in anchor:
+                parts = anchor.split("-")
+                # Look for field-like patterns
+                for part in parts:
+                    if part in self._field_patterns:
+                        field_name = part
+                        break
+                # Also try the last part (often the field name)
+                if not field_name and parts:
+                    last_part = parts[-1]
+                    if last_part in self._field_patterns:
+                        field_name = last_part
+        
+        # Also check context for field mentions
+        if not field_name and context.get("surrounding_text"):
+            surrounding_text = context["surrounding_text"].lower()
+            # Look for field mentions in surrounding text
+            for field in self._field_patterns.keys():
+                if field in surrounding_text:
+                    field_name = field
+                    break
+        
+        # If we found a field name, get the exact URL from index
+        if field_name and field_name in self._field_patterns:
+            field_infos = self._field_patterns[field_name]
+            
+            # If we have product context, prioritize that product's field URL
+            if context.get("products"):
+                for product in context["products"]:
+                    for field_info in field_infos:
+                        if field_info["product"] == product:
+                            return field_info["url"]
+            
+            # Otherwise, return the first match (most relevant)
+            if field_infos:
+                return field_infos[0]["url"]
+        
+        return None
+    
+    def _get_exact_endpoint_match_url(self, url: str, context: Dict) -> Optional[str]:
+        """Get exact endpoint match URL from index, prioritizing over AI suggestions"""
+        parsed = urlparse(url)
+        
+        # Extract endpoint from URL path
+        endpoint = None
+        path_segments = [seg for seg in parsed.path.split('/') if seg]
+        
+        # Look for API endpoint patterns in the path
+        if len(path_segments) >= 2:
+            # Try different endpoint patterns
+            potential_endpoints = [
+                f"/{'/'.join(path_segments[-2:])}",  # /auth/get, /transactions/sync
+                f"/{'/'.join(path_segments[-3:])}",  # /bank_transfer/event/list
+                f"/{'/'.join(path_segments[-4:])}",  # /processor/transactions/sync
+            ]
+            
+            for potential_endpoint in potential_endpoints:
+                # Check if this endpoint exists in our index
+                for product, config in PLAID_API_INDEX.items():
+                    if potential_endpoint in config.get("endpoints", {}):
+                        endpoint = potential_endpoint
+                        break
+                if endpoint:
+                    break
+        
+        # Also check context for endpoint mentions
+        if not endpoint and context.get("surrounding_text"):
+            surrounding_text = context["surrounding_text"].lower()
+            # Look for endpoint mentions in surrounding text
+            for product, config in PLAID_API_INDEX.items():
+                for ep in config.get("endpoints", {}).keys():
+                    if ep in surrounding_text:
+                        endpoint = ep
+                        break
+                if endpoint:
+                    break
+        
+        # If we found an endpoint, get the exact URL from index
+        if endpoint:
+            for product, config in PLAID_API_INDEX.items():
+                if endpoint in config.get("endpoints", {}):
+                    endpoint_info = config["endpoints"][endpoint]
+                    return f"{config['base_url']}{endpoint_info['anchor']}"
+        
+        return None
+    
     def _intelligent_url_correction(self, url: str, context: Dict) -> List[str]:
-        """Generate intelligent URL corrections based on context"""
+        """Generate intelligent URL corrections based on context with index priority"""
         suggestions = []
         parsed = urlparse(url)
         
         # If it's a Plaid domain, try to fix the path
         if any(domain in parsed.netloc.lower() for domain in ["plaid.com", "docs.plaid.com"]):
             
-            # Special case: Common URL mistakes for specific products
-            special_corrections = {
-                # CRA mistake: /cra/ should be /check/
-                "/docs/api/products/cra/": "https://plaid.com/docs/api/products/check/",
-                "/docs/api/products/cra": "https://plaid.com/docs/api/products/check/",
-                "/docs/api/cra/": "https://plaid.com/docs/api/products/check/",
-                "/docs/api/cra": "https://plaid.com/docs/api/products/check/",
-                "/docs/cra/": "https://plaid.com/docs/check/",
-                "/docs/cra": "https://plaid.com/docs/check/",
-                # Common auth path mistakes
-                "/docs/api/auth/": "https://plaid.com/docs/api/products/auth/",
-                "/docs/api/auth": "https://plaid.com/docs/api/products/auth/",
-                # Common transactions path mistakes
-                "/docs/api/transactions/": "https://plaid.com/docs/api/products/transactions/",
-                "/docs/api/transactions": "https://plaid.com/docs/api/products/transactions/",
-                # Common identity path mistakes
-                "/docs/api/identity/": "https://plaid.com/docs/api/products/identity/",
-                "/docs/api/identity": "https://plaid.com/docs/api/products/identity/",
-            }
+            # PRIORITY 1: Exact field name or API endpoint match from index
+            # Extract field name from URL anchor or context
+            field_match_url = self._get_exact_field_match_url(url, context)
+            if field_match_url:
+                suggestions.append(field_match_url)
+                logger.info(f"🎯 Applied exact field match from index: {url} -> {field_match_url}")
             
-            # Check for special corrections first
-            for wrong_path, correct_url in special_corrections.items():
-                if parsed.path == wrong_path or parsed.path.rstrip('/') == wrong_path.rstrip('/'):
-                    suggestions.append(correct_url)
-                    logger.info(f"🔧 Applied special correction: {url} -> {correct_url}")
+            # Extract API endpoint from URL and get exact match
+            endpoint_match_url = self._get_exact_endpoint_match_url(url, context)
+            if endpoint_match_url:
+                suggestions.append(endpoint_match_url)
+                logger.info(f"🎯 Applied exact endpoint match from index: {url} -> {endpoint_match_url}")
             
-            # Case 1: Missing or wrong anchor for field-specific URL
-            if context.get("fields"):
-                for field_info in context["fields"]:
-                    if parsed.path in field_info["url"]:
-                        suggestions.append(field_info["url"])
-            
-            # Case 2: Wrong endpoint path
-            path_segments = [seg for seg in parsed.path.split('/') if seg]
-            if len(path_segments) >= 2:
-                potential_endpoint = f"/{'/'.join(path_segments[-2:])}"
+            # PRIORITY 2: Special case corrections (only if no exact match found)
+            if not suggestions:
+                special_corrections = {
+                    # CRA mistake: /cra/ should be /check/
+                    "/docs/api/products/cra/": "https://plaid.com/docs/api/products/check/",
+                    "/docs/api/products/cra": "https://plaid.com/docs/api/products/check/",
+                    "/docs/api/cra/": "https://plaid.com/docs/api/products/check/",
+                    "/docs/api/cra": "https://plaid.com/docs/api/products/check/",
+                    "/docs/cra/": "https://plaid.com/docs/check/",
+                    "/docs/cra": "https://plaid.com/docs/check/",
+                    # Common auth path mistakes
+                    "/docs/api/auth/": "https://plaid.com/docs/api/products/auth/",
+                    "/docs/api/auth": "https://plaid.com/docs/api/products/auth/",
+                    # Common transactions path mistakes
+                    "/docs/api/transactions/": "https://plaid.com/docs/api/products/transactions/",
+                    "/docs/api/transactions": "https://plaid.com/docs/api/products/transactions/",
+                    # Common identity path mistakes
+                    "/docs/api/identity/": "https://plaid.com/docs/api/products/identity/",
+                    "/docs/api/identity": "https://plaid.com/docs/api/products/identity/",
+                }
                 
-                # Try to find this endpoint in our index
-                endpoint_url = find_endpoint_url(potential_endpoint)
-                if endpoint_url != "https://plaid.com/docs/api/":
-                    suggestions.append(endpoint_url)
+                # Check for special corrections
+                for wrong_path, correct_url in special_corrections.items():
+                    if parsed.path == wrong_path or parsed.path.rstrip('/') == wrong_path.rstrip('/'):
+                        suggestions.append(correct_url)
+                        logger.info(f"🔧 Applied special correction: {url} -> {correct_url}")
             
-            # Case 3: Product-based corrections
-            for product in context.get("products", []):
-                if product in PLAID_API_INDEX:
-                    base_url = PLAID_API_INDEX[product]["base_url"]
-                    suggestions.append(base_url)
+            # PRIORITY 3: Context-based suggestions (fallback for existing logic)
+            if not suggestions:
+                # Case 1: Missing or wrong anchor for field-specific URL
+                if context.get("fields"):
+                    for field_info in context["fields"]:
+                        if parsed.path in field_info["url"]:
+                            suggestions.append(field_info["url"])
+                
+                # Case 2: Wrong endpoint path
+                path_segments = [seg for seg in parsed.path.split('/') if seg]
+                if len(path_segments) >= 2:
+                    potential_endpoint = f"/{'/'.join(path_segments[-2:])}"
                     
-                    # If we have endpoint context, add specific endpoint
-                    for endpoint_info in context.get("endpoints", []):
-                        if endpoint_info["product"] == product:
-                            suggestions.append(endpoint_info["url"])
-            
-            # Case 4: Keyword-based corrections
-            for keyword in context.get("keywords", []):
-                if keyword in KEYWORD_TO_PRODUCT:
-                    for product in KEYWORD_TO_PRODUCT[keyword]:
-                        if product in PLAID_API_INDEX:
-                            suggestions.append(PLAID_API_INDEX[product]["base_url"])
-                            
-            # Case 5: Text-based product detection for CRA/Check
-            url_lower = url.lower()
-            text_lower = context.get("surrounding_text", "").lower() if context.get("surrounding_text") else ""
-            
-            if any(term in url_lower or term in text_lower for term in ["cra", "consumer report", "base report", "check report", "plaid check"]):
-                # Add both API docs and general product docs
-                suggestions.append("https://plaid.com/docs/api/products/check/")
-                suggestions.append("https://plaid.com/docs/check/")
+                    # Try to find this endpoint in our index
+                    endpoint_url = find_endpoint_url(potential_endpoint)
+                    if endpoint_url != "https://plaid.com/docs/api/":
+                        suggestions.append(endpoint_url)
+                
+                # Case 3: Product-based corrections
+                for product in context.get("products", []):
+                    if product in PLAID_API_INDEX:
+                        base_url = PLAID_API_INDEX[product]["base_url"]
+                        suggestions.append(base_url)
+                        
+                        # If we have endpoint context, add specific endpoint
+                        for endpoint_info in context.get("endpoints", []):
+                            if endpoint_info["product"] == product:
+                                suggestions.append(endpoint_info["url"])
+                
+                # Case 4: Keyword-based corrections
+                for keyword in context.get("keywords", []):
+                    if keyword in KEYWORD_TO_PRODUCT:
+                        for product in KEYWORD_TO_PRODUCT[keyword]:
+                            if product in PLAID_API_INDEX:
+                                suggestions.append(PLAID_API_INDEX[product]["base_url"])
+                                
+                # Case 5: Text-based product detection for CRA/Check
+                url_lower = url.lower()
+                text_lower = context.get("surrounding_text", "").lower() if context.get("surrounding_text") else ""
+                
+                if any(term in url_lower or term in text_lower for term in ["cra", "consumer report", "base report", "check report", "plaid check"]):
+                    # Add both API docs and general product docs
+                    suggestions.append("https://plaid.com/docs/api/products/check/")
+                    suggestions.append("https://plaid.com/docs/check/")
         
         # Remove duplicates while preserving order
         seen = set()
@@ -320,7 +432,7 @@ class EnhancedPlaidURLValidator:
             )
     
     async def validate_url_with_context(self, url: str, surrounding_text: str = "") -> EnhancedURLValidationResult:
-        """Validate URL with contextual intelligence from API index"""
+        """Validate URL with contextual intelligence from API index - prioritizes exact matches"""
         
         # Extract context from surrounding text
         context = self._extract_context_from_text(surrounding_text, url)
@@ -332,7 +444,31 @@ class EnhancedPlaidURLValidator:
         if cache_key in self.cache:
             return self.cache[cache_key]
         
-        # Enhanced pattern validation
+        # PRIORITY 1: Check for exact field or endpoint matches from index
+        # This overrides AI suggestions and ensures database accuracy
+        exact_field_url = self._get_exact_field_match_url(url, context)
+        exact_endpoint_url = self._get_exact_endpoint_match_url(url, context)
+        
+        if exact_field_url or exact_endpoint_url:
+            # We have an exact match from index - use it as the authoritative source
+            corrected_url = exact_field_url or exact_endpoint_url
+            
+            # Check if this is actually a correction (different from original)
+            if corrected_url != url:
+                result = EnhancedURLValidationResult(
+                    original_url=url,
+                    is_valid=True,
+                    corrected_url=corrected_url,
+                    suggested_urls=[corrected_url],
+                    confidence=1.0,  # High confidence for exact matches
+                    correction_method="exact_index_match",
+                    field_context={"exact_match": True}
+                )
+                logger.info(f"🎯 Exact index match override: {url} -> {corrected_url}")
+                self.cache[cache_key] = result
+                return result
+        
+        # PRIORITY 2: Enhanced pattern validation (existing logic)
         result = self._pattern_validate_and_enhance(url, context)
         
         # If pattern validation suggests improvements, don't need live validation
@@ -340,7 +476,7 @@ class EnhancedPlaidURLValidator:
             self.cache[cache_key] = result
             return result
         
-        # Live validation for Plaid URLs (always check these)
+        # PRIORITY 3: Live validation for Plaid URLs (always check these)
         if result.is_valid and self.session and any(domain in url.lower() for domain in ["plaid.com", "docs.plaid.com"]):
             try:
                 # Rate limiting
@@ -359,11 +495,20 @@ class EnhancedPlaidURLValidator:
                         result.error_type = "not_found_404"
                         result.confidence = 0.95
                         
-                        # Generate intelligent suggestions for 404s
-                        suggestions = self._intelligent_url_correction(url, context or {})
+                        # For 404s, prioritize exact matches over intelligent suggestions
+                        suggestions = []
+                        if exact_field_url:
+                            suggestions.append(exact_field_url)
+                        if exact_endpoint_url:
+                            suggestions.append(exact_endpoint_url)
+                        
+                        # Add intelligent suggestions as fallback
+                        if not suggestions:
+                            suggestions = self._intelligent_url_correction(url, context or {})
+                        
                         if suggestions:
                             result.suggested_urls = suggestions
-                            result.correction_method = "404_recovery"
+                            result.correction_method = "404_recovery_with_index_priority"
                             logger.info(f"🔧 Generated {len(suggestions)} suggestions for 404: {suggestions}")
                     
                     elif response.status >= 400:
@@ -371,7 +516,7 @@ class EnhancedPlaidURLValidator:
                         result.error_type = f"http_error_{response.status}"
                         result.confidence = 0.9
                         
-                        # Generate suggestions based on context
+                        # Generate suggestions based on context (with index priority)
                         if context:
                             result.suggested_urls = self._intelligent_url_correction(url, context)
                             

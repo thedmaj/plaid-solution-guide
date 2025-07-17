@@ -4,7 +4,8 @@ export const DebugPanel = ({
   currentWorkspace, 
   artifacts, 
   messages, 
-  currentSession 
+  currentSession,
+  lastDebugInfo 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -32,7 +33,7 @@ export const DebugPanel = ({
       if (response.ok) {
         const data = await response.json();
         setAskBillStatus(data);
-        console.log('🔍 DEBUG: AskBill status updated', data);
+        // Removed console.log to reduce log spam
       } else {
         setAskBillStatus({ 
           status: 'fetch_error', 
@@ -52,12 +53,11 @@ export const DebugPanel = ({
     }
   };
 
-  // Auto-refresh AskBill status
+  // Auto-refresh AskBill status (only on open, no recurring updates)
   useEffect(() => {
     if (isOpen) {
       fetchAskBillStatus();
-      const interval = setInterval(fetchAskBillStatus, 10000); // Refresh every 10 seconds
-      return () => clearInterval(interval);
+      // Removed recurring interval to reduce log spam
     }
   }, [isOpen]);
 
@@ -211,6 +211,59 @@ export const DebugPanel = ({
             </div>
           ) : (
             <div className="text-gray-400 text-sm">Click refresh to check status</div>
+          )}
+        </div>
+        
+        {/* Debug Info Section */}
+        <div className="mb-4">
+          <h3 className="text-yellow-400 font-bold">Last Chat Debug Info:</h3>
+          {lastDebugInfo ? (
+            <div className="text-sm">
+              <div className="mb-2">
+                <div className="text-cyan-400">Chat Mode: <span className="text-white">{lastDebugInfo.chat_mode}</span></div>
+                <div className="text-cyan-400">AskBill Direct: <span className="text-white">{lastDebugInfo.is_askbill_direct ? 'Yes' : 'No'}</span></div>
+                <div className="text-cyan-400">Knowledge Template: <span className="text-white">{lastDebugInfo.is_knowledge_template ? 'Yes' : 'No'}</span></div>
+                <div className="text-cyan-400">AskBill Used: <span className="text-white">{lastDebugInfo.askbill_used ? 'Yes' : 'No'}</span></div>
+              </div>
+              
+              {lastDebugInfo.raw_askbill_response && (
+                <div className="mb-2">
+                  <div className="text-red-400 font-bold">Raw AskBill Response:</div>
+                  <div className="bg-gray-900 p-2 rounded text-xs max-h-32 overflow-auto text-green-300">
+                    {lastDebugInfo.raw_askbill_response}
+                  </div>
+                </div>
+              )}
+              
+              {lastDebugInfo.enhanced_message && (
+                <div className="mb-2">
+                  <div className="text-blue-400 font-bold">Enhanced Message to Claude:</div>
+                  <div className="bg-gray-900 p-2 rounded text-xs max-h-32 overflow-auto text-blue-300">
+                    {lastDebugInfo.enhanced_message}
+                  </div>
+                </div>
+              )}
+              
+              {lastDebugInfo.system_prompt && (
+                <div className="mb-2">
+                  <div className="text-purple-400 font-bold">System Prompt:</div>
+                  <div className="bg-gray-900 p-2 rounded text-xs max-h-32 overflow-auto text-purple-300">
+                    {lastDebugInfo.system_prompt}
+                  </div>
+                </div>
+              )}
+              
+              {lastDebugInfo.user_message && (
+                <div className="mb-2">
+                  <div className="text-orange-400 font-bold">Original User Message:</div>
+                  <div className="bg-gray-900 p-2 rounded text-xs max-h-32 overflow-auto text-orange-300">
+                    {lastDebugInfo.user_message}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-gray-400 text-sm">No debug info available yet</div>
           )}
         </div>
         

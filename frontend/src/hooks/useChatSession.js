@@ -10,6 +10,7 @@ export const useChatSession = (onNewAssistantMessage) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState('solution_guide');
+  const [lastDebugInfo, setLastDebugInfo] = useState(null);
   
   // Fetch sessions with React Query
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
@@ -522,8 +523,15 @@ export const useChatSession = (onNewAssistantMessage) => {
         askbillUsed: result.askbill_used,
         askbillLength: result.askbill_length,
         knowledgeTemplateUsed: result.knowledge_template_used,
-        sessionUpdate: result.session
+        sessionUpdate: result.session,
+        debugInfo: result.debug_info ? 'Available' : 'Not available'
       });
+
+      // Store debug info for the Debug Panel
+      if (result.debug_info) {
+        setLastDebugInfo(result.debug_info);
+        console.log('🔍 Debug info stored:', result.debug_info);
+      }
 
       // Update session cache if session data was returned (for title updates)
       if (result.session && currentSession?.id === result.session.id) {
@@ -618,6 +626,7 @@ export const useChatSession = (onNewAssistantMessage) => {
     setMessages, // Add setMessages for artifact ID updates
     isLoading: isLoading || messagesLoading || sessionsLoading,
     selectedMode,
+    lastDebugInfo,
     createNewSession,
     loadSession,
     updateSessionTitle,

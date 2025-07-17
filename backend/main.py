@@ -1340,7 +1340,8 @@ async def get_askbill_status_endpoint(user: User = Depends(get_current_user)):
             }
         
         status = ask_bill_client.get_connection_status()
-        logger.info(f"📊 ASKBILL STATUS: Retrieved status: {status['current_status']}")
+        # Reduced logging to avoid spam - only log on status changes
+        # logger.info(f"📊 ASKBILL STATUS: Retrieved status: {status['current_status']}")
         
         # Determine icon based on status
         status_icon = "🔗"

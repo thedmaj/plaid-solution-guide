@@ -10,7 +10,7 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/products/auth/",
         "endpoints": {
             "/auth/get": {
-                "anchor": "#authget",
+                "anchor": "#auth-get",
                 "description": "Retrieve bank account information to set up electronic funds transfers"
             },
             "/bank_transfer/event/list": {
@@ -58,15 +58,15 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/products/transactions/",
         "endpoints": {
             "/transactions/sync": {
-                "anchor": "#transactionssync",
+                "anchor": "#transactions-sync",
                 "description": "Get incremental transaction updates on an Item"
             },
             "/transactions/get": {
-                "anchor": "#transactionsget", 
+                "anchor": "#transactions-get", 
                 "description": "Fetch transaction data"
             },
             "/transactions/recurring/get": {
-                "anchor": "#transactionsrecurringget",
+                "anchor": "#transactions-recurring-get",
                 "description": "Fetch recurring transaction data"
             },
             "/transactions/refresh": {
@@ -74,7 +74,7 @@ PLAID_API_INDEX = {
                 "description": "Refresh transaction data"
             },
             "/categories/get": {
-                "anchor": "#categoriesget",
+                "anchor": "#categories-get",
                 "description": "Fetch all transaction categories"
             },
             # Processor endpoints
@@ -135,6 +135,15 @@ PLAID_API_INDEX = {
             "personal_finance_category": "#transactions-sync-response-added-personal-finance-category",
             "counterparties": "#transactions-sync-response-added-counterparties",
             "pending": "#transactions-sync-response-added-pending",
+            "check_number": "#transactions-sync-response-added-check-number",
+            "category": "#transactions-sync-response-added-category",
+            "category_id": "#transactions-sync-response-added-category-id",
+            "account_owner": "#transactions-sync-response-added-account-owner",
+            "iso_currency_code": "#transactions-sync-response-added-iso-currency-code",
+            "unofficial_currency_code": "#transactions-sync-response-added-unofficial-currency-code",
+            "datetime": "#transactions-sync-response-added-datetime",
+            "authorized_date": "#transactions-sync-response-added-authorized-date",
+            "authorized_datetime": "#transactions-sync-response-added-authorized-datetime",
             
             # Location sub-fields
             "address": "#transactions-sync-response-added-location-address",
@@ -170,11 +179,11 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/products/investments/",
         "endpoints": {
             "/investments/holdings/get": {
-                "anchor": "#investmentsholdingsget",
+                "anchor": "#investments-holdings-get",
                 "description": "Fetch investment holdings"
             },
             "/investments/transactions/get": {
-                "anchor": "#investmentstransactionsget", 
+                "anchor": "#investments-transactions-get", 
                 "description": "Fetch investment transactions"
             },
             "/investments/refresh": {
@@ -234,7 +243,7 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/products/identity/",
         "endpoints": {
             "/identity/get": {
-                "anchor": "#identityget",
+                "anchor": "#identity-get",
                 "description": "Retrieve identity information for an account"
             },
             "/identity/match": {
@@ -332,7 +341,7 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/products/liabilities/",
         "endpoints": {
             "/liabilities/get": {
-                "anchor": "#liabilitiesget",
+                "anchor": "#liabilities-get",
                 "description": "Retrieve Liabilities data"
             }
         },
@@ -793,7 +802,7 @@ PLAID_API_INDEX = {
         "base_url": "https://plaid.com/docs/api/link/",
         "endpoints": {
             "/link/token/create": {
-                "anchor": "#link_tokencreate",
+                "anchor": "#linktokencreate",
                 "description": "Create a token for initializing a Link session"
             },
             "/link/token/get": {

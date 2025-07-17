@@ -75,6 +75,10 @@ class AskBillClient:
         self.anonymous_id = str(uuid.uuid4())
         self.user_id = str(uuid.uuid4())
         
+        # Store partial responses in case of timeout
+        self._partial_answer = []
+        self._partial_sources = []
+        
         # Enhanced logging with icons
         logger.info(f"🚀 ASKBILL: Initialized AskBill client")
         logger.info(f"🔗 ASKBILL: Target URI: {self.uri}")
@@ -152,6 +156,10 @@ class AskBillClient:
                 logger.info(f"✅ ASKBILL: Question sent in {send_time:.3f}s")
                 connection_status.current_status = "waiting_response"
 
+                # Clear partial response storage before starting
+                self._partial_answer = []
+                self._partial_sources = []
+                
                 # Create a task with timeout
                 try:
                     logger.info(f"⏳ ASKBILL: Waiting for response (timeout: {timeout}s)...")
@@ -173,13 +181,26 @@ class AskBillClient:
                     connection_status.current_status = "timeout"
                     connection_status.last_error = f"Timeout after {timeout}s"
                     
-                    logger.error(f"⏰ ASKBILL: Response timed out after {timeout} seconds")
-                    logger.error(f"📊 ASKBILL: Connection stats: {connection_status.to_dict()}")
-                    
-                    return {
-                        "answer": f"⏰ AskBill response timed out after {timeout} seconds. Please try again.",
-                        "sources": []
-                    }
+                    # Check if we have partial content to return
+                    partial_answer = "".join(self._partial_answer)
+                    if partial_answer.strip():
+                        logger.warning(f"⏰ ASKBILL: Timed out but returning partial response ({len(partial_answer)} chars)")
+                        logger.warning(f"📊 ASKBILL: Connection stats: {connection_status.to_dict()}")
+                        
+                        return {
+                            "answer": partial_answer,
+                            "sources": self._partial_sources,
+                            "partial_response": True,
+                            "timeout_reason": f"Partial response after {timeout}s timeout"
+                        }
+                    else:
+                        logger.error(f"⏰ ASKBILL: Response timed out after {timeout} seconds with no content")
+                        logger.error(f"📊 ASKBILL: Connection stats: {connection_status.to_dict()}")
+                        
+                        return {
+                            "answer": f"⏰ AskBill response timed out after {timeout} seconds. Please try again.",
+                            "sources": []
+                        }
                     
         except ConnectionClosed as e:
             connection_status.failed_connections += 1
@@ -277,9 +298,12 @@ class AskBillClient:
                     
                     # Process response based on type
                     if response.get("type") == TYPE_ANSWER:
-                        answer_chunk = response.get("answer", "")
+                        answer_chunk = response.get("ans", "")  # Fixed: use "ans" key not "answer"
                         full_answer.append(answer_chunk)
                         answer_chunks += 1
+                        
+                        # Store in instance variables for timeout handling
+                        self._partial_answer.append(answer_chunk)
                         
                         logger.info(f"💬 ASKBILL: Answer chunk #{answer_chunks} ({len(answer_chunk)} chars)")
                         logger.info(f"📝 ASKBILL: Total answer length: {len(''.join(full_answer))} chars")
@@ -287,6 +311,9 @@ class AskBillClient:
                     elif response.get("type") == TYPE_SOURCES:
                         new_sources = response.get("sources", [])
                         sources.extend(new_sources)
+                        
+                        # Store in instance variables for timeout handling
+                        self._partial_sources.extend(new_sources)
                         
                         logger.info(f"📚 ASKBILL: Received {len(new_sources)} sources")
                         logger.info(f"📚 ASKBILL: Total sources: {len(sources)}")
@@ -332,6 +359,15 @@ class AskBillClient:
         logger.info(f"✅ ASKBILL: Message processing complete")
         logger.info(f"📝 ASKBILL: Final answer length: {len(final_answer)} characters")
         logger.info(f"📚 ASKBILL: Final sources count: {len(sources)}")
+        
+        # Log the complete AskBill response for comparison with Anthropic
+        logger.info(f"🔍 ASKBILL: COMPLETE RESPONSE START:")
+        logger.info(f"=== ASKBILL FULL ANSWER ===")
+        logger.info(final_answer)
+        logger.info(f"=== ASKBILL SOURCES ===")
+        for i, source in enumerate(sources):
+            logger.info(f"Source {i+1}: {source.get('title', 'No title')} - {source.get('url', 'No URL')}")
+        logger.info(f"🔍 ASKBILL: COMPLETE RESPONSE END")
         
         return {
             "answer": final_answer,

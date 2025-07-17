@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTemplateContext } from '../contexts/TemplateContext';
 
-const TemplateSelector = ({ selectedTemplateId, onTemplateSelect, onCreateTemplate, onEditTemplate }) => {
+const TemplateSelector = ({ selectedTemplateId, onTemplateSelect, onCreateTemplate, onEditTemplate, disabled = false }) => {
   const { templates, loading } = useTemplateContext();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -27,13 +27,16 @@ const TemplateSelector = ({ selectedTemplateId, onTemplateSelect, onCreateTempla
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex items-center space-x-2">
         <span className="text-sm font-medium text-gray-700">Template:</span>
         <div className="relative">
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center justify-between min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            onClick={() => !disabled && setIsOpen(!isOpen)}
+            disabled={disabled}
+            className={`flex items-center justify-between min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              disabled ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+            }`}
           >
             <span className="truncate">
               {selectedTemplate ? selectedTemplate.name : 'No Template'}

@@ -19,6 +19,7 @@ export const ChatWindow = ({
   currentSession,
   currentWorkspace, // Current workspace to check for existing artifacts
   isChatCollapsed,
+  selectedMode,
   onModeChange,
   onProcessMessage, // New prop for processing messages for artifacts
   getLinkedArtifact, // New prop to get linked artifacts
@@ -534,11 +535,54 @@ export const ChatWindow = ({
             onTemplateSelect={onTemplateSelect}
             onCreateTemplate={onCreateTemplate}
             onEditTemplate={onEditTemplate}
+            disabled={selectedMode === 'askbill_direct'}
           />
           
+          {/* Chat Mode Toggle */}
+          <div className="mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-gray-700">Chat Mode:</span>
+            </div>
+            <div className="relative inline-flex bg-gray-100 rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => onModeChange?.('solution_guide')}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
+                  selectedMode === 'solution_guide'
+                    ? 'bg-white text-plaid-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Use solution guide templates and merging"
+              >
+                Solution Guide Mode
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  Use solution guide templates and merging
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-2 border-transparent border-t-gray-900"></div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => onModeChange?.('askbill_direct')}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
+                  selectedMode === 'askbill_direct'
+                    ? 'bg-white text-plaid-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title="Chat with AskBill with no solution guide templates or merging"
+              >
+                AskBill Direct
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                  Chat with AskBill with no solution guide templates or merging
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-2 border-transparent border-t-gray-900"></div>
+                </div>
+              </button>
+            </div>
+          </div>
           
           {/* Response Mode Toggle Selector */}
-          <div className="mb-2">
+          <div className={`mb-2 ${selectedMode === 'askbill_direct' ? 'opacity-50 pointer-events-none' : ''}`}>
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-medium text-gray-700">Response Mode:</span>
             </div>
@@ -546,11 +590,12 @@ export const ChatWindow = ({
               <button
                 type="button"
                 onClick={() => onMergeModeChange?.('chat_only')}
+                disabled={selectedMode === 'askbill_direct'}
                 className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
                   mergeMode === 'chat_only'
                     ? 'bg-white text-plaid-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                } ${selectedMode === 'askbill_direct' ? 'cursor-not-allowed' : ''}`}
                 title="Responses stay in the chat conversation"
               >
                 Chat Only
@@ -563,11 +608,12 @@ export const ChatWindow = ({
               <button
                 type="button"
                 onClick={() => onMergeModeChange?.('merge_response')}
+                disabled={selectedMode === 'askbill_direct'}
                 className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 group ${
                   mergeMode === 'merge_response'
                     ? 'bg-white text-plaid-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                } ${selectedMode === 'askbill_direct' ? 'cursor-not-allowed' : ''}`}
                 title="Responses automatically merge into the guide"
               >
                 Auto-Merge

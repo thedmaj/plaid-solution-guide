@@ -7,6 +7,7 @@ from ..database import Base
 class ChatMode:
     SOLUTION_GUIDE = "solution_guide"
     FREE_WHEELIN = "free_wheelin"
+    ASKBILL_DIRECT = "askbill_direct"
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"

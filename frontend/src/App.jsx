@@ -49,6 +49,8 @@ function App() {
     createNewSession,
     loadSession,
     deleteSession,
+    selectedMode,
+    lastDebugInfo,
     handleModeChange
   } = useChatSession();
 
@@ -1028,6 +1030,7 @@ function App() {
                 currentSession={currentSession}
                 sessionArtifact={sessionArtifact}
                 isChatCollapsed={isChatCollapsed}
+                selectedMode={selectedMode}
                 onModeChange={handleModeChange}
                 getLinkedArtifact={getLinkedArtifact}
                 onDismissChange={dismissRecentChange}
@@ -1115,6 +1118,7 @@ function App() {
           artifacts={artifacts}
           messages={messages}
           currentSession={currentSession}
+          lastDebugInfo={lastDebugInfo}
         />
       )}
 
