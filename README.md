@@ -13,6 +13,81 @@ The Plaid Solution Guide Generator is an intelligent assistant that helps Sales 
 - **Format Templates**: Override the system prompt default format and create your own templates for AI instructions for each section
 - **Claude AI**: Intelligent content generation and enhancement
 
+## 🚀 Quickstart
+
+Get up and running in minutes with these simple steps:
+
+### **Prerequisites**
+- Node.js 16+ and npm
+- Python 3.8+
+- Git
+- **Anthropic API Key** (required for Claude AI)
+- **Plaid VPN Access** (required for AskBill MCP service)
+
+### **Step 1: Open Terminal**
+**On Mac:**
+- Press `Cmd + Space` and type "Terminal"
+- Or go to Applications → Utilities → Terminal
+
+**On Windows:**
+- Press `Win + R`, type `cmd`, and press Enter
+- Or search for "Command Prompt" in Start menu
+
+**On Linux:**
+- Press `Ctrl + Alt + T`
+- Or search for "Terminal" in your applications
+
+### **Step 2: Clone the Repository**
+```bash
+git clone https://github.com/thedmaj/plaid-solution-guide.git
+cd plaid-solution-guide
+```
+
+### **Step 3: Get Your API Key**
+1. Visit [Anthropic Console](https://console.anthropic.com/)
+2. Sign in or create an account
+3. Navigate to **API Keys** section
+4. Create a new API key
+5. Copy the key (starts with `sk-ant-api03-`)
+6. **Keep this key safe** - you'll need it in Step 6
+
+### **Step 4: Run Installation Script**
+```bash
+chmod +x install-plaid-guide.sh
+./install-plaid-guide.sh
+```
+
+### **Step 5: Configure Environment**
+```bash
+# Copy the sample environment file
+cp backend/.env.sample backend/.env
+
+# Generate a secure JWT secret key
+openssl rand -hex 32
+```
+
+### **Step 6: Edit Configuration**
+1. **Find .env file**: `backend/.env` (use `Cmd + Shift + .` on Mac to see hidden files)
+2. **Edit the file** with your preferred text editor
+3. **Add your API key**: Replace `your_anthropic_api_key_here` with your actual key
+4. **Add JWT secret**: Replace `your_jwt_secret_key_here` with the generated key from Step 5
+5. **Save the file**
+
+### **Step 7: Launch the Application**
+```bash
+chmod +x launch.sh
+./launch.sh
+```
+
+### **Step 8: Access the Application**
+- **Frontend**: http://localhost:3000 (opens automatically)
+- **Backend**: http://localhost:8000
+- **Default Login**: admin@example.com / admin123
+
+🎉 **You're ready to go!** The application will start both frontend and backend servers automatically.
+
+---
+
 ## 🎯 Key Features
 
 
@@ -52,6 +127,35 @@ graph TD
     
     H --> I[Create/Update Artifact]
     I --> J[Display in Interface]
+```
+
+### AskBill Direct Mode - Detailed Sequence
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant AskBill
+    participant Claude
+    
+    User->>Frontend: Submit question
+    Frontend->>Backend: POST /api/chat/stream
+    
+    Note over Backend: Step 1: Query AskBill
+    Backend->>AskBill: WebSocket connection
+    AskBill-->>Backend: Documentation response
+    
+    Note over Backend: Step 2: Enhance with Claude
+    Backend->>Claude: Enhanced prompt with AskBill context
+    Claude-->>Backend: Generated solution guide
+    
+    Backend-->>Frontend: Complete response
+    Frontend-->>User: Display solution guide
+    
+    Note over Frontend,Backend: Merge Response Mode
+    Frontend->>Backend: POST /api/artifacts (if enabled)
+    Backend-->>Frontend: Artifact created/updated
 ```
 
 ### **1. AskBill MCP Service Integration**
@@ -113,74 +217,27 @@ graph TD
 
 **Pro Tip**: Start in Merge Mode when you want to build a comprehensive guide that will evolve throughout your conversation.
 
-## 🛠️ Installation & Setup
-
-### Prerequisites
-- Node.js 16+ and npm
-- Python 3.8+
-- Git
-- **Anthropic API Key** (required for Claude AI)
-- **Plaid VPN Access** (required for AskBill MCP service)
+## 📝 Detailed Configuration Guide
 
 ### ⚠️ Important: Virtual Environment Required
 
 **This application MUST be run in a Python virtual environment.** The setup process will automatically create and configure a virtual environment for you. Never install the Python dependencies globally - this can cause conflicts with other Python projects on your system.
 
-### 🔑 Environment Setup (Required First!)
+### 🔑 Alternative JWT Key Generation Methods
 
-**Before installation, you need to obtain required API keys:**
+If `openssl` is not available, you can generate a JWT secret key using these alternative methods:
 
-#### **1. Get Anthropic API Key**
-0. Ask David M for a key or perform the steps below
-1. Visit [Anthropic Console](https://console.anthropic.com/)
-2. Sign in or create an account
-3. Navigate to **API Keys** section
-4. Create a new API key
-5. Copy the key (starts with `sk-ant-api03-`)
-6. **Keep this key safe** - you'll need it for configuration
-
-#### **2. Verify Plaid VPN Access**
-- Ensure you're connected to Plaid VPN
-- AskBill MCP service requires internal network access
-- Test connectivity to internal documentation service
-
-## 📝 Complete Configuration Guide for Non-Developers
-
-### Quick Configuration Summary:
-1. **Make script executable**: `chmod +x install-plaid-guide.sh`
-2. **Run install script**: `./install-plaid-guide.sh`
-3. **Generate JWT key (to add to the .env file)**: `openssl rand -hex 32`
-4. **Find .env file**: `backend/.env` (use `Cmd + Shift + .` on Mac to see hidden files)
-5. **Add your keys**: Edit ANTHROPIC_API_KEY and JWT_SECRET_KEY
-6. **Make launch script executable**: `chmod +x launch.sh`
-7. **Launch**: `./launch.sh`
-### Detailed Step-by-Step Configuration:
-
-#### **Step A: Generate Your JWT Secret Key**
-
-**What is a JWT Secret Key?**
-A JWT (JSON Web Token) secret key is used to secure user sessions. Think of it as a password that only your application knows.
-
-**How to Generate One:**
-
-Open **Terminal** (Applications → Utilities → Terminal) and run ONE of these commands:
-
-**Option 1 - OpenSSL (Recommended):**
-```bash
-openssl rand -hex 32
-```
-
-**Option 2 - Python:**
+**Option 1 - Python:**
 ```bash
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-**Option 3 - Node.js:**
+**Option 2 - Node.js:**
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-**Copy the result** - it will be a long string of letters and numbers like:
+**The generated key** will be a 64-character string like:
 ```
 a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
 ```
@@ -471,6 +528,8 @@ After installation, use the generated launch script:
 ./launch.sh
 ```
 
+**📍 Launch Script Location:** `launch.sh` (in the project root directory)
+
 This single command will:
 - ✅ **Automatically activate the virtual environment** (no manual activation needed)
 - ✅ Start the backend server on port 8000
@@ -479,6 +538,38 @@ This single command will:
 - ✅ Handle graceful shutdown with Ctrl+C
 
 **The launch script handles all virtual environment management for you - just run it and go!**
+
+## 📁 Important File Locations
+
+After installation, you'll need to know where key files are located:
+
+### **Essential Files:**
+- **🚀 Launch Script**: `launch.sh` (project root) - Start the application
+- **⚙️ Install Script**: `install-plaid-guide.sh` (project root) - Run initial setup
+- **🔧 Environment Template**: `backend/.env.sample` - Copy this to create your config
+- **🔑 Your Config File**: `backend/.env` - Edit this with your API keys
+- **📋 Requirements**: `backend/requirements.txt` - Python dependencies
+
+### **Directory Structure:**
+```
+plaid-solution-guide/
+├── launch.sh                    # 🚀 Main launch script
+├── install-plaid-guide.sh       # ⚙️ Setup script
+├── backend/
+│   ├── .env.sample             # 🔧 Configuration template
+│   ├── .env                    # 🔑 Your config (create this)
+│   ├── requirements.txt        # 📋 Python dependencies
+│   └── main.py                 # Backend server
+├── frontend/
+│   ├── package.json           # Node.js dependencies
+│   └── src/                   # React application
+└── README.md                  # This file
+```
+
+### **Quick Setup Checklist:**
+1. ✅ Copy: `backend/.env.sample` → `backend/.env`
+2. ✅ Edit: `backend/.env` with your API keys
+3. ✅ Run: `./launch.sh` (from project root)
 
 ## 🎯 Getting Started
 
@@ -556,6 +647,12 @@ After installation, you **must** configure the environment variables:
 cd backend
 cp .env.sample .env
 ```
+
+**📍 File Locations:**
+- **Sample file**: `backend/.env.sample` (provided template)
+- **Your config file**: `backend/.env` (copy and edit this)
+- **Launch script**: `launch.sh` (in project root directory)
+- **Install script**: `install-plaid-guide.sh` (in project root directory)
 
 #### **Step 2: Locate and Edit .env File**
 
