@@ -44,12 +44,11 @@ cd plaid-solution-guide
 ```
 
 ### **Step 3: Get Your API Key**
-1. Visit [Anthropic Console](https://console.anthropic.com/)
-2. Sign in or create an account
-3. Navigate to **API Keys** section
-4. Create a new API key
-5. Copy the key (starts with `sk-ant-api03-`)
-6. **Keep this key safe** - you'll need it in Step 6
+1. **Login to Anthropic console through Okta homepage and generate an API key** or obtain an API key from a team member
+2. If generating yourself: Navigate to **API Keys** section in [Anthropic Console](https://console.anthropic.com/)
+3. Create a new API key
+4. Copy the key (starts with `sk-ant-api03-`)
+5. **Keep this key safe** - you'll need it in Step 6
 
 ### **Step 4: Run Installation Script**
 ```bash
