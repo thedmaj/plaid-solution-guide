@@ -24,6 +24,26 @@ Get up and running in minutes with these simple steps:
 - **Anthropic API Key** (required for Claude AI)
 - **Plaid VPN Access** (required for AskBill MCP service)
 
+**🍎 macOS Setup (if not already installed):**
+```bash
+# Install Homebrew (package manager for macOS)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Node.js (includes npm)
+brew install node
+
+# Install Python 3
+brew install python
+
+# Install Git
+brew install git
+
+# Verify installations
+node --version    # Should show v16+ 
+python3 --version # Should show 3.8+
+git --version     # Should show git version
+```
+
 ### **Step 1: Open Terminal**
 **On Mac:**
 - Press `Cmd + Space` and type "Terminal"
